@@ -1,0 +1,72 @@
+SCRUM MEETING #1
+Date: January 22, 2026
+Attendance: Tariq, Siam, Omarion, Talon
+
+Discussion:
+- Developed temporary meeting schedule next week for submission of Milestone 1
+
+Action Items:
+- Omarion: Started working on an initial Milestone 1 Template
+- Tariq & Siam: Writing questions for TA regarding the optional features
+- Talon & Tariq: Developing the Traceability Matrix Template
+
+
+SCRUM MEETING #2
+Date: January 26, 2026
+Attendance: Tariq, Siam, Omarion, Talon
+
+Discussion:
+- Went over the milestone 1 document to check for any errors before turning it in
+- Checked that we answered the optional feature questions right based on what the TA said
+- Submitted the milestone 1 assignment
+
+Action Items:
+- Omarion: Finished the template for milestone 1 and put everyone's parts together
+- Talon & Tariq: Finished up the traceability matrix
+- Siam: Fixed up the answers for the optional features section
+- Team: Submitted the milestone 1 files
+
+
+SCRUM MEETING #3
+Date: January 29, 2026
+Attendance: Tariq, Siam, Omarion, Talon
+
+Discussion:
+- Started looking at what we need for milestone 2 and the big changes needed
+- Discussed the system architecture and the diagrams we need to make like sequence and class diagrams
+- Planning to use class time tomorrow to figure out who is doing what for the next part
+- Need to look into how to set up the folders for the next submission
+
+Action Items:
+- All: Read over the notes on system components so we know what to do next
+- Tariq & Siam: Look into the architecture patterns we might need
+- Talon & Omarion: Start thinking about the folder structure for milestone 2
+
+
+SCRUM MEETING #4
+Date: February 5, 2026
+Attendance: Tariq, Siam, Omarion, Talon
+
+Discussion:
+- Discussion on System Components, general consensus is that they look pretty well done with 1 or 2 minor additions required
+- Further task delegation on what is required of everyone to meet the soft deadline of Feb 7
+- Will meet up during lab to work on repository requirements and consolidate work
+- Figuring out document structure to start piecing together the components required for Milestone 2 submission
+
+Action Items:
+- Siam: Assigned 1-2 Sequence Diagrams
+  Insight into how items will be taxed and what system components may be related/required
+
+- Tariq: Finished writing draft of the System Components document
+  Will look over Architecture Overview for any necessary changes and additions
+  Start work on Class Diagram
+  Prepping for Milestone 2 Document
+
+- Omarion: Working on Data Flow Diagram
+  Will start work on 1 of the Sequence Diagrams
+  Assisting in the prep of Milestone 2 Document
+
+- Talon: Taking notes for current meeting
+  Finished draft of System Architecture Overview
+  Continuing work on Use Case Diagram
+  Will look into scrum folder requirements and start piecing it together
