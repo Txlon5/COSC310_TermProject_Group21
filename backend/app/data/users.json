@@ -1,0 +1,20 @@
+[
+  {
+    "id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7",
+    "name": "Jane Doe",
+    "email": "jane.doe@example.com",
+    "password": "test"
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "John Smith",
+    "email": "john.smith@example.com",
+    "password": "password123"
+  },
+  {
+    "id": "f7e6d5c4-b3a2-1098-fedc-ba9876543210",
+    "name": "Maria Garcia",
+    "email": "maria.garcia@example.com",
+    "password": "pass"
+  }
+]
