@@ -1,9 +1,10 @@
 from fastapi import FastAPI
+from routers.users import router as users_router
 
 app = FastAPI()
-@app.get("/")
-def hello():
-    return {"msg": "Hello World"}
-@app.get("/items/{name}")
-def get_item(name: str):
-    return {"item": name, "status": "ok"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+app.include_router(users_router)
