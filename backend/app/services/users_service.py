@@ -13,7 +13,7 @@ def create_user(payload: UserCreate) -> User:
     if any(it.get("id") == new_id for it in users):  # extremely unlikely, but consistent check
         raise HTTPException(status_code=409, detail="ID collision; retry.")
     new_user = User(id=new_id, name=payload.name.strip(), email=payload.email.strip(), password=payload.password.strip())
-    users.append(new_user.dict())
+    users.append(new_user.model_dump())
     save_all(users)
     return new_user
 
@@ -34,7 +34,7 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
                 email=payload.email.strip(),
                 password=payload.password.strip(),
             )
-            users[idx] = updated.dict()
+            users[idx] = updated.model_dump()
             save_all(users)
             return updated
     raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
