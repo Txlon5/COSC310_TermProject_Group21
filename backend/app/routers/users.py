@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 from typing import List
-from schemas.user import User, UserCreate, UserUpdate
-from services.users_service import list_users, create_user, delete_user, update_user
+from app.schemas.user import User, UserCreate, UserUpdate
+from app.services.users_service import list_users, create_user, delete_user, update_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -14,7 +14,7 @@ def get_users():
 def post_user(payload: UserCreate):
     return create_user(payload)
 
-from services.users_service import list_users, create_user, get_user_by_id
+from app.services.users_service import list_users, create_user, get_user_by_id
 
 @router.get("/{user_id}", response_model=User)
 def get_user(user_id: str):
