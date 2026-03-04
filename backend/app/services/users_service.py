@@ -1,8 +1,8 @@
 import uuid
 from typing import List, Dict, Any
 from fastapi import HTTPException
-from schemas.user import User, UserCreate, UserUpdate
-from repositories.users_repo import load_all, save_all
+from app.schemas.user import User, UserCreate, UserUpdate
+from app.repositories.users_repo import load_all, save_all
 
 def list_users() -> List[User]:
     return [User(**it) for it in load_all()]
