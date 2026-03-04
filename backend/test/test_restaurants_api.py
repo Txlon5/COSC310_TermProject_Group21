@@ -1,3 +1,18 @@
-''' This is like an integration test, so I'm unsure about testing it for now.
-Further discussion with the group and teaching assistants is needed
-But this file will be necessary soon''' 
+from fastapi.testclient import TestClient
+from app.main import app
+
+client = TestClient(app) # I discovered FastAPI has its own test component
+
+def test_no_params_returns_200():
+    r = client.get("/restaurants")
+    assert r.status_code == 200 # Status code 200 means success, which works if no params are provided
+
+def test_empty_q_returns_400():
+    r = client.get("/restaurants", params={"q": "   "})
+    assert r.status_code == 400 # Status code 400 means bad request, which is what we want if an invalid search query is provided (in this case, just an empty string with whitespace)
+    assert "q cannot be empty" in r.json()["detail"]
+
+def test_empty_tag_returns_400():
+    r = client.get("/restaurants", params={"tag": ""})
+    assert r.status_code == 400 # Same as above, just now for when an invalid tag is provided (in this case, just an empty string)
+    assert "tag cannot be empty" in r.json()["detail"]
