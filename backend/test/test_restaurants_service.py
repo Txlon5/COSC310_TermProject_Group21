@@ -55,19 +55,37 @@ def test_filter_by_restaurant_id():
 
 def test_filter_by_is_open():
     service = RestaurantsService(FakeRestaurantsRepository())
-    data = service.search_restaurants(is_open=True)
+    data = service.search_restaurants(is_open=True) # See if it's open, so we should get the pizza place but not the burger house
     assert len(data) == 1
     assert data[0]["restaurantId"] == 1
 
 
 def test_filter_by_tag():
     service = RestaurantsService(FakeRestaurantsRepository())
-    data = service.search_restaurants(tag="pizza")
+    data = service.search_restaurants(tag="pizza") # Search by pizza tag, should return the pizza place but not the burger house
     assert len(data) == 1
     assert data[0]["restaurantId"] == 1
 
 
 def test_invalid_empty_tag_rejected():
     service = RestaurantsService(FakeRestaurantsRepository())
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError): # Check if we get an error when we put an invalid tag, which in this case is just an empty string with whitespace
         service.search_restaurants(tag="  ")    
+
+def test_search_q_matches_restaurant_name():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    data = service.search_restaurants(q="burger") # Search by burger,
+    assert len(data) == 1
+    assert data[0]["restaurantId"] == 2
+    
+def test_search_q_matches_menu_item_name():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    data = service.search_restaurants(q="pepperoni") # Now try looking for a menu item, should return the pizza place because of the pepperoni pizza
+    assert len(data) == 1
+    assert data[0]["restaurantId"] == 1
+
+
+def test_invalid_empty_q_rejected():
+    service = RestaurantsService(FakeRestaurantsRepository()) # 
+    with pytest.raises(ValueError): # Check if we get an error when we put an invalid search query, which in this case is just an empty string with whitespace
+        service.search_restaurants(q="   ")
