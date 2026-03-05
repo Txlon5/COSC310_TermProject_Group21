@@ -89,3 +89,35 @@ def test_invalid_empty_q_rejected():
     service = RestaurantsService(FakeRestaurantsRepository()) # 
     with pytest.raises(ValueError): # Check if we get an error when we put an invalid search query, which in this case is just an empty string with whitespace
         service.search_restaurants(q="   ")
+        
+"""SR3 PAGINATION TESTS"""
+
+def test_paginate_limits_by_page_size():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    items = list(range(1, 11))  # 1...10
+    page1 = service.paginate(items, page=1, page_size=3)
+    assert page1 == [1, 2, 3] # Based on the page size and what's in items, we should get 1, 2, and 3 for page 1
+
+def test_paginate_page2_no_duplicates():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    items = list(range(1, 11))
+    page1 = service.paginate(items, page=1, page_size=3)
+    page2 = service.paginate(items, page=2, page_size=3)
+    assert page2 == [4, 5, 6] # Page 2 must be 4, 5 and 6
+    assert set(page1).isdisjoint(set(page2)) # This is the important part, we want to make sure there are no duplicates
+
+def test_paginate_last_page_partial():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    items = list(range(1, 11))
+    page4 = service.paginate(items, page=4, page_size=3)
+    assert page4 == [10] # Final page should just have the last item, which is 10
+
+def test_paginate_invalid_page_rejected():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    with pytest.raises(ValueError):
+        service.paginate([1, 2, 3], page=0, page_size=2) # Page number less than 1 should raise an error
+
+def test_paginate_invalid_page_size_rejected():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    with pytest.raises(ValueError):
+        service.paginate([1, 2, 3], page=1, page_size=0) # Page size less than 1 should raise an error

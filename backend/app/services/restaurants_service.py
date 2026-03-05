@@ -65,3 +65,18 @@ class RestaurantsService:
             restaurants = [r for r in restaurants if matches(r)] # And of course, just show whatever meets either condition
             
         return restaurants
+    
+    
+    def paginate(self, items, page, page_size): # Users can put in a page count and how many items they want per page
+        # Below are some basic checks to make sure their parameters are valid
+        if page is None or page_size is None:
+            return items # If no pagination parameters are given, just return all items without paginating
+
+        if page < 1:
+            raise ValueError("page must be >= 1") # If given a page number less than 1 raise an error
+        if page_size < 1:
+            raise ValueError("pageSize must be >= 1") # If given a page size less than 1 raise an error
+
+        start = (page - 1) * page_size
+        end = start + page_size
+        return items[start:end] # Just return the slice of items that corresponds to the requested page and page size
