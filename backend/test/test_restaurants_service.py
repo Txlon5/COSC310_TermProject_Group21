@@ -121,3 +121,15 @@ def test_paginate_invalid_page_size_rejected():
     service = RestaurantsService(FakeRestaurantsRepository())
     with pytest.raises(ValueError):
         service.paginate([1, 2, 3], page=1, page_size=0) # Page size less than 1 should raise an error
+        
+def test_search_with_pagination_limits_results():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    # Fake repo has 2 restaurants; page_size=1 should return only 1
+    data = service.search_restaurants(page=1, page_size=1)
+    assert len(data) == 1
+
+def test_search_with_pagination_page2_no_duplicates():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    page1 = service.search_restaurants(page=1, page_size=1)
+    page2 = service.search_restaurants(page=2, page_size=1)
+    assert page1[0]["restaurantId"] != page2[0]["restaurantId"] # Just have to make sure the first element of each page is different, since we only have one item per page, this ensures no duplicates across pages
