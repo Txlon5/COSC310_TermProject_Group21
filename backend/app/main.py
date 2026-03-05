@@ -37,12 +37,14 @@ def get_restaurants(
                     restaurantId: Optional[int] = Query(default=None, ge=1),
                     isOpen: Optional[bool] = Query(default=None),
                     tag: Optional[str] = Query(default=None),
+                    page: Optional[int] = Query(default=None, ge=1), # Where ge is greater than or equal to, so we make sure the page number is valid
+                    pageSize: Optional[int] = Query(default=None, ge=1),
                     ):
     
     # SR2 - Implementing search and filter functionality
     try:
         # If no params were supplied, behave like SR1 - it's the same functionality it just looks a bit different
-        if q is None and restaurantId is None and isOpen is None and tag is None:
+        if q is None and restaurantId is None and isOpen is None and tag is None and page is None and pageSize is None:
             return restaurants_service.get_restaurants()
         
         # Apply the provided filters and search accordingly, and the logic is handled in the service.
@@ -51,6 +53,8 @@ def get_restaurants(
             restaurant_id=restaurantId,
             is_open=isOpen,
             tag=tag,
+            page=page,
+            page_size=pageSize,
         )
         
     except ValueError as e:

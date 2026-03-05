@@ -15,7 +15,7 @@ class RestaurantsService:
         self.repo = repo
 
     # Public method to get all restaurants
-    # This is what the API layer will call
+    # This is what the API layer calls
     def get_restaurants(self):
 
         restaurants = self.repo.get_all() # Call the repository to retrieve raw data
