@@ -33,13 +33,13 @@ jobs:
     
       # Install dependencies
       - name: Install dependencies
-        working-directory: backend
+        working-directory: COSC310_TermProject_Group21/backend
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       # Run tests
       - name: Run pytest
-        working-directory: backend
+        working-directory: COSC310_TermProject_Group21/backend
         run: |
           python -m pytest -q
