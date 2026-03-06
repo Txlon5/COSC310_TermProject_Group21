@@ -85,10 +85,10 @@ def test_search_q_matches_menu_item_name():
     assert data[0]["restaurantId"] == 1
 
 
-def test_invalid_empty_q_rejected():
-    service = RestaurantsService(FakeRestaurantsRepository()) # 
-    with pytest.raises(ValueError): # Check if we get an error when we put an invalid search query, which in this case is just an empty string with whitespace
-        service.search_restaurants(q="   ")
+def test_empty_q_returns_empty_list():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    result = service.search_restaurants(q="")
+    assert result == []  # Expecting an empty list when q is an empty string, this works for Feat3-US1 :) I should've implemented it sooner
         
 """SR3 PAGINATION TESTS"""
 

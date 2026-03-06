@@ -66,7 +66,7 @@ class RestaurantsService:
         if q is not None:
             q_norm = str(q).strip().lower() # Normalize as we did above for tags
             if q_norm == "": # May need to discuss with the team what should be done if no search query is provided, but for now, if it's just an empty string, we will raise an error
-                raise ValueError("q cannot be empty")
+                return [] # I think this satisfies FEAT3-US1
 
             def matches(r):# But what if the user puts something in and we want to find a match
                 name_ok = q_norm in str(r.get("name", "")).lower() # Confirm the name matches and if not just default to ""
