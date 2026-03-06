@@ -1,4 +1,4 @@
-from app.schemas.menu import Menu
+from app.schemas.menu import Menu, MenuCreate
 
 restaurants = [
     {"id": 1, "name": "Burger Place"},
@@ -19,3 +19,14 @@ def get_all_restaurants():
 
 def get_all_menus():
     return menus
+
+def add_menu(menu_data: MenuCreate):
+    new_id = len(menus) + 1
+    new_menu = Menu(
+        id=new_id,
+        restaurant_id=menu_data.restaurant_id,
+        name=menu_data.name,
+        price=menu_data.price
+    )
+    menus.append(new_menu)
+    return new_menu
