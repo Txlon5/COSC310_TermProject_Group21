@@ -3,7 +3,6 @@ from app.main import app
 
 client = TestClient(app)
 
-
 # User Retrival
 def test_get_user():
     r = client.get("/users/9c6dbfcb-72c5-4cc4-9f76-29200f0efda7")
@@ -30,3 +29,19 @@ def test_create_user():
     assert data["email"] == "txlon5@student.ubc.ca"
     assert data["password"] == "test123"
 
+# User Creation - Email Conflict
+def test_conflict_create_user():
+    r = client.post(
+        "/users/",
+        json={"name": "Talon Lusk", "email": "txlon5@student.ubc.ca", "password": "test123"},
+    )
+    assert r.status_code == 409
+
+
+# User Deletion
+def test_delete_user():
+    r = client.post("/users/", json={"name": "Delete Me", "email": "delete_me@test.com", "password": "test123"})
+    assert r.status_code == 201
+    user_id = r.json()["id"]
+    r = client.delete(f"/users/{user_id}")
+    assert r.status_code == 204
