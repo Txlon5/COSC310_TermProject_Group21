@@ -2,7 +2,7 @@ import uuid
 import hashlib
 from typing import List, Dict, Any
 from fastapi import HTTPException
-from app.schemas.user import User, UserCreate, UserUpdate
+from app.schemas.user import User, UserCreate, UserUpdate, UserValidator
 from app.repositories.users_repo import load_all, save_all
 
 def hash_password(password: str) -> str:
@@ -15,9 +15,19 @@ def create_user(payload: UserCreate) -> User:
     users = load_all()
     new_id = str(uuid.uuid4())
     new_email=payload.email.strip()
+
+    # User input validation
+    if not UserValidator.is_valid_email(payload.email.strip()):
+        raise HTTPException(status_code=422, detail="Invalid email format.")
+    if not UserValidator.is_valid_password(payload.password.strip()):
+        raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
+    
+    # User conflict validation
     if any(it.get("id") == new_id for it in users):  # extremely unlikely, but consistent check
         raise HTTPException(status_code=409, detail="ID collision; retry.")
     check_email_collision(new_email, new_id)
+
+    # Create User
     new_user = User(id=new_id, name=payload.name.strip(), email=new_email, password=hash_password(payload.password.strip()))
     users.append(new_user.model_dump())
     save_all(users)
@@ -34,12 +44,21 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
     users = load_all()
     for idx, it in enumerate(users):
         if it.get("id") == user_id:
+            # User input validation
+            if not UserValidator.is_valid_email(payload.email.strip()):
+                raise HTTPException(status_code=422, detail="Invalid email format.")
+            if not UserValidator.is_valid_password(payload.password.strip()):
+                raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
+            
+            # Create updated user object
             updated = User(
                 id=user_id,
                 name=payload.name.strip(),
                 email=payload.email.strip(),
                 password=hash_password(payload.password.strip()),
             )
+            
+            # Store updated user information
             users[idx] = updated.model_dump()
             save_all(users)
             return updated
