@@ -1,12 +1,8 @@
 import uuid
-import hashlib
 from typing import List, Dict, Any
 from fastapi import HTTPException
 from app.schemas.user import User, UserCreate, UserUpdate, UserValidator
 from app.repositories.users_repo import load_all, save_all
-
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
 
 def list_users() -> List[User]:
     return [User(**it) for it in load_all()]
@@ -28,7 +24,7 @@ def create_user(payload: UserCreate) -> User:
     check_email_collision(new_email, new_id)
 
     # Create User
-    new_user = User(id=new_id, name=payload.name.strip(), email=new_email, password=hash_password(payload.password.strip()))
+    new_user = User(id=new_id, name=payload.name.strip(), email=new_email, password=UserValidator.hash_password(payload.password.strip()))
     users.append(new_user.model_dump())
     save_all(users)
     return new_user
@@ -55,7 +51,7 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
                 id=user_id,
                 name=payload.name.strip(),
                 email=payload.email.strip(),
-                password=hash_password(payload.password.strip()),
+                password=UserValidator.hash_password(payload.password.strip()),
             )
             
             # Store updated user information
