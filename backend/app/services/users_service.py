@@ -10,9 +10,11 @@ def list_users() -> List[User]:
 def create_user(payload: UserCreate) -> User:
     users = load_all()
     new_id = str(uuid.uuid4())
+    new_email=payload.email.strip()
     if any(it.get("id") == new_id for it in users):  # extremely unlikely, but consistent check
         raise HTTPException(status_code=409, detail="ID collision; retry.")
-    new_user = User(id=new_id, name=payload.name.strip(), email=payload.email.strip(), password=payload.password.strip())
+    check_email_collision(new_email, new_id)
+    new_user = User(id=new_id, name=payload.name.strip(), email=new_email, password=payload.password.strip())
     users.append(new_user.model_dump())
     save_all(users)
     return new_user
@@ -45,3 +47,13 @@ def delete_user(user_id: str) -> None:
     if len(new_users) == len(users):
         raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
     save_all(new_users)
+
+
+# Helper Functions
+
+# Email Collision Check
+def check_email_collision (email: str, ignore_id: str):
+    users = load_all()
+    for it in users:
+        if it.get("email") == email and it.get("id") != ignore_id:
+            raise HTTPException(status_code=409, detail="Conflict: Email exists already.")
