@@ -1,7 +1,8 @@
 import uuid
 from typing import List, Dict, Any
 from fastapi import HTTPException
-from app.schemas.user import User, UserCreate, UserUpdate, UserValidator
+from app.schemas.user import User, UserCreate, UserUpdate
+from app.schemas.user_validator import UserValidator
 from app.repositories.users_repo import load_all, save_all
 
 def list_users() -> List[User]:
@@ -21,7 +22,7 @@ def create_user(payload: UserCreate) -> User:
     # User conflict validation
     if any(it.get("id") == new_id for it in users):  # extremely unlikely, but consistent check
         raise HTTPException(status_code=409, detail="ID collision; retry.")
-    check_email_collision(new_email, new_id)
+    check_email_collision(new_email, new_id) # Check if email is already registered
 
     # Create User
     new_user = User(id=new_id, name=payload.name.strip(), email=new_email, password=UserValidator.hash_password(payload.password.strip()))
@@ -46,6 +47,9 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
             if not UserValidator.is_valid_password(payload.password.strip()):
                 raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
             
+            # Conflict checks
+            check_email_collision(payload.email.strip(), user_id)
+
             # Create updated user object
             updated = User(
                 id=user_id,
