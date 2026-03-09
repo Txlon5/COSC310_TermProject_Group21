@@ -61,3 +61,28 @@ def get_restaurants(
         # “handled gracefully with an error message” as put in our acceptance criteria, 
         # so we catch the ValueError from the service and return a 400 Bad Request with the error message
         raise HTTPException(status_code=400, detail=str(e))
+
+"""Feat 4 Stuff - Will move to router soon"""
+# Orders imports
+from app.schemas.orders import OrderCreateRequest, OrderOut
+from app.repositories.orders_repository import OrdersRepository
+from app.services.orders_service import OrdersService
+
+# Create orders repository and service
+orders_repository = OrdersRepository()
+orders_service = OrdersService(orders_repository, restaurants_repository)
+
+# Orders endpoint
+@app.post("/orders", response_model=OrderOut)
+def create_order(order: OrderCreateRequest):
+    try:
+        # Convert items to dicts for validation
+        items = [item.dict() for item in order.items]
+        created = orders_service.create_order(order.restaurantId, items)
+        return OrderOut(
+            orderId=created["orderId"],
+            restaurantId=created["restaurantId"],
+            items=order.items
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
