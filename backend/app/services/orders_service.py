@@ -10,15 +10,27 @@ Here, we can:
 """
 
 class OrdersService:
-    def __init__(self, repo):
+    def __init__(self, repo, restaurants_repo):
         self.repo = repo
+        self.restaurants_repo = restaurants_repo
 
-    def create_order(self, user_id, restaurant_id, items):
+    def create_order(self, restaurant_id, items):
         # Order must contain at least one item
         if not items or len(items) == 0:
-            raise ValueError("Order must contain at least one item") # Quick error handling
+            raise ValueError("Order must contain at least one item")
 
-        return self.repo.create_order(user_id, restaurant_id, items) #Give it to the repository to store and return the created order
+        # Validate menuItemIds against restaurant's menuItems
+        restaurants = self.restaurants_repo.get_all()
+        restaurant = next((r for r in restaurants if r["restaurantId"] == restaurant_id), None)
+        if not restaurant:
+            raise ValueError("Restaurant not found")
+
+        valid_menu_ids = {item["menuItemId"] for item in restaurant["menuItems"]}
+        for order_item in items:
+            if order_item["menuItemId"] not in valid_menu_ids:
+                raise ValueError(f"Invalid menuItemId: {order_item['menuItemId']} for restaurant {restaurant_id}")
+
+        return self.repo.create_order(restaurant_id, items)
 
     def get_order_by_id(self, order_id):
         # Retrieve the order from the repository

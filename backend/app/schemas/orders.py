@@ -18,7 +18,6 @@ class OrderItem(BaseModel):
 
 # Request body for creating an order
 class OrderCreateRequest(BaseModel):
-    userId: int
     restaurantId: int
     items: List[OrderItem]
 
@@ -26,6 +25,5 @@ class OrderCreateRequest(BaseModel):
 # Response returned after creating/retrieving an order
 class OrderOut(BaseModel):
     orderId: int
-    userId: int
     restaurantId: int
     items: List[OrderItem]

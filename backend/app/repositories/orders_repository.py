@@ -11,10 +11,9 @@ class OrdersRepository:
         self.orders = []  # List to store order dictionaries
         self.next_id = 1  # Counter for assigning unique order IDs
 
-    def create_order(self, user_id, restaurant_id, items):
+    def create_order(self, restaurant_id, items):
         order = {
             "orderId": self.next_id,
-            "userId": user_id,
             "restaurantId": restaurant_id,
             "items": items,}
         # We can update this later, but based on our current scrum meetings, and this is feat4 this is good enough for now
