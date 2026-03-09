@@ -1,13 +1,16 @@
 from fastapi import HTTPException
-from app.repositories.menu_repository import (
-    get_all_restaurants,
-    get_all_menus,
-    add_menu
-)
+from app.repositories.menu_repository import ( get_all_restaurants, get_all_menus, add_menu, add_restaurant)
 from app.schemas.menu import MenuCreate
+from app.schemas.restaurant import RestaurantCreate
+
 
 def fetch_all_menus():
     return get_all_menus()
+
+
+def fetch_all_restaurants():
+    return get_all_restaurants()
+
 
 def fetch_menu_by_restaurant_id(restaurant_id: int):
     restaurants = get_all_restaurants()
@@ -16,7 +19,7 @@ def fetch_menu_by_restaurant_id(restaurant_id: int):
     restaurant_exists = False
 
     for restaurant in restaurants:
-        if restaurant["id"] == restaurant_id:
+        if restaurant.id == restaurant_id:
             restaurant_exists = True
             break
 
@@ -31,13 +34,14 @@ def fetch_menu_by_restaurant_id(restaurant_id: int):
 
     return restaurant_menu
 
+
 def create_menu(menu_data: MenuCreate):
     restaurants = get_all_restaurants()
 
     restaurant_exists = False
 
     for restaurant in restaurants:
-        if restaurant["id"] == menu_data.restaurant_id:
+        if restaurant.id == menu_data.restaurant_id:
             restaurant_exists = True
             break
 
@@ -45,3 +49,7 @@ def create_menu(menu_data: MenuCreate):
         raise HTTPException(status_code=400, detail="Restaurant does not exist")
 
     return add_menu(menu_data)
+
+
+def create_restaurant(restaurant_data: RestaurantCreate):
+    return add_restaurant(restaurant_data)
