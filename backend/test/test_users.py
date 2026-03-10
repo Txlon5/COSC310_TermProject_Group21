@@ -34,40 +34,62 @@ def test_get_user():
     assert r.status_code == 200
     assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "test"}
 
+def test_get_user_na():
+    r = client.get("/users/00000000-0000-0000-0000-000000000000")
+    assert r.status_code == 404
 
-# # User Creation
-# def test_create_user():
-#     r = client.post(
-#         "/users/",
-#         json={"name": "Talon Lusk", "email": "txlon5@student.ubc.ca", "password": "test123"},
-#     )
-#     assert r.status_code == 201
-
-#     # Save json response to variable
-#     data = r.json() 
-
-#     # Check if id exists and is not empty
-#     assert "id" in data
-#     assert data["id"] != ""
-
-#     # Check that returned user data matches input
-#     assert data["name"] == "Talon Lusk"
-#     assert data["email"] == "txlon5@student.ubc.ca"
-#     assert data["password"] == "test123"
-
-# User Creation - Email Conflict
-def test_conflict_create_user():
+# User Creation
+def test_create_user():
     r = client.post(
         "/users/",
-        json={"name": "Talon Lusk", "email": "txlon5@student.ubc.ca", "password": "test123"},
+        json={"name": "User", "email": "user@example.com", "password": "Password123!"},
+    )
+    assert r.status_code == 201
+
+    # Save json response to variable
+    data = r.json() 
+
+    # Check if id exists and is not empty
+    assert "id" in data
+    assert data["id"] != ""
+
+    # Check that returned user data matches input
+    assert data["name"] == "User"
+    assert data["email"] == "user@example.com"
+    assert data["password"] == "Password123!"
+
+# User Creation - Email Conflict
+def test_create_user_conflict():
+    r = client.post(
+        "/users/",
+        json={"name": "Talon Lusk", "email": "txlon5@student.ubc.ca", "password": "Password123!"},
     )
     assert r.status_code == 409
 
+def test_create_user_invalid_email():
+    r = client.post(
+        "/users/",
+        json={"name": "User", "email": "example", "password": "Password123!"},
+    )
+    assert r.status_code == 422
+
+def test_create_user_invalid_password():
+    r = client.post(
+        "/users/",
+        json={"name": "User", "email": "user@example.com", "password": "pass"},
+    )
+    assert r.status_code == 422
 
 # User Deletion
 def test_delete_user():
-    r = client.post("/users/", json={"name": "Delete Me", "email": "delete_me@test.com", "password": "test123"})
+    r = client.post("/users/", json={"name": "User", "email": "user@example.com", "password": "Password123!"})
     assert r.status_code == 201
     user_id = r.json()["id"]
     r = client.delete(f"/users/{user_id}")
     assert r.status_code == 204
+
+def test_delete_user_na():
+    r = client.delete("/users/00000000-0000-0000-0000-000000000000")
+    assert r.status_code == 404
+
+
