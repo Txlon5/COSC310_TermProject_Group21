@@ -6,9 +6,18 @@ from app.schemas.user_validator import UserValidator
 from app.repositories.users_repo import load_all, save_all
 
 def list_users() -> List[User]:
+    """
+    Returns list of all users
+    """
     return [User(**it) for it in load_all()]
 
 def create_user(payload: UserCreate) -> User:
+    """
+    Creates a new user
+    Returns the new user on success
+    Raises 422 if email or password is invalid
+    Raises 409 if email is already registered
+    """
     users = load_all()
     new_id = str(uuid.uuid4())
     new_email=payload.email.strip()
@@ -31,6 +40,10 @@ def create_user(payload: UserCreate) -> User:
     return new_user
 
 def get_user_by_id(user_id: str) -> User:
+    """
+    Returns the user matching the userid
+    Raises 404 if no user exists
+    """
     users = load_all()
     for it in users:
         if it.get("id") == user_id:
@@ -38,6 +51,13 @@ def get_user_by_id(user_id: str) -> User:
     raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
 
 def update_user(user_id: str, payload: UserUpdate) -> User:
+    """
+    Updates the user matching the userid
+    Returns the updated user on success
+    Raises 422 if email or password is invalid
+    Raises 409 if the new email already exists
+    Raises 404 if no user exists
+    """
     users = load_all()
     for idx, it in enumerate(users):
         if it.get("id") == user_id:
@@ -65,6 +85,10 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
     raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
 
 def delete_user(user_id: str) -> None:
+    """
+    Deletes the user matching the given userid
+    Raises 404 if no user exists
+    """
     users = load_all()
     new_users = [it for it in users if it.get("id") != user_id]
     if len(new_users) == len(users):
@@ -75,7 +99,11 @@ def delete_user(user_id: str) -> None:
 # Helper Functions
 
 # Email Collision Check
-def check_email_collision (email: str, ignore_id: str):
+def check_email_collision(email: str, ignore_id: str):
+    """
+    Raises 409 if the email already exists
+    Ignores the user with ignore_id, meant to help with a user updating their own info
+    """
     users = load_all()
     for it in users:
         if it.get("email") == email and it.get("id") != ignore_id:
