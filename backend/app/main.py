@@ -73,16 +73,27 @@ orders_repository = OrdersRepository()
 orders_service = OrdersService(orders_repository, restaurants_repository)
 
 # Orders endpoint
-@app.post("/orders", response_model=OrderOut)
+@app.post("/orders")
 def create_order(order: OrderCreateRequest):
     try:
         # Convert items to dicts for validation
         items = [item.dict() for item in order.items]
         created = orders_service.create_order(order.restaurantId, items)
-        return OrderOut(
-            orderId=created["orderId"],
-            restaurantId=created["restaurantId"],
-            items=order.items
-        )
+        # Lookup item names from restaurant menu
+        restaurants = restaurants_repository.get_all()
+        restaurant = next((r for r in restaurants if r["restaurantId"] == order.restaurantId), None)
+        menu_lookup = {item["menuItemId"]: item["name"] for item in restaurant["menuItems"]} if restaurant else {}
+        enriched_items = []
+        for item in items:
+            enriched_items.append({
+                "menuItemId": item["menuItemId"],
+                "name": menu_lookup.get(item["menuItemId"], "Unknown"),
+                "quantity": item["quantity"]
+            })
+        return {
+            "orderId": created["orderId"],
+            "restaurantId": created["restaurantId"],
+            "items": enriched_items
+        }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
