@@ -23,6 +23,8 @@ def test_password_validation():
     assert not UserValidator.is_valid_password("password1!")        # False - no capitals
     assert not UserValidator.is_valid_password("Password1")         # False - no special character
     assert not UserValidator.is_valid_password("")                  # False - blank entry
+    assert not UserValidator.is_valid_password("Passw1!")           # False - 7 characters
+    assert UserValidator.is_valid_password("Passwo1!")              # True  - 8 characters
 
 # Password Hash
 def test_hash_password():
