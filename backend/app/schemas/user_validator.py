@@ -4,11 +4,24 @@ import re
 class UserValidator:
     @staticmethod
     def is_valid_email(email: str) -> bool:
+        """
+        Returns True if email matches valid format
+        Returns False otherwise
+        """
+        # Regex pattern to test email
         pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
         return re.match(pattern, email) is not None
     
     @staticmethod
     def is_valid_password(password: str) -> bool:
+        """
+        Returns True if password meets all requirements
+        - 8 characters long minimum
+        - At least 1 uppercase letter
+        - At least 1 special character 
+        Returns False otherwise.
+        """
+        # Test Values
         length_valid = False
         capitals = False
         special_character = False
