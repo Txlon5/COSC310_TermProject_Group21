@@ -1,3 +1,5 @@
+import pytest
+
 from app.repositories.orders_repository import OrdersRepository
 
 
@@ -27,3 +29,13 @@ def test_get_order_by_id_returns_correct_order():
     found = repo.get_order_by_id(created["orderId"])
     assert found is not None
     assert found["orderId"] == created["orderId"]
+    
+def test_update_completed_order_raises_error(): # feat4-sr2 test to ensure we cannot update a completed order
+    repo = OrdersRepository()
+    order = repo.create_order(
+        restaurant_id=19,
+        items=[{"menuItemId": 1, "quantity": 1}] # This is our order
+    )
+    repo.mark_order_status(order["orderId"], "completed") # And if we mark it as completed...
+    with pytest.raises(ValueError):
+        repo.update_order(order["orderId"], items=[{"menuItemId": 2, "quantity": 2}]) # We should hopefully get an error when trying to change its items

@@ -7,7 +7,6 @@ Orders are persisted in memory while the server is running
 """
 
 class OrdersRepository:
-
     def __init__(self):
         self.orders = []  # List to store order dictionaries
         self.next_id = 1  # Counter for assigning unique order IDs
@@ -15,7 +14,7 @@ class OrdersRepository:
     def create_order(self, restaurant_id, items):
         order = {
             "orderId": self.next_id,
-            "restaurantId": restaurant_id,
+            "restaurantId": restaurant_id, 
             "items": items,
             "status": "pending" # This is a default status for new orders, I will be able to set it to complete manually for testing
         }
@@ -42,3 +41,18 @@ class OrdersRepository:
         order = self.get_order_by_id(order_id)
         if order:
             order["status"] = status # Update the order's status
+    
+    
+    # Update an order's items or restaurantId, but prevent changes if status is 'completed'.
+    # Returns updated order if successful, raises ValueError if completed or not found.
+    def update_order(self, order_id, restaurant_id=None, items=None):
+        order = self.get_order_by_id(order_id)
+        if not order:
+            raise ValueError("Order not found") # Quick error handling for order not found
+        if order["status"] == "completed":
+            raise ValueError("Cannot update a completed order") # Prevent updates to completed orders, our feat4-sr2
+        if restaurant_id is not None:
+            order["restaurantId"] = restaurant_id # Update restaurantId if provided
+        if items is not None:
+            order["items"] = items # Update items if provided
+        return order
