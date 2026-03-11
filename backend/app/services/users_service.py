@@ -52,6 +52,17 @@ def get_user_by_id(user_id: str) -> User:
             return User(**it)
     raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
 
+def get_user_by_email(email: str) -> User:
+    """
+    Returns the user matching the email
+    Raises 404 if no user exists
+    """
+    users = load_all()
+    for it in users:
+        if it.get("email") == email:
+            return User(**it)
+    raise HTTPException(status_code=404, detail=f"User '{email}' not found")
+
 def update_user(user_id: str, payload: UserUpdate) -> User:
     """
     Updates the user matching the userid
@@ -96,6 +107,9 @@ def delete_user(user_id: str) -> None:
     if len(new_users) == len(users):
         raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
     save_all(new_users)
+
+# def login_user (email:str, password: str) -> None:
+
 
 
 # Helper Functions
