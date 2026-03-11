@@ -13,9 +13,9 @@ class NotificationService:
         notification = Notification(
             user_id = user_id,
             order_id = order_id,
-            type = "Order Created",
-            title = "Your order has been created!",
-            message = f"Your order has been successfully created. Order ID: {order_id}",
+            type = "Order_Created",
+            title = "Order Created",
+            message = f"Your order {order_id} has been created successfully.",
             timestamp=datetime.now()
         )
         self.notifications.append(notification)     #Store the notification in memory to retrieve it later if needed.
