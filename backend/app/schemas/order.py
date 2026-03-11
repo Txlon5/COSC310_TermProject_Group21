@@ -3,7 +3,7 @@ from typing import List
 
 class CreateOrderRequest(BaseModel):
     """SR1 only cares about notification being generated when an order is created.
-        This is the input model for orer creation. 
+        This is the input model for order creation. 
     """
     user_id: str = Field(..., min_length = 1)
     restaurant_id: str = Field(..., min_length = 1)
