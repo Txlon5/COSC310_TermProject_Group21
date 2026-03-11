@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Body
 
 # RESTAURANT STUFF - I am unsure if we will put all imports and such in main?
 from app.data.restaurants_data import RESTAURANTS
@@ -96,4 +96,29 @@ def create_order(order: OrderCreateRequest):
             "items": enriched_items
         }
     except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+# Additional order endpoint
+@app.put("/orders/{orderId}")
+def update_order(orderId: int, restaurantId: int = None, items: List[dict] = Body(default=None)):
+    try:
+        updated = orders_repository.update_order(orderId, restaurant_id=restaurantId, items=items)
+        return {
+            "orderId": updated["orderId"],
+            "restaurantId": updated["restaurantId"],
+            "items": updated["items"],
+            "status": updated["status"]
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+# Additional additional order endpoint to update order status
+# I was considering not doing this but needed it to write my test file
+@app.patch("/orders/{orderId}/status")
+def update_order_status(orderId: int, status: str = Body(...)): # We use Body here because we want to pass the status in the body of the request, and the ... means it's required
+    try:
+        orders_repository.mark_order_status(orderId, status) # This will raise a ValueError if the status is invalid or if the order is not found, which we catch and return as a 400 Bad Request
+        order = orders_repository.get_order_by_id(orderId)
+        return {"orderId": orderId, "status": order["status"]}
+    except ValueError as e: # If the order is not found or if the status is invalid, we catch the ValueError and return a 400 Bad Request with the error message
         raise HTTPException(status_code=400, detail=str(e))
