@@ -1,5 +1,6 @@
 import hashlib
 import re
+import jwt
 
 class UserValidator:
     @staticmethod
@@ -54,3 +55,7 @@ class UserValidator:
     @staticmethod
     def hash_password(password: str) -> str:
         return hashlib.sha256(password.encode()).hexdigest()
+    
+    @staticmethod
+    def verify_password(plain_password: str, hash_password: str) -> bool:
+        return UserValidator.hash_password(plain_password) == hash_password
