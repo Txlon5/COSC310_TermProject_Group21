@@ -55,8 +55,14 @@ def get_user_by_id(user_id: str) -> User:
 def get_user_by_email(email: str) -> User:
     """
     Returns the user matching the email
+    Raises 422 if email
     Raises 404 if no user exists
     """
+    # User input validation
+    if not UserValidator.is_valid_email(email):
+        raise HTTPException(status_code=422, detail="Invalid email format.")
+    
+    # Fetch users and search user associated with email
     users = load_all()
     for it in users:
         if it.get("email") == email:
