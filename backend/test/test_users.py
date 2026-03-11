@@ -35,22 +35,33 @@ def test_hash_password():
 
 # Integration Tests
 
-# User Retrival - Valid
+# User Retrival by ID - Valid
 def test_get_user():
     r = client.get("/users/9c6dbfcb-72c5-4cc4-9f76-29200f0efda7")
     assert r.status_code == 200
     assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea"}
 
-# User Retrival - Not Found
+# User ID Retrival by ID - Not Found
 def test_get_user_na():
     r = client.get("/users/00000000-0000-0000-0000-000000000000")
     assert r.status_code == 404
 
-# User Retrival - All Users
+# User Retrival by ID - All Users
 def test_get_users():
     r = client.get("/users/")
     assert r.status_code == 200
     assert len(r.json()) > 0                                        # Check that list of users is not empty
+
+# User Retrival by Email - Valid
+def test_get_user_email():
+    r = client.get("/users/email/jane.doe@example.com")
+    assert r.status_code == 200
+    assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea"}
+
+# User Retrival by Email- Not Found
+def test_get_user_by_email_na():
+    r = client.get("/users/email/jane@example.com")
+    assert r.status_code == 404
 
 # User Create - Valid
 def test_create_user():
