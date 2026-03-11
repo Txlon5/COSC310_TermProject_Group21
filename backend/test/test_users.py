@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.schemas.user_validator import UserValidator
+from app.services.users_service import login_user
 client = TestClient(app)
 
 # Unit Tests
@@ -191,4 +192,6 @@ def test_update_user_invalid_password():
     )
     assert r.status_code == 422
 
-
+# Get Hash Password
+def test_get_password_hash_via_email():
+    assert login_user("jane.doe@example.com","Password123!")
