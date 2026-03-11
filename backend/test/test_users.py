@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.schemas.user_validator import UserValidator
+from app.auth.password_utils import PasswordHandler
 from app.services.users_service import login_user
 client = TestClient(app)
 
@@ -29,9 +30,9 @@ def test_password_validation():
 
 # Password Hash
 def test_hash_password():
-    hashed = UserValidator.hash_password("Password123!")
+    hashed = PasswordHandler.hash_password("Password123!")
     assert hashed != "Password123!"                                 # True - Check password is not plain text
-    assert UserValidator.hash_password("Password123!") == hashed    # True - Manually hashed password matches
+    assert PasswordHandler.hash_password("Password123!") == hashed    # True - Manually hashed password matches
 
 
 # Integration Tests
@@ -82,7 +83,7 @@ def test_create_user():
     # Check that returned user data matches input
     assert data["name"] == "User"
     assert data["email"] == "user@example.com"
-    assert data["password"] == UserValidator.hash_password("Password123!")  # Check is hashed
+    assert data["password"] == PasswordHandler.hash_password("Password123!")  # Check is hashed
 
     # Clean up test data
     client.delete(f"/users/{data['id']}")
@@ -146,7 +147,7 @@ def test_update_user():
     # Check that returned user data matches input
     assert data["name"] == "Updated User"
     assert data["email"] == "updated@example.com"
-    assert data["password"] == UserValidator.hash_password("NewPassword123!")  # Check is hashed
+    assert data["password"] == PasswordHandler.hash_password("NewPassword123!")  # Check is hashed
 
     # Clean up test data
     client.delete(f"/users/{data['id']}")

@@ -2,6 +2,7 @@ import uuid
 from typing import List, Dict, Any
 from fastapi import HTTPException
 from app.schemas.user import User, UserCreate, UserUpdate
+from app.auth.password_utils import PasswordHandler
 from app.schemas.user_validator import UserValidator
 from app.repositories.users_repo import load_all, save_all
 
@@ -36,7 +37,7 @@ def create_user(payload: UserCreate) -> User:
     check_email_collision(new_email, new_id) # Check if email is already registered
 
     # Create User
-    new_user = User(id=new_id, name=new_name, email=new_email, password=UserValidator.hash_password(new_plain_password))
+    new_user = User(id=new_id, name=new_name, email=new_email, password=PasswordHandler.hash_password(new_plain_password))
     users.append(new_user.model_dump())
     save_all(users)
     return new_user
@@ -94,7 +95,7 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
                 id=user_id,
                 name=payload.name.strip(),
                 email=payload.email.strip(),
-                password=UserValidator.hash_password(payload.password.strip()),
+                password=PasswordHandler.hash_password(payload.password.strip()),
             )
             
             # Store updated user information
@@ -125,7 +126,7 @@ def login_user (email:str, password: str) -> bool:
     hash_password = get_user_by_email(email).password
     
     # Validate password
-    if (UserValidator.verify_password(password, hash_password)):
+    if (PasswordHandler.verify_password(password, hash_password)):
         return True
     
     return False

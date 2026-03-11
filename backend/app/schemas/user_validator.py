@@ -1,6 +1,4 @@
-import hashlib
 import re
-import jwt
 
 class UserValidator:
     @staticmethod
@@ -51,11 +49,3 @@ class UserValidator:
         
         # Return if conditions not met and has not returned yet
         return False
-    
-    @staticmethod
-    def hash_password(password: str) -> str:
-        return hashlib.sha256(password.encode()).hexdigest()
-    
-    @staticmethod
-    def verify_password(plain_password: str, hash_password: str) -> bool:
-        return UserValidator.hash_password(plain_password) == hash_password
