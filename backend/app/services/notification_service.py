@@ -1,6 +1,6 @@
 from typing import List
 from datetime import datetime
-from backend.app.schemas.notification import Notification  
+from app.schemas.notification import Notification  
 
 class NotificationService:
     #This is the in-memory notification service. Since there is no database, we will store notifications in a list. However, notifications disappear when application restarts.
