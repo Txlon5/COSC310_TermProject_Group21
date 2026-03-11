@@ -20,12 +20,14 @@ def create_user(payload: UserCreate) -> User:
     """
     users = load_all()
     new_id = str(uuid.uuid4())
+    new_name = payload.name.strip()
     new_email=payload.email.strip()
+    new_plain_password=payload.password.strip()
 
     # User input validation
-    if not UserValidator.is_valid_email(payload.email.strip()):
+    if not UserValidator.is_valid_email(new_email):
         raise HTTPException(status_code=422, detail="Invalid email format.")
-    if not UserValidator.is_valid_password(payload.password.strip()):
+    if not UserValidator.is_valid_password(new_plain_password):
         raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
     
     # User conflict validation
@@ -34,7 +36,7 @@ def create_user(payload: UserCreate) -> User:
     check_email_collision(new_email, new_id) # Check if email is already registered
 
     # Create User
-    new_user = User(id=new_id, name=payload.name.strip(), email=new_email, password=UserValidator.hash_password(payload.password.strip()))
+    new_user = User(id=new_id, name=new_name, email=new_email, password=UserValidator.hash_password(new_plain_password))
     users.append(new_user.model_dump())
     save_all(users)
     return new_user
