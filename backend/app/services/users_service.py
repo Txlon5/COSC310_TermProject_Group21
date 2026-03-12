@@ -115,21 +115,25 @@ def delete_user(user_id: str) -> None:
         raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
     save_all(new_users)
 
-def login_user (email:str, password: str) -> bool:
+def login_user (email:str, password: str) -> None:
+    """
+    Login the user matching the given userid
+    Raises 422 if email or password is invalid
+    Raises 401 if input password does not match stored password
+    """
     # User input validation
     if not UserValidator.is_valid_email(email):
         raise HTTPException(status_code=422, detail="Invalid email format.")
     if not UserValidator.is_valid_password(password):
         raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
-    
+
     # Fetch hash password
     hash_password = get_user_by_email(email).password
     
-    # Validate password
-    if (PasswordHandler.verify_password(password, hash_password)):
-        return True
-    
-    return False
+    # Validate password related to user
+    if not (PasswordHandler.verify_password(password, hash_password)):
+        # If invalid raise issue for invalid credentials
+        raise HTTPException(status_code=401, detail="Invalid credentials.")
 
 
 # Helper Functions
