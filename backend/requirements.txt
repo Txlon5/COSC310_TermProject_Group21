@@ -1,7 +1,5 @@
 fastapi[standard]
 httpx
 pytest
-<<<<<<< HEAD
 pylint
-=======
->>>>>>> ecde577 (Add FastAPI, HTTPX, and Pytest to requirements.txt)
+

@@ -1,5 +1,5 @@
-from backend.app.main import app
-from backend.app.routers.orders import notification
+from app.main import app
+from app.routers.orders import notification
 from fastapi.testclient import TestClient
 
 client = TestClient(app)

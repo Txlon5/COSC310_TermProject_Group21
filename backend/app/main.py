@@ -1,10 +1,6 @@
-from backend.app.routers.orders import router as orders_router
+from app.routers.orders import router as orders_router
 from fastapi import FastAPI
-<<<<<<< HEAD
-from backend.app.routers.users import router as users_router
-=======
 from app.routers.users import router as users_router
->>>>>>> 84cbee2 (Update import references to fix reference issues with pytest)
 
 app = FastAPI()
 

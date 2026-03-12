@@ -1,5 +1,5 @@
-from backend.app.schemas.order import CreateOrderRequest, CreateOrderResponse
-from backend.app.services.notification_service import NotificationService
+from app.schemas.order import CreateOrderRequest, CreateOrderResponse
+from app.services.notification_service import NotificationService
 
 from fastapi import APIRouter, status
 from uuid import uuid4 
