@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Query
+from app.routers.orders import router as orders_router
 from app.routers.users import router as users_router
 
 # RESTAURANT STUFF - I am unsure if we will put all imports and such in main?
@@ -10,16 +11,8 @@ from app.services.restaurants_service import RestaurantsService
 # END Restaurant imports
 
 app = FastAPI()
-
-app.include_router(users_router)
-
-@app.get("/")
-def hello():
-    return {"msg": "Hello World"}
-
-@app.get("/items/{name}")
-def get_item(name: str):
-    return {"item": name, "status": "ok"}
+app.include_router(orders_router)     #Include the orders router to make the order creation endpoint available.
+app.include_router(users_router)    #Include the users router to make user management endpoints available.
 
 @app.get("/debug")
 def debug_data():
