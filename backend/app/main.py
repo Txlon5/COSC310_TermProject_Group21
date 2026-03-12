@@ -1,4 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
+from app.routers.users import router as users_router
+
+app.include_router(users_router)
 
 # RESTAURANT STUFF - I am unsure if we will put all imports and such in main?
 from app.data.restaurants_data import RESTAURANTS
