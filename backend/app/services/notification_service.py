@@ -31,7 +31,7 @@ class NotificationService:
             order_id = order_id,
             type = "Order_Status_Changed",
             title = "Order Status Updated",
-            message = f"Your order {order_id} status has been updated from {old_status} to {new_status}.",
+            message = f"Your order {order_id} status has been changed from {old_status} to {new_status}.",
             timestamp=datetime.now()
         )
         self.notifications.append(notification)     #Store the notification in memory to retrieve it later if needed.
