@@ -2,7 +2,3 @@ fastapi[standard]
 httpx
 pytest
 pylint
-<<<<<<< HEAD
-=======
-
->>>>>>> feat-8-sr1-generate-order-create-notification
