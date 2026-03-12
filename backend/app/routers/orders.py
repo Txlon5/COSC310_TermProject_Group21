@@ -2,11 +2,12 @@ from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStat
 from app.services.notification_service import NotificationService
 from fastapi import APIRouter, status, HTTPException
 from uuid import uuid4 
+from typing import Dict 
 
 router = APIRouter()
 
 notification = NotificationService()     #Creates an instance of NotificationService class. This will be used to generate notifications when orders are created.
-orders_store: dict[str, CreateOrderResponse] = {}   #In-memory storage for orders in a dictionary. However, orders disappear when application restarts.
+orders_store: Dict[str, CreateOrderResponse] = {}   #In-memory storage for orders in a dictionary. However, orders disappear when application restarts.
 
 @router.post("/orders", response_model = CreateOrderResponse, status_code = status.HTTP_201_CREATED)
 def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
