@@ -1,3 +1,4 @@
+
 from typing import Dict
 from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest
 from app.services.notification_service import NotificationService
@@ -9,26 +10,66 @@ router = APIRouter()
 notification = NotificationService()     #Creates an instance of NotificationService class. This will be used to generate notifications when orders are created.
 orders_store: Dict[str, CreateOrderResponse] = {}   #In-memory storage for orders in a dictionary. However, orders disappear when application restarts.
 
+DELIVERY_STATUS_TRANSITIONS = {
+    "Created": ["Preparing"],
+    "Preparing": ["Ready"],
+    "Ready": []
+   # "Created": ["Preparing"],
+   # "Preparing": ["Out for delivery"],
+   # "Out for delivery": ["Delivered"],
+   # "Delivered": []
+}
+
+PICKUP_STATUS_TRANSITIONS = {
+    "Created": ["Preparing"],
+    "Preparing": ["Ready"],
+    "Ready": []
+   # "Created": ["Preparing"],
+    #"Preparing": ["Ready for pickup"],
+    #"Ready for pickup": ["Picked up"],
+    #"Picked up": []
+}
+
 @router.post("/orders", response_model = CreateOrderResponse, status_code = status.HTTP_201_CREATED)
 def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
-    """This is the endpoint for creating an order. It generates a notification when an order is created. key endpoint for SR1. Updated in SR2 as it now stores in memory.
-    """
-    order_id = str(uuid4())     #Generates a unique order ID using uuid4.
-    
-    order = CreateOrderResponse(
-        order_id = order_id,
-        user_id = order_request.user_id,
-        restaurant_id = order_request.restaurant_id,
-        items = order_request.items,
-        status = "Created"
-    )
-    
-    orders_store[order.order_id] = order     #Store the order in the in-memory orders_store dictionary.
-    
-    #Generate a notification for the order creation event.
-    notification.create_order_created_notification(user_id = order_request.user_id, order_id = order.order_id)
-    
-    return order
+# This is the endpoint for creating an order. It generates a notification when an order is created. key endpoint for SR1. Updated in SR2 as it now stores in memory.
+ if order_request.delivery_method is not None:
+     if order_request.delivery_method not in ["delivery", "pickup"]:
+         raise HTTPException(status_code=400,detail="delivery_method must be either 'delivery' or 'pickup'.")
+
+     if order_request.delivery_method == "delivery" and not order_request.delivery_address:
+         raise HTTPException(status_code=400,detail="delivery_address is required for delivery orders.")
+
+     if order_request.delivery_method == "pickup" and not order_request.pickup_location:
+         raise HTTPException(status_code=400,detail="pickup_location is required for pickup orders.")
+
+ order_id = str(uuid4())     #Generates a unique order ID using uuid4.
+
+ order = CreateOrderResponse(
+     order_id = order_id,
+     user_id = order_request.user_id,
+     restaurant_id = order_request.restaurant_id,
+     items = order_request.items,
+     status = "Created",
+     delivery_method=order_request.delivery_method,
+     delivery_address=order_request.delivery_address,
+     pickup_location=order_request.pickup_location,
+ )
+
+ orders_store[order.order_id] = order     #Store the order in the in-memory orders_store dictionary.
+
+ #Generate a notification for the order creation event.
+ notification.create_order_created_notification(user_id = order_request.user_id, order_id = order.order_id)
+
+ return order
+
+@router.get("/orders/{order_id}", response_model=CreateOrderResponse)
+def get_order(order_id: str) -> CreateOrderResponse:
+    """Retrieves a stored order by its ID."""
+    if order_id not in orders_store:
+        raise HTTPException(status_code=404, detail="Order not found.")
+
+    return orders_store[order_id]
 
 @router.patch("/orders/{order_id}/status", response_model = CreateOrderResponse)
 def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest) -> CreateOrderResponse:
@@ -42,8 +83,16 @@ def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest)
     new_status = status_request.status
     
     if old_status == new_status:
-        raise HTTPException(status_code = 400, detail = "Order status remains unchanged.")     
-    
+        raise HTTPException(status_code = 400, detail = "Order status remains unchanged.")  
+
+    if order.delivery_method == "pickup":
+        allowed_next_statuses = PICKUP_STATUS_TRANSITIONS.get(old_status, [])
+    else:
+        allowed_next_statuses = DELIVERY_STATUS_TRANSITIONS.get(old_status, [])
+
+    if new_status not in allowed_next_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status transition from '{old_status}' to '{new_status}'.")
+
     order.status = new_status     #Update the order status in the in-memory store.
     orders_store[order_id] = order     #Save the updated order back to the in-memory store.
         
