@@ -38,11 +38,18 @@ def test_get_notifications_for_user_returns_all_notifications():
     assert data[0]["order_id"] == order_id
     assert data[0]["type"] == "Order_Created"
     assert data[0]["title"] == "Order Created"
+    assert data[0]["message"] == (f"Your order {order_id} has been created successfully.")
+    assert "timestamp" in data[0]
+    assert data[0]["timestamp"] is not None
     
     assert data[1]["user_id"] == "user456"
     assert data[1]["order_id"] == order_id
     assert data[1]["type"] == "Order_Status_Changed"
     assert data[1]["title"] == "Order Status Updated"
+    assert data[1]["message"] == (f"Your order {order_id} status has been changed from Created to Preparing.")
+    assert "timestamp" in data[1]
+    assert data[1]["timestamp"] is not None
+    
 
 def test_get_notifications_returns_requested_users_notifications_only():
     #Checks that when retrieving notifications for a specific user, only that user's notifications are returned and not notifications for other users.
@@ -67,4 +74,8 @@ def test_get_notifications_returns_requested_users_notifications_only():
     assert data[0]["user_id"] == "user111"
     assert data[0]["order_id"] == order_id1
     assert data[0]["type"] == "Order_Created"
+    assert data[0]["title"] == "Order Created"
+    assert data[0]["message"] == (f"Your order {order_id1} has been created successfully.")
+    assert "timestamp" in data[0]
+    assert data[0]["timestamp"] is not None
     
