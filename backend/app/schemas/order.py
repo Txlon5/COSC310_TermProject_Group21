@@ -18,3 +18,7 @@ class CreateOrderResponse(BaseModel):
     restaurant_id: str
     items: List[str]
     status: str
+    
+class OrderStatusUpdateRequest(BaseModel):
+    """This is essential for SR2, because this is the input model for order status update. Keeps validatio consistent"""
+    status: str = Field(..., min_length = 1)
