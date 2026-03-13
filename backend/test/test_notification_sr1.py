@@ -1,6 +1,7 @@
 from app.main import app
 from app.routers.orders import notification
 from fastapi.testclient import TestClient
+from unittest.mock import patch
 
 client = TestClient(app)
 
@@ -28,6 +29,7 @@ def test_create_order_notification():
     assert notif.type == "Order_Created"
     assert notif.title == "Order Created"
     assert notif.message == f"Your order {created_order_id} has been created successfully."
+    assert notif.timestamp is not None
     
 def test_notification_associated_with_correct_user():
     order_request = {
@@ -83,8 +85,20 @@ def test_invalid_order_request_does_not_generate_notification():
     dave_notifications = notification.get_notifications_for_user("Dave44")
     assert len(dave_notifications) == 0     #Assert that no notification was generated for the invalid order request.
     
+def test_failed_order_creation_does_not_generate_notification():
+    """Simulates a payment failed situation where a bad request is sent, and ensures that no notification is generated for the failed order creation attempt.
+    """
+    invalid_order_request = {
+        "user_id": "Eve44",
+        "restaurant_id": "restaurant123",
+        "items": []
+    }
     
-    
-    
-    
+    with patch("app.routers.orders.notification.create_order_created_notification") as mock_notification:
+        response = client.post("/orders", json = invalid_order_request)
+        assert response.status_code == 422     #Request invalid due to missing criteria (failed payument).
+        mock_notification.assert_not_called()
         
+    eve_notifications = notification.get_notifications_for_user("Eve44")
+    assert len(eve_notifications) == 0     #Validate that no notification was generated for the failed order creation attempt.
+         
