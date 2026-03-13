@@ -8,7 +8,7 @@ class CreateOrderRequest(BaseModel):
     user_id: str = Field(..., min_length = 1)
     restaurant_id: str = Field(..., min_length = 1)
     items: List[str] = Field(..., min_length = 1)
-    delivery_method: str =  Optional[str] = None
+    delivery_method: Optional[str] = None
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
 
