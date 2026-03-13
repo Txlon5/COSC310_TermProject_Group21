@@ -18,3 +18,6 @@ class CreateOrderResponse(BaseModel):
     restaurant_id: str
     items: List[str]
     status: str
+
+class UpdateOrderStatusRequest(BaseModel):
+    new_status: str
