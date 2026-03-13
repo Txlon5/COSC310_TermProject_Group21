@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 .venv/
 __pycache__/
 *.pyc
 .env
+=======
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+>>>>>>> main

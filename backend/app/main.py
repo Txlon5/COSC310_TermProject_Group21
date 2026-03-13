@@ -1,21 +1,18 @@
-from fastapi import FastAPI
-
-from app.data.restaurants_data import RESTAURANTS # Grabbing the RESTAURTANTS class
+from fastapi import FastAPI, HTTPException, Query
+from app.routers.orders import router as orders_router
+from app.routers.users import router as users_router
 
 # RESTAURANT STUFF - I am unsure if we will put all imports and such in main?
-from typing import List
+from app.data.restaurants_data import RESTAURANTS
+from typing import List, Optional
 from app.schemas.restaurants import RestaurantOut
 from app.repositories.restaurants_repository import RestaurantsRepository
 from app.services.restaurants_service import RestaurantsService
 # END Restaurant imports
 
 app = FastAPI()
-@app.get("/")
-def hello():
-    return {"msg": "Hello World"}
-@app.get("/items/{name}")
-def get_item(name: str):
-    return {"item": name, "status": "ok"}
+app.include_router(orders_router)     #Include the orders router to make the order creation endpoint available.
+app.include_router(users_router)    #Include the users router to make user management endpoints available.
 
 @app.get("/debug")
 def debug_data():
@@ -31,8 +28,28 @@ restaurants_service = RestaurantsService(restaurants_repository)
 
 # Using the endpoint, response_model ensures returned data matches RestaurantOut schema
 @app.get("/restaurants", response_model=List[RestaurantOut])
-def get_restaurants():
-
-    restaurants = restaurants_service.get_restaurants() # Call business logic layer
-
-    return restaurants # Return result to client
+def get_restaurants(    
+                    q: Optional[str] = Query(default=None),
+                    restaurantId: Optional[int] = Query(default=None, ge=1),
+                    isOpen: Optional[bool] = Query(default=None),
+                    tag: Optional[str] = Query(default=None),
+                    ):
+    
+    # SR2 - Implementing search and filter functionality
+    try:
+        # If no params were supplied, behave like SR1 - it's the same functionality it just looks a bit different
+        if q is None and restaurantId is None and isOpen is None and tag is None:
+            return restaurants_service.get_restaurants()
+        
+        # Apply the provided filters and search accordingly, and the logic is handled in the service.
+        return restaurants_service.search_restaurants(
+            q=q,
+            restaurant_id=restaurantId,
+            is_open=isOpen,
+            tag=tag,
+        )
+        
+    except ValueError as e:
+        # “handled gracefully with an error message” as put in our acceptance criteria, 
+        # so we catch the ValueError from the service and return a 400 Bad Request with the error message
+        raise HTTPException(status_code=400, detail=str(e))
