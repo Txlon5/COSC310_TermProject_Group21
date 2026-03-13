@@ -50,4 +50,27 @@ def test_order_status_change_generates_notification():
     assert status_notification.order_id == order_id
     assert status_notification.type == "Order_Status_Changed"
     assert status_notification.title == "Order Status Updated"
-    assert status_notification.message == f"Your order {order_id} status has been changed from Created to Preparing."
+    assert status_notification.message == (f"Your order {order_id} status has been changed from Created to Preparing.")
+    assert status_notification.timestamp is not None
+    
+def test_status_change_creates_only_one_notification():
+    order_request = {"user_id" : "user999", "restaurant_id" :"restaurant999", "items": ["Sushi"]}
+    
+    create_response = client.post("/orders", json=order_request)
+    assert create_response.status_code == 201
+    
+    order_id = create_response.json()["order_id"]
+    
+    response_1 = client.patch(f"/orders/{order_id}/status", json={"status": "Preparing"})
+    assert response_1.status_code == 200
+    user_notifications = notification.get_notifications_for_user("user999")
+    assert len(user_notifications) == 2     #Two notifications should exist, one for order created and one for the status change.
+    assert user_notifications[0].type == "Order_Created"
+    assert user_notifications[1].type == "Order_Status_Changed"
+    
+    response_2 = client.patch(f"/orders/{order_id}/status", json={"status": "Ready"})
+    assert response_2.status_code == 200
+    user_notifications = notification.get_notifications_for_user("user999")
+    assert len(user_notifications) == 3     #Now three notifications should exist, one for order created and two for the two status changes.
+    assert user_notifications[2].type == "Order_Status_Changed"    
+    assert user_notifications[2].message == (f"Your order {order_id} status has been changed from Preparing to Ready.")
