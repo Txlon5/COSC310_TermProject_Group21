@@ -1,9 +1,5 @@
 from fastapi import HTTPException
-from app.repositories.menu_repository import (
-    get_all_restaurants,
-    get_all_menus,
-    add_menu
-)
+from app.repositories.menu_repository import (get_all_restaurants, get_all_menus, add_menu)
 from app.schemas.menu import MenuCreate
 
 def fetch_all_menus():
