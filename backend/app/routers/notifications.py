@@ -6,7 +6,7 @@ from app.schemas.notification import Notification
 router = APIRouter()
 
 @router.get("/notifications/{user_id}", response_model = List[Notification])
-def get_notifications_for_user(user_id: str) -> list[Notification]:
+def get_notifications_for_user(user_id: str) -> List[Notification]:
     #This endpoint retrieves all notifications for a specific user. Requirement for SR3.
     return notification.get_notifications_for_user(user_id)
 
