@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
+from app.routers.orders import router as orders_router
+from app.routers.users import router as users_router
 
 # RESTAURANT STUFF - I am unsure if we will put all imports and such in main?
 from app.data.restaurants_data import RESTAURANTS
@@ -9,14 +11,8 @@ from app.services.restaurants_service import RestaurantsService
 # END Restaurant imports
 
 app = FastAPI()
-
-@app.get("/")
-def hello():
-    return {"msg": "Hello World"}
-
-@app.get("/items/{name}")
-def get_item(name: str):
-    return {"item": name, "status": "ok"}
+app.include_router(orders_router)     #Include the orders router to make the order creation endpoint available.
+app.include_router(users_router)    #Include the users router to make user management endpoints available.
 
 @app.get("/debug")
 def debug_data():
@@ -43,6 +39,9 @@ def get_restaurants(
     
     # SR2 - Implementing search and filter functionality
     try:
+        if q is not None and str(q).strip() == "":
+            raise HTTPException(status_code=400, detail="q cannot be empty")
+
         # If no params were supplied, behave like SR1 - it's the same functionality it just looks a bit different
         if q is None and restaurantId is None and isOpen is None and tag is None and page is None and pageSize is None:
             return restaurants_service.get_restaurants()
