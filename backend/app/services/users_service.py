@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Dict, Any
+from typing import List
 from fastapi import HTTPException
 from app.schemas.user import User, UserCreate, UserUpdate
 from app.auth.password_utils import PasswordHandler

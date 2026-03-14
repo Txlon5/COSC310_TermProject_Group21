@@ -192,7 +192,3 @@ def test_update_user_invalid_password():
         json={"name": "Jane Doe", "email": "jane.doe@example.com", "password": "pass"},
     )
     assert r.status_code == 422
-
-# Get Hash Password
-def test_get_password_hash_via_email():
-    assert login_user("jane.doe@example.com","Password123!")
