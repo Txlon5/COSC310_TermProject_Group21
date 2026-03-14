@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest
 from app.services.notification_service import NotificationService
 from fastapi import APIRouter, status, HTTPException
@@ -57,8 +57,8 @@ def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest)
     
     return order
 
-@router.get("/history/{user_id}", response_model = list[CreateOrderResponse])
-def get_past_order_history(user_id: str) -> list[CreateOrderResponse]:
+@router.get("/history/{user_id}", response_model = List[CreateOrderResponse])
+def get_past_order_history(user_id: str) -> List[CreateOrderResponse]:
     #For a specific order, view all past orders.
     user_orders = [order for order in orders_store.values()      #Reuses current in-memory orders_store, satisfies SR1
                    if order.user_id == user_id]
