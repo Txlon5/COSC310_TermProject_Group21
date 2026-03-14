@@ -56,3 +56,10 @@ def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest)
     )
     
     return order
+
+@router.get("/history/{user_id}", response_model = list[CreateOrderResponse])
+def get_past_order_history(user_id: str) -> list[CreateOrderResponse]:
+    #For a specific order, view all past orders.
+    user_orders = [order for order in orders_store.values()      #Reuses current in-memory orders_store, satisfies SR1
+                   if order.user_id == user_id]
+    return user_orders
