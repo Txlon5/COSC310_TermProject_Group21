@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.security import OAuth2PasswordRequestForm
-from backend.app.schemas.auth import Token, LoginField
+from app.schemas.auth import Token, LoginField
 from app.services.users_service import login_user
 from app.auth.token_utils import create_token
 
