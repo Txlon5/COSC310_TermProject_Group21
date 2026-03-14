@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Annotated
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Header, HTTPException, Depends, status
-from app.services.users_service import get_user_by_email
+from app.services.users_service import get_user_by_id
 import jwt 
 
 # JWT Token encode variables
@@ -29,3 +29,27 @@ def decode_token(token: str) -> dict:
     Decode JWT token and return payload with userid and token expiration time
     """
     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+# return userid of user associated with token
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    """
+    Verify JWT token is valid and return the userid associated with the token
+    Raises 401 if token is invalid or expired
+    Raises 422 if token data is invalid
+    """
+    try:
+        # Decode token and get userid from token payload
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        userid = payload.get("sub")
+        
+        # Verify token payload has valid data
+        if userid is None:
+            raise HTTPException(status_code=422, detail="Invalid token data.")
+        
+        # Get user associated with token
+        user = get_user_by_id(userid)
+    except jwt.InvalidTokenError:
+        # Raise exception if token is invalid or expired
+        raise HTTPException(status_code=401, detail="Invalid token.")
+    return user
+
