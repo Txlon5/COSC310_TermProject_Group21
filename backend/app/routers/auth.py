@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.schemas.auth import Token, LoginField
+from fastapi.security import OAuth2PasswordRequestForm
+from app.schemas.auth import Token
 from app.services.users_service import login_user
 from app.auth.token_utils import create_token
 
@@ -7,7 +8,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 # login route - returns JWT token after valid credentials provided
 @router.post("/login", response_model=Token)
-def login(form_data: LoginField = Depends()):
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
     # Verify user login is valid or throw exception
     login_user(form_data.username, form_data.password)
     # Pass in username and create authorized JWT token
