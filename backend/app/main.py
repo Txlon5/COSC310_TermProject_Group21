@@ -15,7 +15,7 @@ from app.services.restaurants_service import RestaurantsService
 app = FastAPI()
 app.include_router(orders_router)     #Include the orders router to make the order creation endpoint available.
 app.include_router(users_router)    #Include the users router to make user management endpoints available.
-app.include_router(notifications_router)    #Include the notifications router to make the notifications retrieval endpoint available.
+app.include_router(notifications_router, tags = ["Notifications"])    #Include the notifications router to make the notifications retrieval endpoint available.
 
 @app.get("/debug")
 def debug_data():
