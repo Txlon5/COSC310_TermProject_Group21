@@ -4,12 +4,12 @@ from app.services.notification_service import NotificationService
 from fastapi import APIRouter, status, HTTPException
 from uuid import uuid4 
  
-router = APIRouter()
+router = APIRouter(prefix = "/orders", tags = ["Orders"])
 
 notification = NotificationService()     #Creates an instance of NotificationService class. This will be used to generate notifications when orders are created.
 orders_store: Dict[str, CreateOrderResponse] = {}   #In-memory storage for orders in a dictionary. However, orders disappear when application restarts.
 
-@router.post("/orders", response_model = CreateOrderResponse, status_code = status.HTTP_201_CREATED)
+@router.post("", response_model = CreateOrderResponse, status_code = status.HTTP_201_CREATED)
 def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
     """This is the endpoint for creating an order. It generates a notification when an order is created. key endpoint for SR1. Updated in SR2 as it now stores in memory.
     """
@@ -30,7 +30,7 @@ def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
     
     return order
 
-@router.patch("/orders/{order_id}/status", response_model = CreateOrderResponse)
+@router.patch("/{order_id}/status", response_model = CreateOrderResponse)
 def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest) -> CreateOrderResponse:
     #this updated status of existing order and generates a notif when status changes. Essential for SR2.
     if order_id not in orders_store:

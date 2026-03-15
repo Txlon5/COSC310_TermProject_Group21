@@ -1,12 +1,14 @@
 from fastapi import FastAPI, HTTPException, Query
+from typing import List, Optional
+
 from app.routers.orders import router as orders_router
 from app.routers.users import router as users_router
 from app.routers.auth import router as auth_router
 
+from app.routers.notifications import router as notifications_router
 
 # RESTAURANT STUFF - I am unsure if we will put all imports and such in main?
 from app.data.restaurants_data import RESTAURANTS
-from typing import List, Optional
 from app.schemas.restaurants import RestaurantOut
 from app.repositories.restaurants_repository import RestaurantsRepository
 from app.services.restaurants_service import RestaurantsService
@@ -16,6 +18,7 @@ app = FastAPI()
 app.include_router(orders_router)   #Include the orders router to make the order creation endpoint available.
 app.include_router(users_router)    #Include the users router to make user management endpoints available.
 app.include_router(auth_router)     #Include the auth router to make authentication endpoints available.
+app.include_router(notifications_router, tags = ["Notifications"])    #Include the notifications router to make the notifications retrieval endpoint available.
 
 @app.get("/debug")
 def debug_data():
