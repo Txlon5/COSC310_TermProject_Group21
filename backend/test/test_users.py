@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.schemas.user_validator import UserValidator
+from app.auth.password_utils import PasswordHandler
+from app.services.users_service import login_user
 client = TestClient(app)
 
 # Unit Tests
@@ -28,29 +30,40 @@ def test_password_validation():
 
 # Password Hash
 def test_hash_password():
-    hashed = UserValidator.hash_password("Password123!")
+    hashed = PasswordHandler.hash_password("Password123!")
     assert hashed != "Password123!"                                 # True - Check password is not plain text
-    assert UserValidator.hash_password("Password123!") == hashed    # True - Manually hashed password matches
+    assert PasswordHandler.hash_password("Password123!") == hashed    # True - Manually hashed password matches
 
 
 # Integration Tests
 
-# User Retrival - Valid
+# User Retrival by ID - Valid
 def test_get_user():
     r = client.get("/users/9c6dbfcb-72c5-4cc4-9f76-29200f0efda7")
     assert r.status_code == 200
     assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea"}
 
-# User Retrival - Not Found
+# User ID Retrival by ID - Not Found
 def test_get_user_na():
     r = client.get("/users/00000000-0000-0000-0000-000000000000")
     assert r.status_code == 404
 
-# User Retrival - All Users
+# User Retrival by ID - All Users
 def test_get_users():
     r = client.get("/users/")
     assert r.status_code == 200
     assert len(r.json()) > 0                                        # Check that list of users is not empty
+
+# User Retrival by Email - Valid
+def test_get_user_email():
+    r = client.get("/users/email/jane.doe@example.com")
+    assert r.status_code == 200
+    assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea"}
+
+# User Retrival by Email- Not Found
+def test_get_user_by_email_na():
+    r = client.get("/users/email/jane@example.com")
+    assert r.status_code == 404
 
 # User Create - Valid
 def test_create_user():
@@ -70,7 +83,7 @@ def test_create_user():
     # Check that returned user data matches input
     assert data["name"] == "User"
     assert data["email"] == "user@example.com"
-    assert data["password"] == UserValidator.hash_password("Password123!")  # Check is hashed
+    assert data["password"] == PasswordHandler.hash_password("Password123!")  # Check is hashed
 
     # Clean up test data
     client.delete(f"/users/{data['id']}")
@@ -134,7 +147,7 @@ def test_update_user():
     # Check that returned user data matches input
     assert data["name"] == "Updated User"
     assert data["email"] == "updated@example.com"
-    assert data["password"] == UserValidator.hash_password("NewPassword123!")  # Check is hashed
+    assert data["password"] == PasswordHandler.hash_password("NewPassword123!")  # Check is hashed
 
     # Clean up test data
     client.delete(f"/users/{data['id']}")
@@ -179,5 +192,3 @@ def test_update_user_invalid_password():
         json={"name": "Jane Doe", "email": "jane.doe@example.com", "password": "pass"},
     )
     assert r.status_code == 422
-
-
