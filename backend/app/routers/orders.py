@@ -48,7 +48,7 @@ def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
  return order
 
 
-@router.get("/orders/{order_id}", response_model=CreateOrderResponse)
+@router.get("/{order_id}", response_model=CreateOrderResponse)
 def get_order(order_id: str) -> CreateOrderResponse:
     """Retrieves a stored order by its ID."""
     if order_id not in orders_store:
@@ -56,7 +56,7 @@ def get_order(order_id: str) -> CreateOrderResponse:
 
     return orders_store[order_id]
 
-@router.patch("/orders/{order_id}/status", response_model = CreateOrderResponse)
+@router.patch("/{order_id}/status", response_model = CreateOrderResponse)
 def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest) -> CreateOrderResponse:
     #this updated status of existing order and generates a notif when status changes. Essential for SR2.
     if order_id not in orders_store:
