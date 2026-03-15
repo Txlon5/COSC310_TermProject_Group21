@@ -47,3 +47,26 @@ def test_get_certain_past_order_displays_full_order_details():
     assert "updated_at" in data
     assert data["delivered_at"] is None
     
+def test_get_certain_past_order_reflects_updated_status():
+    order_request = {"user_id": "user789", "restaurant_id": "restaurantC", "items":["Butter Chicken"]}
+    
+    create_response = client.post("/orders", json=order_request)
+    assert create_response.status_code == 201
+
+    order_id = create_response.json()["order_id"]
+
+    update_response = client.patch(f"/orders/{order_id}/status",json={"status": "Preparing"})       # Update the order status to Preparing
+    assert update_response.status_code == 200
+    
+    response = client.get(f"/orders/history/user789/{order_id}")
+    assert response.status_code == 200
+
+    data = response.json()
+
+    # Confirming that the returned order reflects the updated status
+    assert data["order_id"] == order_id
+    assert data["user_id"] == "user789"
+    assert data["restaurant_id"] == "restaurantC"
+    assert data["items"] == ["Butter Chicken"]
+    assert data["status"] == "Preparing"
+    assert data["delivered_at"] is None     # Since the order is not delivered yet, it should still be None
