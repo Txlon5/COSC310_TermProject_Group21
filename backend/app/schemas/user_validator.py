@@ -1,4 +1,3 @@
-import hashlib
 import re
 
 class UserValidator:
@@ -50,7 +49,3 @@ class UserValidator:
         
         # Return if conditions not met and has not returned yet
         return False
-    
-    @staticmethod
-    def hash_password(password: str) -> str:
-        return hashlib.sha256(password.encode()).hexdigest()
