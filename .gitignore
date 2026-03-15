@@ -3,3 +3,8 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.DS_STORE
+.venv/
+.coverage
+Milestone2.pdf
+.gitignore

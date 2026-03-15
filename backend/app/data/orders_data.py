@@ -9,7 +9,8 @@ orders_db = [
         delivery_method="delivery",
         delivery_address="123 Main St",
         pickup_location=None,
-        assigned_driver="Alex"
+        assigned_driver="Alex",
+        status="created"
     ),
     Order(
         id=2,
@@ -19,6 +20,9 @@ orders_db = [
         delivery_method="pickup",
         delivery_address=None,
         pickup_location="Front Desk",
-        assigned_driver=None
+        assigned_driver=None,
+        status="created"
+        
     )
+    
 ]

@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
-from typing import Literal
+from typing import List, Optional, Literal
 
 
 class Order(BaseModel):
@@ -13,3 +12,5 @@ class Order(BaseModel):
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
     assigned_driver: Optional[str] = None
+
+    status: str = "created"
