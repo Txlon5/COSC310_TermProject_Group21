@@ -1,5 +1,5 @@
 from typing import Dict, List
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest
 from app.services.notification_service import NotificationService
 from fastapi import APIRouter, status, HTTPException
@@ -15,7 +15,7 @@ def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
     """This is the endpoint for creating an order. It generates a notification when an order is created. key endpoint for SR1. Updated in SR2 as it now stores in memory.
     """
     order_id = str(uuid4())     #Generates a unique order ID using uuid4.
-    now = datetime.now(UTC)     #records tiem wfor when order is created/updated/delivered
+    now = datetime.now(timezone.utc)     #records tiem wfor when order is created/updated/delivered
     
     order = CreateOrderResponse(
         order_id = order_id,
@@ -49,7 +49,7 @@ def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest)
     if old_status == new_status:
         raise HTTPException(status_code = 400, detail = "Order status remains unchanged.")     
     
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     
     order.status = new_status     #Update the order status in the in-memory store.
     order.updated_at = now
