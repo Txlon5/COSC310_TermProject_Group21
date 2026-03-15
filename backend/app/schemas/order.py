@@ -26,3 +26,13 @@ class CreateOrderResponse(BaseModel):
 class OrderStatusUpdateRequest(BaseModel):
     """This is essential for SR2, because this is the input model for order status update. Keeps validatio consistent"""
     status: str = Field(..., min_length = 1)
+
+    class DeliveryInfoUpdateRequest(BaseModel):
+    driver_name: str
+    delivery_status: str
+    estimated_time: str | None = None
+
+    class DeliveryInfoResponse(BaseModel):
+    driver_name: str
+    delivery_status: str
+    estimated_time: str | None = None

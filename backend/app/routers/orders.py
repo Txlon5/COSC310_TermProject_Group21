@@ -76,3 +76,7 @@ def get_past_order_history(user_id: str) -> List[CreateOrderResponse]:
     user_orders = [order for order in orders_store.values()      #Reuses current in-memory orders_store, satisfies SR1
                    if order.user_id == user_id]
     return user_orders
+
+
+@router.put("/orders/{order_id}/delivery")
+def assign_delivery_info(order_id: str, delivery_request: DeliveryInfoUpdateRequest):
