@@ -1,15 +1,29 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 from datetime import datetime, timezone
 from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest
 from app.services.notification_service import NotificationService
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Header, Request
 from uuid import uuid4 
+import logging
  
 router = APIRouter(prefix = "/orders", tags = ["Orders"])
 
 notification = NotificationService()     #Creates an instance of NotificationService class. This will be used to generate notifications when orders are created.
 orders_store: Dict[str, CreateOrderResponse] = {}   #In-memory storage for orders in a dictionary. However, orders disappear when application restarts.
 
+#For SR3, we will be storing unauthorized access attempts
+unauthorized_access_log: List[dict] = []
+logger = logging.getLogger(__name__)        #creates a python logger for server logs
+
+def validate_access_to_order_history(requested_user_id: str, authenticated_user_id: Optional[str], path: str) -> None:
+    
+    #Unauthenticated user request rejected
+    if authenticated_user_id is None:
+        attempt = {"requested_user_id": requested_user_id, "authenticated_user_id": None, "path": path, "timestamp": datetime.now(timezone.utc)}
+        unauthorized_access_log.append(attempt)
+        logger.warning("Unauthorized attempt: order history access rejected: %s", attempt)
+        raise HTTPException(status_code = 401, detail = "Authentication required.")
+ 
 @router.post("", response_model = CreateOrderResponse, status_code = status.HTTP_201_CREATED)
 def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
     """This is the endpoint for creating an order. It generates a notification when an order is created. key endpoint for SR1. Updated in SR2 as it now stores in memory.
