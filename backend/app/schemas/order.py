@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
+from datetime import datetime
 
 class CreateOrderRequest(BaseModel):
     """SR1 only cares about notification being generated when an order is created.
@@ -18,6 +19,9 @@ class CreateOrderResponse(BaseModel):
     restaurant_id: str
     items: List[str]
     status: str
+    created_at: datetime
+    updated_at: datetime
+    delivered_at: Optional[datetime] = None     #optional, as it returns the time only when an order is delivered.
     
 class OrderStatusUpdateRequest(BaseModel):
     """This is essential for SR2, because this is the input model for order status update. Keeps validatio consistent"""
