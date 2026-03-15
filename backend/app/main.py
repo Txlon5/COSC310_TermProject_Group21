@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from typing import List, Optional
 
 from app.routers.orders import router as orders_router
+from app.routes.order import router as order_router
 from app.routers.users import router as users_router
 from app.routers.auth import router as auth_router
 
@@ -24,6 +25,9 @@ app.include_router(notifications_router, tags = ["Notifications"])    #Include t
 def debug_data():
     return RESTAURANTS # Trying to see if I can get a response from RESTAURANTS
 
+app.include_router(order_router)
+app.include_router(orders_router)     #Include the orders router to make the order creation endpoint available.
+app.include_router(users_router)  
 # Create repository instance
 # This object is responsible for retrieving restaurant data
 restaurants_repository = RestaurantsRepository()

@@ -17,12 +17,20 @@ class CreateOrderRequest(BaseModel):
 class CreateOrderResponse(BaseModel):
    # This is the output model for order creation. 
         #This returns response after order creation.
-    
     order_id: str
     user_id: str
     restaurant_id: str
     items: List[str]
     status: str
+    delivery_method: Optional[str] = None
+    delivery_address: Optional[str] = None
+    pickup_location: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    delivered_at: Optional[datetime] = None
+
+class UpdateOrderStatusRequest(BaseModel):
+    new_status: str
     delivery_method: Optional[str] = None
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
