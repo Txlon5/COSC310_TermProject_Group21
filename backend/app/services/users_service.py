@@ -1,7 +1,8 @@
 import uuid
-from typing import List, Dict, Any
+from typing import List
 from fastapi import HTTPException
 from app.schemas.user import User, UserCreate, UserUpdate
+from app.auth.password_utils import PasswordHandler
 from app.schemas.user_validator import UserValidator
 from app.repositories.users_repo import load_all, save_all
 
@@ -20,12 +21,14 @@ def create_user(payload: UserCreate) -> User:
     """
     users = load_all()
     new_id = str(uuid.uuid4())
+    new_name = payload.name.strip()
     new_email=payload.email.strip()
+    new_plain_password=payload.password.strip()
 
     # User input validation
-    if not UserValidator.is_valid_email(payload.email.strip()):
+    if not UserValidator.is_valid_email(new_email):
         raise HTTPException(status_code=422, detail="Invalid email format.")
-    if not UserValidator.is_valid_password(payload.password.strip()):
+    if not UserValidator.is_valid_password(new_plain_password):
         raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
     
     # User conflict validation
@@ -34,7 +37,7 @@ def create_user(payload: UserCreate) -> User:
     check_email_collision(new_email, new_id) # Check if email is already registered
 
     # Create User
-    new_user = User(id=new_id, name=payload.name.strip(), email=new_email, password=UserValidator.hash_password(payload.password.strip()))
+    new_user = User(id=new_id, name=new_name, email=new_email, password=PasswordHandler.hash_password(new_plain_password))
     users.append(new_user.model_dump())
     save_all(users)
     return new_user
@@ -49,6 +52,23 @@ def get_user_by_id(user_id: str) -> User:
         if it.get("id") == user_id:
             return User(**it)
     raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+
+def get_user_by_email(email: str) -> User:
+    """
+    Returns the user matching the email
+    Raises 422 if email
+    Raises 404 if no user exists
+    """
+    # User input validation
+    if not UserValidator.is_valid_email(email):
+        raise HTTPException(status_code=422, detail="Invalid email format.")
+    
+    # Fetch users and search user associated with email
+    users = load_all()
+    for it in users:
+        if it.get("email") == email:
+            return User(**it)
+    raise HTTPException(status_code=404, detail=f"User '{email}' not found")
 
 def update_user(user_id: str, payload: UserUpdate) -> User:
     """
@@ -75,7 +95,7 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
                 id=user_id,
                 name=payload.name.strip(),
                 email=payload.email.strip(),
-                password=UserValidator.hash_password(payload.password.strip()),
+                password=PasswordHandler.hash_password(payload.password.strip()),
             )
             
             # Store updated user information
@@ -94,6 +114,31 @@ def delete_user(user_id: str) -> None:
     if len(new_users) == len(users):
         raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
     save_all(new_users)
+
+def login_user (email:str, password: str) -> User:
+    """
+    Login the user matching the given userid
+    Raises 422 if email or password is invalid
+    Raises 401 if input password does not match stored password
+    """
+    # User input validation
+    if not UserValidator.is_valid_email(email):
+        raise HTTPException(status_code=422, detail="Invalid email format.")
+    if not UserValidator.is_valid_password(password):
+        raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
+
+    # Fetch user
+    user = get_user_by_email(email)
+
+    # Fetch hash password
+    hash_password = user.password
+    
+    # Validate password related to user
+    if not (PasswordHandler.verify_password(password, hash_password)):
+        # If invalid raise issue for invalid credentials
+        raise HTTPException(status_code=401, detail="Invalid credentials.")
+    
+    return user
 
 
 # Helper Functions
