@@ -1,4 +1,5 @@
-from typing import Dict
+from typing import Dict, List
+from datetime import datetime, timezone
 from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest
 from app.services.notification_service import NotificationService
 from fastapi import APIRouter, status, HTTPException
@@ -14,13 +15,17 @@ def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
     """This is the endpoint for creating an order. It generates a notification when an order is created. key endpoint for SR1. Updated in SR2 as it now stores in memory.
     """
     order_id = str(uuid4())     #Generates a unique order ID using uuid4.
+    now = datetime.now(timezone.utc)     #records tiem wfor when order is created/updated/delivered
     
     order = CreateOrderResponse(
         order_id = order_id,
         user_id = order_request.user_id,
         restaurant_id = order_request.restaurant_id,
         items = order_request.items,
-        status = "Created"
+        status = "Created",
+        created_at = now,
+        updated_at = now,
+        delivered_at = None
     )
     
     orders_store[order.order_id] = order     #Store the order in the in-memory orders_store dictionary.
@@ -44,8 +49,16 @@ def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest)
     if old_status == new_status:
         raise HTTPException(status_code = 400, detail = "Order status remains unchanged.")     
     
+    now = datetime.now(timezone.utc)
+    
     order.status = new_status     #Update the order status in the in-memory store.
+    order.updated_at = now
+    
+    if new_status =="Delivered":
+        order.delivered_at = now
+        
     orders_store[order_id] = order     #Save the updated order back to the in-memory store.
+    
         
     #Now generate a notification for the order status change event.
     notification.create_order_status_changed_notification(
@@ -56,3 +69,10 @@ def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest)
     )
     
     return order
+
+@router.get("/history/{user_id}", response_model = List[CreateOrderResponse])
+def get_past_order_history(user_id: str) -> List[CreateOrderResponse]:
+    #For a specific order, view all past orders.
+    user_orders = [order for order in orders_store.values()      #Reuses current in-memory orders_store, satisfies SR1
+                   if order.user_id == user_id]
+    return user_orders
