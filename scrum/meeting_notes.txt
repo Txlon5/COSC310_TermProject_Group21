@@ -70,3 +70,79 @@ Action Items:
   Finished draft of System Architecture Overview
   Continuing work on Use Case Diagram
   Will look into scrum folder requirements and start piecing it together
+
+
+SCRUM MEETING #5
+Date: February 26, 2026
+Attendance: Tariq, Siam, Omarion, Talon
+
+Discussion:
+- Reviewed current state of Milestone 3
+- Developed temporary meeting schedule for preparation of Milestone 3 continuation
+- Prep for first TA Project Update next day
+
+Action Items:
+- All: Todo: Follow up meeting on Saturday, further prioritize issues and redistribute tasks  Blockers: Clarification needed on dataset integration timeline
+
+- Siam:
+   Done: None
+   Todo: Research on best approach to start working on backend and present next meeting
+   Blockers: None
+
+- Tariq:
+  Done: None
+  Todo: Look into FastAPI
+  Blockers: None
+
+- Omarion:
+  Done:None
+  Todo: Look into FastAPI
+  Blockers: None
+
+- Talon:
+  Done: Made branch for Feat1Sr1 and pushed project template to repo. Dockerfile also made for the project
+ Todo: Follow up with TA to get clarification on blockers
+ Blockers: Unsure about how to implement test data
+
+
+SCRUM MEETING #6
+Date: February 28, 2026
+Attendance: Tariq, Omarion, Talon
+Absence: Siam (reason: iftar)
+
+Discussion:
+- Focused on feature distribution, each member selecting two features
+- 2 PRs must be done by end of the week Mar 6
+- Blockers regarding dataset were resolved during lab 
+
+Action Items:
+- All:
+Done: Received clarification for blockers from previous meeting
+Todo: Finalize feature selection for each member
+
+
+SCRUM MEETING #7
+Date: March 1, 2026
+Attendance: Tariq, Omarion, Talon
+Absence: Siam (reason: work shift)
+
+Discussion:
+- Finalized feature ownership: Talon (Feat 1), Tariq (Feat 3), Omarion (Feat 2)
+- Confirmed everyone has their environment setup
+- Discussed plans to contact Siam after the meeting to get feature selection
+
+Action Items:
+- All:
+  Done: Set up local branch
+
+- Tariq:
+  Todo: Continue implementation of Feat 3 System Requirements
+  Blockers: None
+
+- Omarion:
+  Todo:  Continue implementation of Feat 2 System Requirements 
+  Blockers: None
+
+- Talon:
+  Todo: Continue implementation of Feat 1 System Requirements
+  Blockers: None
