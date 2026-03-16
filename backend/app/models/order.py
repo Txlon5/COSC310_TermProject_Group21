@@ -4,7 +4,7 @@ from typing import List, Optional, Literal
 
 class Order(BaseModel):
     id: int
-    user_id: int
+    user_id: str
     items: List[str]
     total_price: float
 
