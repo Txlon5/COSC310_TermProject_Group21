@@ -6,6 +6,7 @@ from datetime import datetime
 class OrderItem(BaseModel):
     menuItemId: int
     quantity: int
+    item_name: Optional[str] = None
 
 # Unified CreateOrderRequest
 class CreateOrderRequest(BaseModel):
@@ -26,6 +27,7 @@ class CreateOrderResponse(BaseModel):
     order_id: str
     user_id: Optional[str] = None
     restaurant_id: int = Field(..., alias="restaurantId")
+    restaurant_name: Optional[str] = None
     items: List[OrderItem]
     status: str
     delivery_method: Optional[str] = None

@@ -13,11 +13,25 @@ orders_service = OrdersService(OrdersRepository(), RestaurantsRepository())
 def create_order_endpoint(order: CreateOrderRequest):
     order_data = order.dict()
     created_order = orders_service.create_order(order_data["restaurant_id"], order_data["items"])
+    # Get restaurant name and menu items
+    restaurants_repo = RestaurantsRepository()
+    restaurants = restaurants_repo.get_all()
+    restaurant = next((r for r in restaurants if r["restaurantId"] == created_order["restaurantId"]), None)
+    restaurant_name = restaurant["name"] if restaurant else None
+    menu_items = restaurant["menuItems"] if restaurant else []
+    # Add item_name to each item
+    items_with_names = []
+    for item in created_order["items"]:
+        item_name = next((m["name"] for m in menu_items if m["menuItemId"] == item["menuItemId"]), None)
+        item_with_name = dict(item)
+        item_with_name["item_name"] = item_name
+        items_with_names.append(item_with_name)
     response_data = {
         "order_id": str(created_order["orderId"]),
         "user_id": order_data.get("user_id"),
         "restaurantId": created_order["restaurantId"],
-        "items": created_order["items"],
+        "restaurant_name": restaurant_name,
+        "items": items_with_names,
         "status": "Created"
     }
     return CreateOrderResponse.model_validate(response_data)
