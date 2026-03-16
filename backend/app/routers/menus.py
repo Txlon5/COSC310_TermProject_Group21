@@ -3,7 +3,7 @@ from app.schemas.menu import MenuCreate
 from app.schemas.restaurant import RestaurantCreate
 from app.services.menu_service import ( fetch_all_menus, fetch_all_restaurants, fetch_menu_by_restaurant_id, create_menu, create_restaurant)
 
-router = APIRouter()
+router = APIRouter(tags=["Menu"])
 
 
 @router.get("/menus")

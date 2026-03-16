@@ -1,0 +1,48 @@
+[
+  {
+    "id": "r1",
+    "name": "Demo Diner",
+    "address": "6767 Back St",
+    "category": "Diner"
+  },
+  {
+    "id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
+    "name": "Omar’s Pizza",
+    "category": "Italian",
+    "tags": [
+      "pizza"
+    ]
+  },
+  {
+    "id": "2d7470ba-a38a-4402-a0de-54059faf625c",
+    "name": "Test Pizza",
+    "category": "Italian",
+    "tags": [
+      "pizza"
+    ]
+  },
+  {
+    "id": "d94acd2d-d617-452b-9365-93bdae80feb7",
+    "name": "Test Burger",
+    "category": "Fast Food",
+    "tags": [
+      "burger"
+    ]
+  },
+  {
+    "id": "89b89555-2ce8-4a67-b422-815cba58f4de",
+    "name": "Test Pizza",
+    "category": "Italian",
+    "tags": [
+      "pizza"
+    ]
+  },
+  {
+    "id": "a545318d-a02a-41bc-a8b7-1d92c7f789ad",
+    "name": "Test Burger",
+    "category": "Fast Food",
+    "tags": [
+      "burger"
+    ]
+  }
+]

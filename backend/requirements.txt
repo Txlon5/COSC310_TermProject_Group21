@@ -1,0 +1,6 @@
+fastapi[standard]
+httpx
+pytest
+pylint
+pwdlib
+pyjwt
