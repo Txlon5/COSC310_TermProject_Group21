@@ -43,7 +43,7 @@ class RestaurantsRepository:
                         
                         "name": f"Restaurant {rid}", # CSV doesn't provide a restaurant name, so we generate one
                         
-                        "tags": "", # CSV doesn't provide tags; keep consistent with schema
+                        "tags": [], # CSV doesn't provide tags; keep consistent with schema
                         
                         "isOpen": True, # CSV doesn't provide open/closed; default True for now
                         
