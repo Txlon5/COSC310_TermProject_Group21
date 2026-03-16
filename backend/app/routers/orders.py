@@ -130,6 +130,17 @@ def get_past_order_history(user_id: str) -> List[CreateOrderResponse]:
                    if order.user_id == user_id]
     return user_orders
 
+@router.get("/history/{user_id}/{order_id}", response_model = CreateOrderResponse)
+def get_certain_past_order(user_id: str, order_id: str) -> CreateOrderResponse:
+    if order_id not in orders_store:
+        raise HTTPException(status_code = 404, detail = "Order not found.")     #Verifies whether the order exists
+    
+    order = orders_store[order_id]
+    
+    if order.user_id != user_id:
+        raise HTTPException(status_code = 403, detail = "Not authorized to view this order.")       #verfies if order belongs to correct user
+    
+    return order 
 
 @router.put("/{order_id}/delivery", response_model=CreateOrderResponse)
 def assign_delivery_info(order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> CreateOrderResponse:
