@@ -44,7 +44,7 @@ def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
          raise HTTPException(status_code=400,detail="pickup_location is required for pickup orders.")
 
  order_id = str(uuid4())     #Generates a unique order ID using uuid4.
- now = datetime.now(timezone.utc)     #records tiem wfor when order is created/updated/delivered
+ timestamp = datetime.now(timezone.utc)     #records tiem wfor when order is created/updated/delivered
     
  order = CreateOrderResponse(
      order_id = order_id,
@@ -55,8 +55,8 @@ def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
      delivery_method=order_request.delivery_method,
      delivery_address=order_request.delivery_address,
      pickup_location=order_request.pickup_location,
-     created_at = now,
-     updated_at = now,
+     created_at = timestamp,
+     updated_at = timestamp,
      delivered_at = None
  )
 
@@ -101,13 +101,13 @@ def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest)
 
              
     
-    now = datetime.now(timezone.utc)
+    timestamp = datetime.now(timezone.utc)
     
     order.status = new_status     #Update the order status in the in-memory store.
-    order.updated_at = now
+    order.updated_at = timestamp
     
     if new_status =="Delivered":
-        order.delivered_at = now
+        order.delivered_at = timestamp
         
     orders_store[order_id] = order     #Save the updated order back to the in-memory store.
     
