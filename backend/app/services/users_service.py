@@ -25,7 +25,7 @@ def create_user(payload: UserCreate) -> User:
     new_name = payload.name.strip()
     new_email=payload.email.strip()
     new_plain_password=payload.password.strip()
-    new_role=payload.role.strip()
+    new_role="user"
 
     # User input validation
     if not UserValidator.is_valid_email(new_email):
