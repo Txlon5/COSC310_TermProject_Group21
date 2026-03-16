@@ -61,7 +61,10 @@ def remove_self(current_user: User = Depends(get_current_user)):
 
 # Delete user by id
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_user(user_id: str):
+def remove_user(user_id: str, current_user: User = Depends(get_current_user)):
+    # Check if user authorized, raise exception otherwise
+    if current_user.id != user_id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized to delete this user.")
     delete_user(user_id)
     return None
 
