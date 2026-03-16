@@ -21,10 +21,20 @@ class RestaurantsService:
 
     def _to_schema_restaurant(self, r):
         return {
-            "id": str(r.get("restaurantId")),
+            "restaurantId": r.get("restaurantId"),
             "name": r.get("name", ""),
-            "category": r.get("category", "Unknown"),
             "tags": r.get("tags", []),
+            "isOpen": r.get("isOpen", True),
+            "menuItems": r.get("menuItems", []),
+        }
+    def _to_crud_response(self, r):
+        base = self._to_schema_restaurant(r)
+
+        return {
+            "id": str(base["restaurantId"]),
+            "name": base["name"],
+            "category": r.get("category", "Unknown"),
+            "tags": base["tags"],
         }
 
     # Public method to get all restaurants
@@ -52,18 +62,19 @@ class RestaurantsService:
         if hasattr(self.repo, "save_all"):
             self.repo.save_all(restaurants)
 
-        return self._to_schema_restaurant(new_restaurant)
-
+         #return self._to_schema_restaurant(new_restaurant)
+        return self._to_crud_response(new_restaurant)
     # Returns a single restaurant by its restaurantId
     def get_restaurant_by_id(self, restaurant_id: str):
         restaurants = self.repo.get_all()
 
         for r in restaurants:
             if str(r.get("restaurantId")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
-                return self._to_schema_restaurant(r)
+                 #return self._to_schema_restaurant(r)
+                return self._to_crud_response(r)
 
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
-
+        
     # Updates an existing restaurant by ID
     def update_restaurant(self, restaurant_id: str, payload):
         restaurants = self.repo.get_all()
@@ -79,8 +90,8 @@ class RestaurantsService:
                 if hasattr(self.repo, "save_all"):
                     self.repo.save_all(restaurants)
 
-                return self._to_schema_restaurant(r)
-
+                 #return self._to_schema_restaurant(r)
+                return self._to_crud_response(r)
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
 
     # Deletes a restaurant by ID
@@ -129,7 +140,7 @@ class RestaurantsService:
         if restaurant_id is not None:
             restaurants = [
                 r for r in restaurants
-                if str(r.get("restaurantId")) == restaurant_id or str(r.get("id")) == str(restaurant_id)
+                if str(r.get("restaurantId")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id)
             ]
 
         # Filter by open/closed status if provided
@@ -149,11 +160,15 @@ class RestaurantsService:
             if tag_norm == "":
                 raise ValueError("tag cannot be empty")
 
-            # Keep only restaurants whose tags contain the given tag
-            restaurants = [
-                r for r in restaurants
-                if tag_norm in str(r.get("tags", "")).lower()
-            ]
+            def has_tag(r):
+                tags = r.get("tags", [])
+
+                 # If tags is a string, convert it into a list
+                if isinstance(tags, str):
+                    tags = [t.strip() for t in tags.split(",") if t.strip()]
+                    
+                return any(tag_norm == str(t).strip().lower() for t in tags)
+            restaurants = [r for r in restaurants if has_tag(r)]
 
         # Search filter
         if q is not None:
