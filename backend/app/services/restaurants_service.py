@@ -15,7 +15,7 @@ class RestaurantsService:
         self.repo = repo
 
     # Public method to get all restaurants
-    # This is what the API layer will call
+    # This is what the API layer calls
     def get_restaurants(self):
 
         restaurants = self.repo.get_all() # Call the repository to retrieve raw data
@@ -23,11 +23,23 @@ class RestaurantsService:
         # For now, we return it directly, until filtering and all is added
         return restaurants
     
-    ''' SR2 STUFF - 
-    Here we will implement some search and filter functionality 
-    and there should be a unit test in the same commit to test this method '''    
-    def search_restaurants(self, q=None, restaurant_id=None, is_open=None, tag=None):
-        
+    """THE BELOW FUNCTION IS FOR SR3 - PAGINATION"""
+    def paginate(self, items, page, page_size): # Users can put in a page count and how many items they want per page
+        # Below are some basic checks to make sure their parameters are valid
+        if page is None or page_size is None:
+            return items # If no pagination parameters are given, just return all items without paginating
+
+        if page < 1:
+            raise ValueError("page must be >= 1") # If given a page number less than 1 raise an error
+        if page_size < 1:
+            raise ValueError("pageSize must be >= 1") # If given a page size less than 1 raise an error
+
+        start = (page - 1) * page_size
+        end = start + page_size
+        return items[start:end] # Just return the slice of items that corresponds to the requested page and page size
+     
+    def search_restaurants(self, q=None, restaurant_id=None, is_open=None, tag=None, page=None, page_size=None):
+    # SR2 - Search and Filter Functionality    
         restaurants = self.repo.get_all() # Like above, call the repository to retrieve raw data
 
         # Here we match the restaurant to the argument passed in the endpoint
@@ -54,7 +66,7 @@ class RestaurantsService:
         if q is not None:
             q_norm = str(q).strip().lower() # Normalize as we did above for tags
             if q_norm == "": # May need to discuss with the team what should be done if no search query is provided, but for now, if it's just an empty string, we will raise an error
-                raise ValueError("q cannot be empty")
+                return [] # I think this satisfies FEAT3-US1
 
             def matches(r):# But what if the user puts something in and we want to find a match
                 name_ok = q_norm in str(r.get("name", "")).lower() # Confirm the name matches and if not just default to ""
@@ -64,4 +76,7 @@ class RestaurantsService:
 
             restaurants = [r for r in restaurants if matches(r)] # And of course, just show whatever meets either condition
             
+        restaurants = self.paginate(restaurants, page, page_size)
+            
         return restaurants
+    
