@@ -1,4 +1,10 @@
-.venv/
+.pytest_cache/
 __pycache__/
 *.pyc
-.env
+*.pyo
+*.pyd
+.DS_STORE
+.venv/
+.coverage
+Milestone2.pdf
+.gitignore
