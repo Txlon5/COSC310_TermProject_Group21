@@ -2,7 +2,7 @@
 from app.services.restaurants_service import RestaurantsService
 from app.repositories.restaurants_repository import RestaurantsRepository
 import pytest # Will be helpful to test raising errors
-
+from fastapi import HTTPException
 
 # Test that the service correctly returns restaurant data
 def test_service_returns_restaurants():
@@ -133,3 +133,50 @@ def test_search_with_pagination_page2_no_duplicates():
     page1 = service.search_restaurants(page=1, page_size=1)
     page2 = service.search_restaurants(page=2, page_size=1)
     assert page1[0]["restaurantId"] != page2[0]["restaurantId"] # Just have to make sure the first element of each page is different, since we only have one item per page, this ensures no duplicates across pages
+
+def get_all(self):
+    return [
+        {
+            "restaurantId": 1,
+            "name": "Pizza Place",
+            "category": "Italian",
+            "tags": ["pizza"],
+            "isOpen": True,
+            "menuItems": []
+        }
+    ]
+
+def save_all(self, restaurants):
+    self.restaurants = restaurants
+
+
+def test_get_restaurant_by_id_not_found():
+    service = RestaurantsService(FakeRestaurantsRepository())
+
+    with pytest.raises(HTTPException) as exc:
+        service.get_restaurant_by_id("999")
+
+    assert exc.value.status_code == 404
+
+
+def test_update_restaurant_not_found():
+    service = RestaurantsService(FakeRestaurantsRepository())
+
+    class Payload:
+        name = "Updated"
+        category = "Test"
+        tags = []
+
+    with pytest.raises(HTTPException) as exc:
+        service.update_restaurant("999", Payload())
+
+    assert exc.value.status_code == 404
+
+
+def test_delete_restaurant_not_found():
+    service = RestaurantsService(FakeRestaurantsRepository())
+
+    with pytest.raises(HTTPException) as exc:
+        service.delete_restaurant("999")
+
+    assert exc.value.status_code == 404
