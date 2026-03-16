@@ -15,7 +15,7 @@ class RestaurantsService:
         self.repo = repo
 
     # Public method to get all restaurants
-    # This is what the API layer will call
+    # This is what the API layer calls
     def get_restaurants(self):
 
         restaurants = self.repo.get_all() # Call the repository to retrieve raw data
@@ -65,17 +65,18 @@ class RestaurantsService:
         # Search filter
         if q is not None:
             q_norm = str(q).strip().lower() # Normalize as we did above for tags
-            if q_norm == "": # Empty search query should return no results
-                restaurants = []
-            else:
-                def matches(r):# But what if the user puts something in and we want to find a match
-                    name_ok = q_norm in str(r.get("name", "")).lower() # Confirm the name matches and if not just default to ""
-                    items = r.get("menuItems", []) # Grab menu items for our next step but default to empty otherwise to avoid errors
-                    item_ok = any(q_norm in str(it.get("name", "")).lower() for it in items) # Use any to match ANY searched item to anything on the menu.
-                    return name_ok or item_ok # Either or! Then we should have a match :)
+            if q_norm == "": # May need to discuss with the team what should be done if no search query is provided, but for now, if it's just an empty string, we will raise an error
+                return [] # I think this satisfies FEAT3-US1
 
-                restaurants = [r for r in restaurants if matches(r)] # And of course, just show whatever meets either condition
+            def matches(r):# But what if the user puts something in and we want to find a match
+                name_ok = q_norm in str(r.get("name", "")).lower() # Confirm the name matches and if not just default to ""
+                items = r.get("menuItems", []) # Grab menu items for our next step but default to empty otherwise to avoid errors
+                item_ok = any(q_norm in str(it.get("name", "")).lower() for it in items) # Use any to match ANY searched item to anything on the menu.
+                return name_ok or item_ok # Either or! Then we should have a match :)
+
+            restaurants = [r for r in restaurants if matches(r)] # And of course, just show whatever meets either condition
             
         restaurants = self.paginate(restaurants, page, page_size)
             
         return restaurants
+    
