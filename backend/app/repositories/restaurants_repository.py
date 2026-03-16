@@ -35,9 +35,9 @@ class RestaurantsRepository:
                         
                         "restaurantId": rid,
                         
-                        "name": row.get("restaurant_name", f"Restaurant {rid}").strip(),
+                        "name": (row.get("restaurant_name", f"Restaurant {rid}") or f"Restaurant {rid}").strip(),
                         # Updated name and tag now that our CSV is updated
-                        "tags": row.get("tags", "").strip(),
+                        "tags": (row.get("tags", "") or "").strip(),
                         
                         "isOpen": True, # CSV doesn't provide open/closed; default True for now
                         
