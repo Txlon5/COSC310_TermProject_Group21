@@ -2,9 +2,9 @@ from app.schemas.menu import Menu, MenuCreate
 from app.schemas.restaurant import Restaurant, RestaurantCreate
 
 restaurants = [
-    Restaurant(id=1, name="Burger Place"),
-    Restaurant(id=2, name="Pizza Spot"),
-    Restaurant(id=3, name="Sub Shop"),
+    Restaurant(id=1, name="Burger Place", category="Fast Food", tags=["Burgers"]),
+    Restaurant(id=2, name="Pizza Spot", category="Italian", tags=["Pizza"]),
+    Restaurant(id=3, name="Sub Shop", category="Turkish", tags=["Sandwich"]),
 ]
 
 menus = [
@@ -17,7 +17,7 @@ menus = [
 
 
 def get_all_restaurants():
-    return restaurants
+    return [restaurant.model_dump() for restaurant in restaurants]
 
 
 def get_all_menus():
@@ -44,6 +44,8 @@ def add_restaurant(restaurant_data: RestaurantCreate):
     new_restaurant = Restaurant(
         id=new_id,
         name=restaurant_data.name,
+        category=restaurant_data.category,
+        tags=restaurant_data.tags,
     )
 
     restaurants.append(new_restaurant)

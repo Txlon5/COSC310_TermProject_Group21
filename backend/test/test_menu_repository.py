@@ -1,5 +1,6 @@
 from app.repositories import menu_repository
 from app.schemas.menu import MenuCreate, Menu
+from app.schemas.restaurant import RestaurantCreate, Restaurant
 
 
 def setup_function():
@@ -9,6 +10,12 @@ def setup_function():
         Menu(id=3, restaurant_id=2, name="Pizza", price=12.99),
         Menu(id=4, restaurant_id=2, name="Garlic Bread", price=4.99),
         Menu(id=5, restaurant_id=3, name="Turkey Sub", price=9.49),
+    ]
+
+    menu_repository.restaurants[:] = [
+        Restaurant(id=1, name="Burger Place", category="Fast Food", tags=["Burgers"]),
+        Restaurant(id=2, name="Pizza Spot", category="Italian", tags=["Pizza"]),
+        Restaurant(id=3, name="Sub Shop", category="Turkish", tags=["Sandwich"]),
     ]
 
 
@@ -53,3 +60,52 @@ def test_add_menu_appends_to_menu_list():
     new_menu = menu_repository.add_menu(new_menu_data)
 
     assert menu_repository.menus[-1] == new_menu
+
+
+def test_add_restaurant_returns_new_restaurant():
+    original_count = len(menu_repository.restaurants)
+
+    new_restaurant = RestaurantCreate(
+        name="Taco Town",
+        category="Mexican",
+        tags=["Tacos", "Burritos"]
+    )
+
+    result = menu_repository.add_restaurant(new_restaurant)
+
+    assert result.id == original_count + 1
+    assert result.name == "Taco Town"
+    assert result.category == "Mexican"
+    assert result.tags == ["Tacos", "Burritos"]
+
+
+def test_add_restaurant_appends_to_restaurants_list():
+    original_count = len(menu_repository.restaurants)
+
+    new_restaurant = RestaurantCreate(
+        name="Sushi Place",
+        category="Japanese",
+        tags=["Sushi"]
+    )
+
+    result = menu_repository.add_restaurant(new_restaurant)
+
+    assert len(menu_repository.restaurants) == original_count + 1
+    assert menu_repository.restaurants[-1].id == result.id
+    assert menu_repository.restaurants[-1].name == "Sushi Place"
+    assert menu_repository.restaurants[-1].category == "Japanese"
+    assert menu_repository.restaurants[-1].tags == ["Sushi"]
+
+
+def test_add_restaurant_assigns_incremented_id():
+    starting_last_id = menu_repository.restaurants[-1].id
+
+    new_restaurant = RestaurantCreate(
+        name="Pasta Corner",
+        category="Italian",
+        tags=["Pasta"]
+    )
+
+    result = menu_repository.add_restaurant(new_restaurant)
+
+    assert result.id == starting_last_id + 1

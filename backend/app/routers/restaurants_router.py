@@ -46,17 +46,17 @@ def post_restaurant(payload: RestaurantCreate):
 
 
 @router.get("/{restaurant_id}", response_model=Restaurant)
-def get_restaurant(restaurant_id: str):
+def get_restaurant(restaurant_id: int):
     return restaurants_service.get_restaurant_by_id(restaurant_id)
 
 
 @router.put("/{restaurant_id}", response_model=Restaurant)
-def put_restaurant(restaurant_id: str, payload: RestaurantUpdate):
+def put_restaurant(restaurant_id: int, payload: RestaurantUpdate):
     return restaurants_service.update_restaurant(restaurant_id, payload)
 
 
 @router.delete("/{restaurant_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_restaurant(restaurant_id: str):
+def remove_restaurant(restaurant_id: int):
     restaurants_service.delete_restaurant(restaurant_id)
     return None
 

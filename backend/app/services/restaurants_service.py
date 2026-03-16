@@ -31,7 +31,7 @@ class RestaurantsService:
         base = self._to_schema_restaurant(r)
 
         return {
-            "id": str(base["restaurantId"]),
+            "id": int(base["restaurantId"]),
             "name": base["name"],
             "category": r.get("category", "Unknown"),
             "tags": base["tags"],
@@ -48,8 +48,15 @@ class RestaurantsService:
     def create_restaurant(self, payload):
         restaurants = self.repo.get_all()
 
+        existing_ids = [
+            int(r.get("restaurantId", r.get("id", 0)))
+            for r in restaurants
+        ]
+        
+        new_id = max(existing_ids, default=0) + 1
+
         new_restaurant = {
-            "restaurantId": str(uuid.uuid4()),
+            "restaurantId": new_id,
             "name": payload.name.strip(),
             "category": payload.category.strip(),
             "tags": payload.tags if payload.tags is not None else [],
@@ -65,22 +72,22 @@ class RestaurantsService:
          #return self._to_schema_restaurant(new_restaurant)
         return self._to_crud_response(new_restaurant)
     # Returns a single restaurant by its restaurantId
-    def get_restaurant_by_id(self, restaurant_id: str):
+    def get_restaurant_by_id(self, restaurant_id: int):
         restaurants = self.repo.get_all()
 
         for r in restaurants:
-            if str(r.get("restaurantId")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
+            if int(r.get("restaurantId", r.get("id"))) == restaurant_id:
                  #return self._to_schema_restaurant(r)
                 return self._to_crud_response(r)
 
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
         
     # Updates an existing restaurant by ID
-    def update_restaurant(self, restaurant_id: str, payload):
+    def update_restaurant(self, restaurant_id: int, payload):
         restaurants = self.repo.get_all()
 
         for r in restaurants:
-            if str(r.get("restaurantId")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
+            if int(r.get("restaurantId", r.get("id"))) == restaurant_id:
                 r["name"] = payload.name.strip()
                 r["category"] = payload.category.strip()
 
@@ -95,11 +102,11 @@ class RestaurantsService:
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
 
     # Deletes a restaurant by ID
-    def delete_restaurant(self, restaurant_id: str):
+    def delete_restaurant(self, restaurant_id: int):
         restaurants = self.repo.get_all()
 
         for i, r in enumerate(restaurants):
-            if str(r.get("restaurantId")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
+            if int(r.get("restaurantId", r.get("id"))) == restaurant_id:
                 restaurants.pop(i)
 
                 if hasattr(self.repo, "save_all"):

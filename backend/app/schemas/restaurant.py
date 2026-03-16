@@ -1,32 +1,31 @@
-from pydantic import BaseModel
-from typing import List, Union
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from uuid import uuid4
 
 class Restaurant(BaseModel):
-    id: str
+    id: int
     name: str = Field(..., min_length=1)
-    category: str
-    tags: List[str] = []
+    category: Optional[str] = None
+    tags: List[str] = Field(default_factory=list)
 
 class RestaurantCreate(BaseModel):
     name: str = Field(..., min_length=1)
-    category: str
-    tags: List[str] = []
+    category: Optional[str] = None
+    tags: List[str] = Field(default_factory=list)
 
 class RestaurantUpdate(BaseModel):
     name: str = Field(..., min_length=1)
-    category:str
-    tags: List[str] = []
+    category: Optional[str] = None
+    tags: List[str] = Field(default_factory=list)
 
-# Represents a single menu item returned to the client
 class MenuItemOut(BaseModel):
     menuItemId: int
     name: str
     price: float
     category: str
 
-# Represents a restaurant returned to the client
 class RestaurantOut(BaseModel):
-    restaurantId: Union[str, int]
+    restaurantId: int
     name: str
     tags: List[str]
     isOpen: bool

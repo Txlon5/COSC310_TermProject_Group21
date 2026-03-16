@@ -19,13 +19,14 @@ def fetch_menu_by_restaurant_id(restaurant_id: int):
     restaurant_exists = False
 
     for restaurant in restaurants:
-        if restaurant.id == restaurant_id:
+        if restaurant["id"] == restaurant_id:
             restaurant_exists = True
             break
-
+        
     if not restaurant_exists:
         raise HTTPException(status_code=404, detail="Restaurant not found")
-
+    
+    return [menu for menu in menus if menu.restaurant_id == restaurant_id]
     restaurant_menu = []
 
     for item in menus:
@@ -41,7 +42,7 @@ def create_menu(menu_data: MenuCreate):
     restaurant_exists = False
 
     for restaurant in restaurants:
-        if restaurant.id == menu_data.restaurant_id:
+        if restaurant["id"] == menu_data.restaurant_id:
             restaurant_exists = True
             break
 
