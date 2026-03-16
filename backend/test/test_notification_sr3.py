@@ -53,8 +53,8 @@ def test_get_notifications_for_user_returns_all_notifications():
 
 def test_get_notifications_returns_requested_users_notifications_only():
     #Checks that when retrieving notifications for a specific user, only that user's notifications are returned and not notifications for other users.
-    order_request1 = {"user_id" : "user111", "restaurant_id" :"restaurant111", "items": ["Pasta"]}
-    order_request2 = {"user_id" : "user222", "restaurant_id" :"restaurant222", "items": ["Salad"]}
+    order_request1 = {"user_id" : "user1", "restaurant_id" :"restaurant1", "items": ["Pasta"]}
+    order_request2 = {"user_id" : "user2", "restaurant_id" :"restaurant2", "items": ["Salad"]}
     
     create_response1 = client.post("/orders", json=order_request1)
     assert create_response1.status_code == 201
@@ -64,14 +64,14 @@ def test_get_notifications_returns_requested_users_notifications_only():
     assert create_response2.status_code == 201
     order_id2 = create_response2.json()["order_id"]
     
-    #Now we retrieve notifications for user111 and check that only user111's notification is returned, not user222's notification.
-    response = client.get("/notifications/user111")
+    #Now we retrieve notifications for user1 and check that only user1's notification is returned, not user2's notification.
+    response = client.get("/notifications/user1")
     assert response.status_code == 200
     
-    #Only one notification should be returned for user111, which is the order created notification for their order.
+    #Only one notification should be returned for user1, which is the order created notification for their order.
     data = response.json()
     assert len(data) == 1     
-    assert data[0]["user_id"] == "user111"
+    assert data[0]["user_id"] == "user1"
     assert data[0]["order_id"] == order_id1
     assert data[0]["type"] == "Order_Created"
     assert data[0]["title"] == "Order Created"
