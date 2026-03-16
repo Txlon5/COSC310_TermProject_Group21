@@ -15,6 +15,6 @@ class MenuItemOut(BaseModel):
 class RestaurantOut(BaseModel):
     restaurantId: int
     name: str
-    tags: str
+    tags: List[str]
     isOpen: bool
     menuItems: List[MenuItemOut]
