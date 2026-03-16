@@ -65,7 +65,7 @@ class RestaurantsService:
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
 
     # Updates an existing restaurant by ID
-     def update_restaurant(self, restaurant_id: str, payload):
+    def update_restaurant(self, restaurant_id: str, payload):
         restaurants = self.repo.get_all()
 
         for r in restaurants:
@@ -84,7 +84,7 @@ class RestaurantsService:
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
 
     # Deletes a restaurant by ID
-     def delete_restaurant(self, restaurant_id: str):
+    def delete_restaurant(self, restaurant_id: str):
         restaurants = self.repo.get_all()
 
         for i, r in enumerate(restaurants):
@@ -178,5 +178,5 @@ class RestaurantsService:
                 # Keep only matching restaurants
                 restaurants = [r for r in restaurants if matches(r)]
 
-         restaurants = self.paginate(restaurants, page, page_size)
+        restaurants = self.paginate(restaurants, page, page_size)
         return [self._to_schema_restaurant(r) for r in restaurants]
