@@ -5,7 +5,7 @@ from app.repositories.restaurants_repository import RestaurantsRepository
 from app.services.restaurants_service import RestaurantsService
 from app.data.restaurants_data import RESTAURANTS
 
-router = APIRouter()
+router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 
 # Create repository instance
 restaurants_repository = RestaurantsRepository()
@@ -13,7 +13,7 @@ restaurants_repository = RestaurantsRepository()
 # Inject repository into the service
 restaurants_service = RestaurantsService(restaurants_repository)
 
-@router.get("/restaurants", response_model=List[RestaurantOut])
+@router.get("", response_model=List[RestaurantOut])
 def get_restaurants(
     q: Optional[str] = Query(default=None),
     restaurantId: Optional[int] = Query(default=None, ge=1),
