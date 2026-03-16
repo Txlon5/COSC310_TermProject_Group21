@@ -6,7 +6,7 @@ from app.services.menu_service import (
     create_menu
 )
 
-router = APIRouter()
+router = APIRouter(tags=["Menu"])
 
 @router.get("/menus")
 def get_menus():
