@@ -70,4 +70,4 @@ def test_get_certain_past_order_reflects_updated_status():
     assert data["restaurant_id"] == "restaurantC"
     assert data["items"] == ["Butter Chicken"]
     assert data["status"] == "Preparing"
-    assert data["delivered_at"] is None     # Since the order is not delivered yet, it should still be None
+    assert data["delivered_at"] is None         # Since the order is not delivered yet, it should still be None
