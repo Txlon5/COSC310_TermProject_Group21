@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, status
 from typing import List, Optional
-from app.schemas.restaurants import RestaurantOut
+from app.schemas.restaurant import RestaurantOut, RestaurantCreate, RestaurantUpdate, Restaurant
 from app.repositories.restaurants_repository import RestaurantsRepository
 from app.services.restaurants_service import RestaurantsService
-from app.data.restaurants_data import RESTAURANTS
+
 
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 
@@ -40,6 +40,23 @@ def get_restaurants(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/debug")
-def debug_data():
-    return RESTAURANTS
+@router.post("", response_model=Restaurant, status_code=201)
+def post_restaurant(payload: RestaurantCreate):
+    return restaurants_service.create_restaurant(payload)
+
+
+@router.get("/{restaurant_id}", response_model=Restaurant)
+def get_restaurant(restaurant_id: str):
+    return restaurants_service.get_restaurant_by_id(restaurant_id)
+
+
+@router.put("/{restaurant_id}", response_model=Restaurant)
+def put_restaurant(restaurant_id: str, payload: RestaurantUpdate):
+    return restaurants_service.update_restaurant(restaurant_id, payload)
+
+
+@router.delete("/{restaurant_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_restaurant(restaurant_id: str):
+    restaurants_service.delete_restaurant(restaurant_id)
+    return None
+
