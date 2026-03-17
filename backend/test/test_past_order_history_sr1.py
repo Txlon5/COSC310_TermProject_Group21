@@ -1,4 +1,4 @@
-from app.routers.orders_t import orders_store, notification
+from app.routers.orders import orders_store, notification, unauthorized_access_log
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -6,11 +6,12 @@ client = TestClient(app)
 
 def setup_function():
     orders_store.clear()        #Clear orders from in-memory store before each test 
-    notification.clear_notifications()      #Clear notifications before each test      
+    notification.clear_notifications()      #Clear notifications before each test  
+    unauthorized_access_log.clear()         # Clear unauthorized access log before each test    
     
 def test_get_past_order_history_for_user_returns_empty_list():
     #verifies that APi returns empty list instead of an error when the user has no past order in history.
-    response = client.get("/orders/history/no_orders_user")
+    response = client.get("/orders/history/no_orders_user", headers = {"X-User-Id": "no_orders_user"})
     assert response.status_code == 200
     assert response.json() == []        #Returned order history is an empty list
     
@@ -50,7 +51,7 @@ def test_get_past_order_history_returns_orders_for_that_user_only():
     created_order_id_2 = response_2.json()["order_id"]
     created_order_id_3 = response_3.json()["order_id"]
     
-    history_response = client.get("/orders/history/user123")        #Retrieves order history for user123 and later converts to python data
+    history_response = client.get("/orders/history/user123", headers = {"X-User-Id": "user123"})        #Retrieves order history for user123 and later converts to python data
     assert history_response.status_code == 200
     data = history_response.json()
     

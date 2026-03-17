@@ -2,8 +2,33 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.schemas.user_validator import UserValidator
 from app.auth.password_utils import PasswordHandler
-from app.services.users_service import login_user
+from app.auth.token_utils import get_current_user
+from app.schemas.user import User
+import pytest
 client = TestClient(app)
+
+
+# Test Preparation
+
+# Create mock admin for testing
+def override_get_current_user():
+    return User(
+        id="8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7",
+        name="Admin",
+        email="admin@example.com",
+        password="password123!",
+        role="admin"
+    )
+
+# Overide get_current_user() function to return the mock admin
+@pytest.fixture(autouse=True)
+def apply_admin_override():
+    # Set the override
+    app.dependency_overrides[get_current_user] = override_get_current_user
+    # Pause to allow test to run with override
+    yield 
+    # Clear the override after test is done
+    app.dependency_overrides = {}
 
 # Unit Tests
 
@@ -28,12 +53,18 @@ def test_password_validation():
     assert not UserValidator.is_valid_password("Passw1!")           # False - 7 characters
     assert UserValidator.is_valid_password("Passwo1!")              # True  - 8 characters
 
+# Role Validation
+def test_role_validation():
+    assert UserValidator.is_valid_role("user")                      # True
+    assert UserValidator.is_valid_role("admin")                     # True
+    assert not UserValidator.is_valid_role("moderator")             # False - invalid role
+    assert not UserValidator.is_valid_role("")                      # False - blank entry
+    
 # Password Hash
 def test_hash_password():
     hashed = PasswordHandler.hash_password("Password123!")
     assert hashed != "Password123!"                                 # True - Check password is not plain text
     assert PasswordHandler.hash_password("Password123!") == hashed    # True - Manually hashed password matches
-
 
 # Integration Tests
 
@@ -41,7 +72,7 @@ def test_hash_password():
 def test_get_user():
     r = client.get("/users/9c6dbfcb-72c5-4cc4-9f76-29200f0efda7")
     assert r.status_code == 200
-    assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea"}
+    assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "role": "user"}
 
 # User ID Retrival by ID - Not Found
 def test_get_user_na():
@@ -58,7 +89,7 @@ def test_get_users():
 def test_get_user_email():
     r = client.get("/users/email/jane.doe@example.com")
     assert r.status_code == 200
-    assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea"}
+    assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "role": "user"}
 
 # User Retrival by Email- Not Found
 def test_get_user_by_email_na():
@@ -192,3 +223,78 @@ def test_update_user_invalid_password():
         json={"name": "Jane Doe", "email": "jane.doe@example.com", "password": "pass"},
     )
     assert r.status_code == 422
+
+
+# Current User Routes
+
+# User Retrieval Self - Valid
+def test_get_self():
+    r = client.get("/users/self")
+    assert r.status_code == 200
+    assert r.json() == {"id": "8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7", "name": "Admin", "email":"admin@example.com", "password":"password123!", "role":"admin"}
+
+# User Update Self - Valid
+def test_update_self():
+    # Create user to update
+    r = client.post(
+        "/users/",
+        json={"name": "Updated User", "email": "updateme@example.com", "password": "Password123!"}
+    )
+    assert r.status_code == 201
+    
+    # Swap current_user to be the new test user 
+    def override_get_current_user():
+        return User(**r.json()) # Load r as current user
+    app.dependency_overrides[get_current_user] = override_get_current_user
+
+    # Perform self update
+    r = client.put(
+        "/users/self",
+        json={"name": "User Updated", "email": "updated@example.com", "password": "NewPassword123!"}
+    )
+    data = r.json()
+
+    # Check if id exists and is not empty
+    assert "id" in data
+    assert data["id"] != ""
+
+    # Check that returned user data matches input
+    assert data["name"] == "User Updated"
+    assert data["email"] == "updated@example.com"
+    assert data["password"] == PasswordHandler.hash_password("NewPassword123!")  # Check is hashed
+
+    # Set override back to admin so we can delete test user
+    app.dependency_overrides[get_current_user] = override_get_current_user
+
+    # Clean up test data
+    client.delete(f"/users/{data['id']}")
+
+# User Delete Self - Valid
+def test_delete_self():
+    # Create user to delete
+    r = client.post(
+        "/users/",
+        json={"name": "User", "email": "user@example.com", "password": "Password123!"}
+    )
+    assert r.status_code == 201
+    user_id = r.json()["id"]
+
+    # Swap current_user to be the new test user 
+    def override_test_user():
+        return User(**r.json()) # Load r as current user
+    app.dependency_overrides[get_current_user] = override_test_user
+
+    # Self delete
+    r = client.delete("/users/self")
+    assert r.status_code == 204
+
+    # Set override back to admin
+    app.dependency_overrides[get_current_user] = override_get_current_user
+    
+    # Verify user is deleted
+    r = client.get(f"/users/{user_id}")
+    assert r.status_code == 404
+
+   
+
+    

@@ -19,17 +19,21 @@ def create_user(payload: UserCreate) -> User:
     Raises 422 if email or password is invalid
     Raises 409 if email is already registered
     """
+    # Fetch user values
     users = load_all()
     new_id = str(uuid.uuid4())
     new_name = payload.name.strip()
     new_email=payload.email.strip()
     new_plain_password=payload.password.strip()
+    new_role="user"
 
     # User input validation
     if not UserValidator.is_valid_email(new_email):
         raise HTTPException(status_code=422, detail="Invalid email format.")
     if not UserValidator.is_valid_password(new_plain_password):
         raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
+    if not UserValidator.is_valid_role(new_role):
+        raise HTTPException(status_code=422, detail="Role must be either user or admin.")
     
     # User conflict validation
     if any(it.get("id") == new_id for it in users):  # extremely unlikely, but consistent check
@@ -37,7 +41,13 @@ def create_user(payload: UserCreate) -> User:
     check_email_collision(new_email, new_id) # Check if email is already registered
 
     # Create User
-    new_user = User(id=new_id, name=new_name, email=new_email, password=PasswordHandler.hash_password(new_plain_password))
+    new_user = User(
+        id=new_id,
+        name=new_name,
+        email=new_email,
+        password=PasswordHandler.hash_password(new_plain_password),
+        role=new_role,
+    )
     users.append(new_user.model_dump())
     save_all(users)
     return new_user

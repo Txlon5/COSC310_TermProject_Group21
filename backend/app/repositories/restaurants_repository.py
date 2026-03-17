@@ -14,13 +14,19 @@ class RestaurantsRepository:
         if csv_path is None:
             csv_path = Path(__file__).resolve().parent.parent / "data" / "dataset.csv" # So from this file, go up twice ie from .py to repositories to app, then down to data then the CSV file
         self.csv_path = Path(csv_path) # We probably won't have one set but this is here anyway for modularity
+        self._restaurants = None
+        
+    def save_all(self, restaurants):
+        self._restaurants = restaurants
+
 
     def get_all(self):
  
         restaurants_map = {}
 
         seen_items = {} # Track which food items we've already added per restaurant (avoid duplicates)
-
+        if self._restaurants is not None:
+            return self._restaurants
         # Open CSV and read rows as dictionaries
         with self.csv_path.open("r", encoding="utf-8", newline="") as f:
             reader = csv.DictReader(f)
@@ -35,9 +41,9 @@ class RestaurantsRepository:
                         
                         "restaurant_id": rid,
                         
-                        "name": (row.get("restaurant_name", f"Restaurant {rid}") or f"Restaurant {rid}").strip(),
+                        "name": f"Restaurant {rid}", # CSV doesn't provide a restaurant name, so we generate one
                         
-                        "tags": (row.get("tags", "") or "").strip(),
+                        "tags": [], # CSV doesn't provide tags; keep consistent with schema
                         
                         "isOpen": True, # CSV doesn't provide open/closed; default True for now
                         
@@ -66,5 +72,6 @@ class RestaurantsRepository:
                 )
                 seen_items[rid].add(item_name)
 
-        # Return list of restaurants (sorted by restaurant_id for stable output)
-        return [restaurants_map[k] for k in sorted(restaurants_map.keys())]
+        # Return list of restaurants (sorted by restaurantId for stable output)
+        self._restaurants = [restaurants_map[k] for k in sorted(restaurants_map.keys())]
+        return self._restaurants

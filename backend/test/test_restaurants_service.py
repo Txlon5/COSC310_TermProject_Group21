@@ -2,8 +2,26 @@
 from app.services.restaurants_service import RestaurantsService
 from app.repositories.restaurants_repository import RestaurantsRepository
 import pytest # Will be helpful to test raising errors
+from fastapi import HTTPException
 
-class FakeRestaurantsRepository:
+# Test that the service correctly returns restaurant data
+def test_service_returns_restaurants():
+
+    repo = RestaurantsRepository() # Create repository instance
+
+    service = RestaurantsService(repo) # Putting repository into service
+
+    data = service.get_restaurants() # Calling the service method
+
+    assert isinstance(data, list) # Ensure the result is a list
+
+    assert len(data) > 0 # Ensure the list is not empty
+
+    assert "restaurantId" in data[0] # Verify structure matches class diagram
+    
+    
+class FakeRestaurantsRepository: # As mentioned in the service file, this might change according to what we do with the CSV file
+# For now, we're going to make a class with a specific structure
     def get_all(self):
         return [
             {
@@ -166,4 +184,51 @@ def test_search_with_pagination_page2_no_duplicates():
         pytest.skip("Not enough restaurant data for pagination test.")
     page1 = service.search_restaurants(page=1, page_size=1)
     page2 = service.search_restaurants(page=2, page_size=1)
-    assert page1[0]["restaurant_id"] != page2[0]["restaurant_id"]
+    assert page1[0]["restaurantId"] != page2[0]["restaurantId"] # Just have to make sure the first element of each page is different, since we only have one item per page, this ensures no duplicates across pages
+
+def get_all(self):
+    return [
+        {
+            "restaurantId": 1,
+            "name": "Pizza Place",
+            "category": "Italian",
+            "tags": ["pizza"],
+            "isOpen": True,
+            "menuItems": []
+        }
+    ]
+
+def save_all(self, restaurants):
+    self.restaurants = restaurants
+
+
+def test_get_restaurant_by_id_not_found():
+    service = RestaurantsService(FakeRestaurantsRepository())
+
+    with pytest.raises(HTTPException) as exc:
+        service.get_restaurant_by_id("999")
+
+    assert exc.value.status_code == 404
+
+
+def test_update_restaurant_not_found():
+    service = RestaurantsService(FakeRestaurantsRepository())
+
+    class Payload:
+        name = "Updated"
+        category = "Test"
+        tags = []
+
+    with pytest.raises(HTTPException) as exc:
+        service.update_restaurant("999", Payload())
+
+    assert exc.value.status_code == 404
+
+
+def test_delete_restaurant_not_found():
+    service = RestaurantsService(FakeRestaurantsRepository())
+
+    with pytest.raises(HTTPException) as exc:
+        service.delete_restaurant("999")
+
+    assert exc.value.status_code == 404
