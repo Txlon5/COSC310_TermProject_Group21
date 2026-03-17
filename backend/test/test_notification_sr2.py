@@ -5,8 +5,8 @@ from fastapi.testclient import TestClient
 client = TestClient(app)
 
 def setup_function():
-    notification.clear_notifications()     #Clear notifications before each test 
-    orders_store.clear()     #Clear orders from in-memory store before each test
+    notification.clear_notifications()      #Clear notifications before each test 
+    orders_store.clear()                    #Clear orders from in-memory store before each test
     
 def test_status_change_for_missing_orders_generates_404():
     response = client.patch("/orders/nonexistent-orderid/status",
