@@ -18,12 +18,12 @@ class OrderItem(BaseModel):
 
 # Request body for creating an order
 class OrderCreateRequest(BaseModel):
-    restaurantId: int
+    restaurant_id: int
     items: List[OrderItem]
 
 
 # Response returned after creating/retrieving an order
 class OrderOut(BaseModel):
     orderId: int
-    restaurantId: int
+    restaurant_id: int
     items: List[OrderItem]

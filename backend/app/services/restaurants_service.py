@@ -44,7 +44,7 @@ class RestaurantsService:
 
         # Here we match the restaurant to the argument passed in the endpoint
         if restaurant_id is not None: 
-            restaurants = [r for r in restaurants if r.get("restaurantId") == restaurant_id] # So it filters out whatever IDs are irrelevant to the one passed in the endpoint
+            restaurants = [r for r in restaurants if r.get("restaurant_id") == restaurant_id] # So it filters out whatever IDs are irrelevant to the one passed in the endpoint
 
         ''' So I'm putting this here for the future. 
         I remember our team spoke about restaurants opening and closing,

@@ -14,7 +14,7 @@ class OrdersRepository:
     def create_order(self, restaurant_id, items):
         order = {
             "orderId": self.next_id,
-            "restaurantId": restaurant_id,
+            "restaurant_id": restaurant_id,
             "items": items,}
         # We can update this later, but based on our current scrum meetings, and this is feat4 this is good enough for now
 

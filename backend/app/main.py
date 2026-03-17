@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from typing import List, Optional
 
 # from app.routers.orders import router as orders_router
-from app.routers.orders_t import router as orders_router
+from app.routers.orders import router as orders_router
 from app.routers.users import router as users_router
 from app.routers.restaurants_router import router as restaurants_router
 from app.routers.auth import router as auth_router

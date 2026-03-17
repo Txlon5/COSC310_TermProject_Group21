@@ -15,7 +15,7 @@ class RestaurantsRepository:
 
     def get_all(self):
         # restaurants_map will look like:
-        # { 16: {"restaurantId":16, "name":"Restaurant 16", ..., "menuItems":[...]}, ... }
+        # { 16: {"restaurant_id":16, "name":"Restaurant 16", ..., "menuItems":[...]}, ... }
         # We do need to update parts of it like restaurant names and tags soon, but this is the general structure for now.
         restaurants_map = {}
 
@@ -33,7 +33,7 @@ class RestaurantsRepository:
                 if rid not in restaurants_map:
                     restaurants_map[rid] = {
                         
-                        "restaurantId": rid,
+                        "restaurant_id": rid,
                         
                         "name": (row.get("restaurant_name", f"Restaurant {rid}") or f"Restaurant {rid}").strip(),
                         # Updated name and tag now that our CSV is updated
@@ -66,5 +66,5 @@ class RestaurantsRepository:
                 )
                 seen_items[rid].add(item_name)
 
-        # Return list of restaurants (sorted by restaurantId for stable output)
+        # Return list of restaurants (sorted by restaurant_id for stable output)
         return [restaurants_map[k] for k in sorted(restaurants_map.keys())]

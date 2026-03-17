@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from app.main import app
-from app.routers.orders import orders_store, notification
+from app.routers.orders_t import orders_store, notification
 
 client = TestClient(app)
 
@@ -14,7 +14,11 @@ def test_get_certain_past_order_not_found_when_order_does_not_exist():
     assert response.json() == {"detail": "Order not found."}     #Returns 404 when order not found.
     
 def test_get_certain_past_orders_show_unauthorized_when_order_belongs_to_another_user():
-    order_request = {"user_id": "user123", "restaurant_id": "restaurantB", "items": ["Mandi"]}
+    order_request = {
+        "user_id": "user123",
+        "restaurant_id": 14,
+        "items": [{"menuItemId": 2, "quantity": 1, "item_name": "Mandi"}]
+    }
     
     create_response = client.post("/orders", json = order_request)
     assert create_response.status_code == 201
@@ -26,7 +30,15 @@ def test_get_certain_past_orders_show_unauthorized_when_order_belongs_to_another
 
 def test_get_certain_past_order_displays_full_order_details():
     #sample order
-    order_request = {"user_id": "user456", "restaurant_id": "restaurantA", "items": ["Shawarma", "Fries"]}
+    order_request = {
+        "user_id": "user456",
+        "restaurant_id": 28,
+        "items": [
+            {"menuItemId": 1, "quantity": 1, "item_name": "Shawarma"},
+            {"menuItemId": 2, "quantity": 1, "item_name": "Fries"}
+        ]
+    }
+
     create_response = client.post("/orders", json = order_request)
     assert create_response.status_code == 201
     
@@ -40,15 +52,21 @@ def test_get_certain_past_order_displays_full_order_details():
     #Verifies the order returned matches the one created before with correct timestamps
     assert data["order_id"] == order_id
     assert data["user_id"] == "user456"
-    assert data["restaurant_id"] == "restaurantA"
-    assert data["items"] == ["Shawarma", "Fries"]
+    assert data["restaurant_id"] == 28
+    assert data["items"] == [{"menuItemId": 1, "quantity": 1, "item_name": "Shawarma"}, {"menuItemId": 2, "quantity": 1, "item_name": "Fries"}]     #Ensures that the order items are returned with the correct structure and details.
     assert data["status"] == "Created"
     assert "created_at" in data
     assert "updated_at" in data
     assert data["delivered_at"] is None
     
 def test_get_certain_past_order_reflects_updated_status():
-    order_request = {"user_id": "user789", "restaurant_id": "restaurantC", "items":["Butter Chicken"]}
+    order_request = {
+        "user_id": "user789",
+        "restaurant_id": 12,
+        "items": [
+            {"menuItemId": 1, "quantity": 1, "item_name": "Butter Chicken"}
+        ]
+    }
     
     create_response = client.post("/orders", json=order_request)
     assert create_response.status_code == 201
@@ -66,7 +84,7 @@ def test_get_certain_past_order_reflects_updated_status():
     # Confirming that the returned order reflects the updated status
     assert data["order_id"] == order_id
     assert data["user_id"] == "user789"
-    assert data["restaurant_id"] == "restaurantC"
-    assert data["items"] == ["Butter Chicken"]
+    assert data["restaurant_id"] == 12
+    assert data["items"] == [{"menuItemId": 1, "quantity": 1, "item_name": "Butter Chicken"}]
     assert data["status"] == "Preparing"
     assert data["delivered_at"] is None     # Since the order is not delivered yet, it should still be None

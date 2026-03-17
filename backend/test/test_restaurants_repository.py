@@ -13,4 +13,4 @@ def test_repository_returns_restaurants():
 
     assert len(data) > 0 # Ensure the list is not empty
 
-    assert "restaurantId" in data[0] # Verify the structure matches our class diagram
+    assert "restaurant_id" in data[0] # Verify the structure matches our class diagram

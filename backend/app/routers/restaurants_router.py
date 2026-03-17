@@ -16,7 +16,7 @@ restaurants_service = RestaurantsService(restaurants_repository)
 @router.get("", response_model=List[RestaurantOut])
 def get_restaurants(
     q: Optional[str] = Query(default=None),
-    restaurantId: Optional[int] = Query(default=None, ge=1),
+    restaurant_id: Optional[int] = Query(default=None, ge=1),
     isOpen: Optional[bool] = Query(default=None),
     tag: Optional[str] = Query(default=None),
     page: Optional[int] = Query(default=None, ge=1),
@@ -26,12 +26,12 @@ def get_restaurants(
         if q is not None and str(q).strip() == "":
             raise HTTPException(status_code=400, detail="q cannot be empty")
 
-        if q is None and restaurantId is None and isOpen is None and tag is None and page is None and pageSize is None:
+        if q is None and restaurant_id is None and isOpen is None and tag is None and page is None and pageSize is None:
             return restaurants_service.get_restaurants()
 
         return restaurants_service.search_restaurants(
             q=q,
-            restaurant_id=restaurantId,
+            restaurant_id=restaurant_id,
             is_open=isOpen,
             tag=tag,
             page=page,

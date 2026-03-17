@@ -17,7 +17,7 @@ def test_service_returns_restaurants():
 
     assert len(data) > 0 # Ensure the list is not empty
 
-    assert "restaurantId" in data[0] # Verify structure matches class diagram
+    assert "restaurant_id" in data[0] # Verify structure matches class diagram
     
     
 class FakeRestaurantsRepository: # As mentioned in the service file, this might change according to what we do with the CSV file
@@ -25,7 +25,7 @@ class FakeRestaurantsRepository: # As mentioned in the service file, this might 
     def get_all(self):
         return [
             {
-                "restaurantId": 1,
+                "restaurant_id": 1,
                 "name": "Pizza Place",
                 "tags": "Italian, Pizza", # Basically why we're here
                 "isOpen": True,
@@ -35,7 +35,7 @@ class FakeRestaurantsRepository: # As mentioned in the service file, this might 
                 ],
             },
             {
-                "restaurantId": 2, # A second restaurant to test for peace of mind
+                "restaurant_id": 2, # A second restaurant to test for peace of mind
                 "name": "Burger House",
                 "tags": "Fast Food, Burgers",
                 "isOpen": False,
@@ -50,21 +50,21 @@ def test_filter_by_restaurant_id():
     service = RestaurantsService(FakeRestaurantsRepository()) # Actually using our fake repository here to test the search functionality, this line is used in every test below for this
     data = service.search_restaurants(restaurant_id=2) # Just testing the search filter for restaurant ID
     assert len(data) == 1
-    assert data[0]["restaurantId"] == 2
+    assert data[0]["restaurant_id"] == 2
 
 
 def test_filter_by_is_open():
     service = RestaurantsService(FakeRestaurantsRepository())
     data = service.search_restaurants(is_open=True) # See if it's open, so we should get the pizza place but not the burger house
     assert len(data) == 1
-    assert data[0]["restaurantId"] == 1
+    assert data[0]["restaurant_id"] == 1
 
 
 def test_filter_by_tag():
     service = RestaurantsService(FakeRestaurantsRepository())
     data = service.search_restaurants(tag="pizza") # Search by pizza tag, should return the pizza place but not the burger house
     assert len(data) == 1
-    assert data[0]["restaurantId"] == 1
+    assert data[0]["restaurant_id"] == 1
 
 
 def test_invalid_empty_tag_rejected():
@@ -76,13 +76,13 @@ def test_search_q_matches_restaurant_name():
     service = RestaurantsService(FakeRestaurantsRepository())
     data = service.search_restaurants(q="burger") # Search by burger,
     assert len(data) == 1
-    assert data[0]["restaurantId"] == 2
+    assert data[0]["restaurant_id"] == 2
     
 def test_search_q_matches_menu_item_name():
     service = RestaurantsService(FakeRestaurantsRepository())
     data = service.search_restaurants(q="pepperoni") # Now try looking for a menu item, should return the pizza place because of the pepperoni pizza
     assert len(data) == 1
-    assert data[0]["restaurantId"] == 1
+    assert data[0]["restaurant_id"] == 1
 
 
 def test_empty_q_returns_empty_list():
@@ -132,4 +132,4 @@ def test_search_with_pagination_page2_no_duplicates():
     service = RestaurantsService(FakeRestaurantsRepository())
     page1 = service.search_restaurants(page=1, page_size=1)
     page2 = service.search_restaurants(page=2, page_size=1)
-    assert page1[0]["restaurantId"] != page2[0]["restaurantId"] # Just have to make sure the first element of each page is different, since we only have one item per page, this ensures no duplicates across pages
+    assert page1[0]["restaurant_id"] != page2[0]["restaurant_id"] # Just have to make sure the first element of each page is different, since we only have one item per page, this ensures no duplicates across pages

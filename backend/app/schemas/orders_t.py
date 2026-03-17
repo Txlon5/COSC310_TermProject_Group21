@@ -19,14 +19,14 @@ class CreateOrderRequest(BaseModel):
 
 # Response returned after creating/retrieving an order
 class OrderOut(BaseModel):
-    orderId: int
-    restaurantId: int
+    order_id: int
+    restaurant_id: int
     items: List[OrderItem]
 
 class CreateOrderResponse(BaseModel):
     order_id: str
     user_id: Optional[str] = None
-    restaurant_id: int = Field(..., alias="restaurantId")
+    restaurant_id: int = Field(..., alias="restaurant_id")
     restaurant_name: Optional[str] = None
     items: List[OrderItem]
     status: str

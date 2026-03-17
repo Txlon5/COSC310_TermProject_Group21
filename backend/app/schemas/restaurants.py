@@ -13,7 +13,7 @@ class MenuItemOut(BaseModel):
 
 # Represents a restaurant returned to the client
 class RestaurantOut(BaseModel):
-    restaurantId: int
+    restaurant_id: int
     name: str
     tags: str
     isOpen: bool

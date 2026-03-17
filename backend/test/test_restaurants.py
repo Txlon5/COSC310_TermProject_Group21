@@ -15,7 +15,7 @@ def test_restaurant_structure():
     r = RESTAURANTS[0] # Take the first restaurant from the list
 
     # If we're going according to our class diagram, these names must be set
-    assert "restaurantId" in r      # Restaurant must have restaurantId
+    assert "restaurant_id" in r      # Restaurant must have restaurant_id
     assert "name" in r              # Restaurant must have name
     assert "tags" in r              # Restaurant must have tags
     assert "isOpen" in r            # Restaurant must have isOpen status

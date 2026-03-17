@@ -4,7 +4,7 @@
 
 RESTAURANTS = [
     {
-        "restaurantId": 1,
+        "restaurant_id": 1,
         "name": "Pizza Place",
         "tags": "Italian, Pizza",
         "isOpen": True,
@@ -14,7 +14,7 @@ RESTAURANTS = [
         ],
     },
     {
-        "restaurantId": 2,
+        "restaurant_id": 2,
         "name": "Burger House",
         "tags": "Fast Food, Burgers",
         "isOpen": False,

@@ -21,7 +21,7 @@ class OrdersService:
 
         # Validate menuItemIds against restaurant's menuItems
         restaurants = self.restaurants_repo.get_all()
-        restaurant = next((r for r in restaurants if r["restaurantId"] == restaurant_id), None)
+        restaurant = next((r for r in restaurants if r["restaurant_id"] == restaurant_id), None)
         if not restaurant:
             raise ValueError("Restaurant not found")
 

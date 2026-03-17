@@ -12,7 +12,7 @@ def test_create_order_stores_order():
     )
     assert order is not None
     assert order["orderId"] == 1
-    assert order["restaurantId"] == 101
+    assert order["restaurant_id"] == 101
     assert len(repo.orders) == 1
 
 
