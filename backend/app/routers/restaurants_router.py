@@ -3,7 +3,6 @@ from typing import List, Optional
 from app.schemas.restaurants import RestaurantOut
 from app.repositories.restaurants_repository import RestaurantsRepository
 from app.services.restaurants_service import RestaurantsService
-from app.data.restaurants_data import RESTAURANTS
 
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 
@@ -39,7 +38,3 @@ def get_restaurants(
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-@router.get("/debug")
-def debug_data():
-    return RESTAURANTS

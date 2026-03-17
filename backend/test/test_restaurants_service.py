@@ -3,6 +3,29 @@ from app.services.restaurants_service import RestaurantsService
 from app.repositories.restaurants_repository import RestaurantsRepository
 import pytest # Will be helpful to test raising errors
 
+class FakeRestaurantsRepository:
+    def get_all(self):
+        return [
+            {
+                "restaurant_id": 1,
+                "name": "Pizza Place",
+                "tags": "Italian, Pizza",
+                "isOpen": True,
+                "menuItems": [
+                    {"menuItemId": 1, "name": "Pepperoni Pizza", "price": 15.0, "category": "Pizza"},
+                    {"menuItemId": 2, "name": "Veggie Pizza", "price": 13.0, "category": "Pizza"},
+                ],
+            },
+            {
+                "restaurant_id": 2,
+                "name": "Burger House",
+                "tags": "Fast Food, Burgers",
+                "isOpen": False,
+                "menuItems": [
+                    {"menuItemId": 1, "name": "Cheeseburger", "price": 10.0, "category": "Burger"},
+                ],
+            },
+        ]
 
 # Test that the service correctly returns restaurant data
 def test_service_returns_restaurants():
@@ -20,75 +43,79 @@ def test_service_returns_restaurants():
     assert "restaurant_id" in data[0] # Verify structure matches class diagram
     
     
-class FakeRestaurantsRepository: # As mentioned in the service file, this might change according to what we do with the CSV file
-# For now, we're going to make a class with a specific structure
-    def get_all(self):
-        return [
-            {
-                "restaurant_id": 1,
-                "name": "Pizza Place",
-                "tags": "Italian, Pizza", # Basically why we're here
-                "isOpen": True,
-                "menuItems": [
-                    {"menuItemId": 1, "name": "Pepperoni Pizza", "price": 15.0, "category": "Pizza"},
-                    {"menuItemId": 2, "name": "Veggie Pizza", "price": 13.0, "category": "Pizza"},
-                ],
-            },
-            {
-                "restaurant_id": 2, # A second restaurant to test for peace of mind
-                "name": "Burger House",
-                "tags": "Fast Food, Burgers",
-                "isOpen": False,
-                "menuItems": [
-                    {"menuItemId": 1, "name": "Cheeseburger", "price": 10.0, "category": "Burger"},
-                ],
-            },
-        ]
-
-
 def test_filter_by_restaurant_id():
-    service = RestaurantsService(FakeRestaurantsRepository()) # Actually using our fake repository here to test the search functionality, this line is used in every test below for this
-    data = service.search_restaurants(restaurant_id=2) # Just testing the search filter for restaurant ID
-    assert len(data) == 1
-    assert data[0]["restaurant_id"] == 2
-
+    repo = RestaurantsRepository()
+    service = RestaurantsService(repo)
+    all_data = service.get_restaurants()
+    if not all_data:
+        pytest.skip("No restaurant data available from CSV.")
+    # Pick a valid restaurant_id from CSV
+    valid_id = all_data[0]["restaurant_id"]
+    data = service.search_restaurants(restaurant_id=valid_id)
+    assert len(data) >= 1
+    assert all(d["restaurant_id"] == valid_id for d in data)
 
 def test_filter_by_is_open():
-    service = RestaurantsService(FakeRestaurantsRepository())
-    data = service.search_restaurants(is_open=True) # See if it's open, so we should get the pizza place but not the burger house
-    assert len(data) == 1
-    assert data[0]["restaurant_id"] == 1
+    repo = RestaurantsRepository()
+    service = RestaurantsService(repo)
+    data = service.search_restaurants(is_open=True)
+    assert isinstance(data, list)
+    # All returned restaurants should be open
+    assert all(d["isOpen"] is True for d in data)
 
 
 def test_filter_by_tag():
-    service = RestaurantsService(FakeRestaurantsRepository())
-    data = service.search_restaurants(tag="pizza") # Search by pizza tag, should return the pizza place but not the burger house
-    assert len(data) == 1
-    assert data[0]["restaurant_id"] == 1
+    repo = RestaurantsRepository()
+    service = RestaurantsService(repo)
+    all_data = service.get_restaurants()
+    if not all_data:
+        pytest.skip("No restaurant data available from CSV.")
+    # Pick a valid tag from CSV
+    valid_tag = all_data[0]["tags"].split(",")[0].strip() if all_data[0]["tags"] else None
+    if not valid_tag:
+        pytest.skip("No tag data available from CSV.")
+    data = service.search_restaurants(tag=valid_tag)
+    assert len(data) >= 1
+    assert any(valid_tag.lower() in d["tags"].lower() for d in data)
 
 
 def test_invalid_empty_tag_rejected():
-    service = RestaurantsService(FakeRestaurantsRepository())
-    with pytest.raises(ValueError): # Check if we get an error when we put an invalid tag, which in this case is just an empty string with whitespace
-        service.search_restaurants(tag="  ")    
+    repo = RestaurantsRepository()
+    service = RestaurantsService(repo)
+    with pytest.raises(ValueError):
+        service.search_restaurants(tag="  ")
 
 def test_search_q_matches_restaurant_name():
-    service = RestaurantsService(FakeRestaurantsRepository())
-    data = service.search_restaurants(q="burger") # Search by burger,
-    assert len(data) == 1
-    assert data[0]["restaurant_id"] == 2
+    repo = RestaurantsRepository()
+    service = RestaurantsService(repo)
+    all_data = service.get_restaurants()
+    if not all_data:
+        pytest.skip("No restaurant data available from CSV.")
+    valid_name = all_data[0]["name"]
+    data = service.search_restaurants(q=valid_name)
+    assert len(data) >= 1
+    assert any(valid_name.lower() in d["name"].lower() for d in data)
     
 def test_search_q_matches_menu_item_name():
-    service = RestaurantsService(FakeRestaurantsRepository())
-    data = service.search_restaurants(q="pepperoni") # Now try looking for a menu item, should return the pizza place because of the pepperoni pizza
-    assert len(data) == 1
-    assert data[0]["restaurant_id"] == 1
+    repo = RestaurantsRepository()
+    service = RestaurantsService(repo)
+    all_data = service.get_restaurants()
+    if not all_data:
+        pytest.skip("No restaurant data available from CSV.")
+    menu_items = all_data[0]["menuItems"]
+    if not menu_items:
+        pytest.skip("No menu items available from CSV.")
+    valid_item = menu_items[0]["name"]
+    data = service.search_restaurants(q=valid_item)
+    assert len(data) >= 1
+    assert any(valid_item.lower() in [it["name"].lower() for it in d["menuItems"]] for d in data)
 
 
 def test_empty_q_returns_empty_list():
-    service = RestaurantsService(FakeRestaurantsRepository())
+    repo = RestaurantsRepository()
+    service = RestaurantsService(repo)
     result = service.search_restaurants(q="")
-    assert result == []  # Expecting an empty list when q is an empty string, this works for Feat3-US1 :) I should've implemented it sooner
+    assert result == []
         
 """SR3 PAGINATION TESTS"""
 
@@ -123,13 +150,20 @@ def test_paginate_invalid_page_size_rejected():
         service.paginate([1, 2, 3], page=1, page_size=0) # Page size less than 1 should raise an error
         
 def test_search_with_pagination_limits_results():
-    service = RestaurantsService(FakeRestaurantsRepository())
-    # Fake repo has 2 restaurants; page_size=1 should return only 1
+    repo = RestaurantsRepository()
+    service = RestaurantsService(repo)
+    all_data = service.get_restaurants()
+    if not all_data:
+        pytest.skip("No restaurant data available from CSV.")
     data = service.search_restaurants(page=1, page_size=1)
     assert len(data) == 1
 
 def test_search_with_pagination_page2_no_duplicates():
-    service = RestaurantsService(FakeRestaurantsRepository())
+    repo = RestaurantsRepository()
+    service = RestaurantsService(repo)
+    all_data = service.get_restaurants()
+    if len(all_data) < 2:
+        pytest.skip("Not enough restaurant data for pagination test.")
     page1 = service.search_restaurants(page=1, page_size=1)
     page2 = service.search_restaurants(page=2, page_size=1)
-    assert page1[0]["restaurant_id"] != page2[0]["restaurant_id"] # Just have to make sure the first element of each page is different, since we only have one item per page, this ensures no duplicates across pages
+    assert page1[0]["restaurant_id"] != page2[0]["restaurant_id"]

@@ -16,7 +16,6 @@ class OrdersRepository:
             "orderId": self.next_id,
             "restaurant_id": restaurant_id,
             "items": items,}
-        # We can update this later, but based on our current scrum meetings, and this is feat4 this is good enough for now
 
         self.orders.append(order) # Add the new order to the list
         self.next_id += 1 # Increment the ID counter for the next order

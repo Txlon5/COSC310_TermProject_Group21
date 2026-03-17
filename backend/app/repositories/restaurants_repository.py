@@ -1,10 +1,12 @@
 import csv # Implementing our CSV parsing logic
 from pathlib import Path
 
-''' I do want to note, "rid" refers to restaurant_id from the CSV, 
-and "item_name" is the food_item column from the CSV. The rest of the fields 
-are generated or default values since the CSV doesn't provide them. This is 
-just a starting point, and we can change it later as needed.'''
+"""
+This file is responsible for reading the CSV file and converting it into a list of restaurant dictionaries with the structure we want. 
+The RestaurantsService will then use this repository to get the data it needs to filter and return to the API layer. The structure of 
+the restaurant dictionaries is designed to match what we expect in our service and API layers, with fields like restaurant_id, name, 
+tags, isOpen, and menuItems.
+"""
 
 class RestaurantsRepository:
     def __init__(self, csv_path=None):
@@ -14,9 +16,7 @@ class RestaurantsRepository:
         self.csv_path = Path(csv_path) # We probably won't have one set but this is here anyway for modularity
 
     def get_all(self):
-        # restaurants_map will look like:
-        # { 16: {"restaurant_id":16, "name":"Restaurant 16", ..., "menuItems":[...]}, ... }
-        # We do need to update parts of it like restaurant names and tags soon, but this is the general structure for now.
+ 
         restaurants_map = {}
 
         seen_items = {} # Track which food items we've already added per restaurant (avoid duplicates)
@@ -36,7 +36,7 @@ class RestaurantsRepository:
                         "restaurant_id": rid,
                         
                         "name": (row.get("restaurant_name", f"Restaurant {rid}") or f"Restaurant {rid}").strip(),
-                        # Updated name and tag now that our CSV is updated
+                        
                         "tags": (row.get("tags", "") or "").strip(),
                         
                         "isOpen": True, # CSV doesn't provide open/closed; default True for now
