@@ -1,18 +1,18 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Union
 from datetime import datetime
 
 # One item inside an order request/response
 class OrderItem(BaseModel):
     menuItemId: int
-    quantity: int
+    quantity: int 
     item_name: Optional[str] = None
 
 # Unified CreateOrderRequest
 class CreateOrderRequest(BaseModel):
     user_id: Optional[str] = None
-    restaurant_id: int = Field(..., alias="restaurant_id")
-    items: List[OrderItem] = Field(..., alias="items")
+    restaurant_id: Union[int, str] = Field(..., alias="restaurant_id")
+    items: List[Union[str, OrderItem]] = Field(..., alias="items")
     delivery_method: Optional[str] = None
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
@@ -20,15 +20,15 @@ class CreateOrderRequest(BaseModel):
 # Response returned after creating/retrieving an order
 class OrderOut(BaseModel):
     order_id: int
-    restaurant_id: int
-    items: List[OrderItem]
+    restaurant_id: Union[int, str]
+    items: List[Union[str, OrderItem]]
 
 class CreateOrderResponse(BaseModel):
     order_id: str
     user_id: Optional[str] = None
-    restaurant_id: int = Field(..., alias="restaurant_id")
+    restaurant_id: Union[int, str] = Field(..., alias="restaurant_id")
     restaurant_name: Optional[str] = None
-    items: List[OrderItem]
+    items: List[Union[str, OrderItem]]
     status: str
     delivery_method: Optional[str] = None
     delivery_address: Optional[str] = None

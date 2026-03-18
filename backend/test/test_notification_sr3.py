@@ -61,14 +61,14 @@ def test_get_notifications_for_user_returns_all_notifications():
 
 def test_get_notifications_returns_requested_users_notifications_only():
     #Checks that when retrieving notifications for a specific user, only that user's notifications are returned and not notifications for other users.
-    order_request1 = {"user_id" : "user111",
+    order_request1 = {"user_id" : "user1",
         "restaurant_id" : 19,
         "items": [
             {"menuItemId": 1, "quantity": 1, "item_name": "Pasta"}
         ]
     }
     order_request2 = {
-        "user_id" : "user222",
+        "user_id" : "user2",
         "restaurant_id" : 34,
         "items": [
             {"menuItemId": 1, "quantity": 1, "item_name": "Salad"}
