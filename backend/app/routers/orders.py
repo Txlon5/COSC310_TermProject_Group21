@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 from datetime import datetime, timezone
-from app.schemas.orders_t import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest, DeliveryInfoUpdateRequest
+from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest, DeliveryInfoUpdateRequest
 from app.services.notification_service import NotificationService
 from fastapi import APIRouter, status, HTTPException, Header, Request
 from uuid import uuid4

@@ -1,5 +1,5 @@
 from app.main import app
-from app.routers.orders_t import notification
+from app.routers.orders import notification
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 
@@ -103,7 +103,7 @@ def test_failed_order_creation_does_not_generate_notification():
         "items": [{}]
     }
     
-    with patch("app.routers.orders_t.notification.create_order_created_notification") as mock_notification:
+    with patch("app.routers.orders.notification.create_order_created_notification") as mock_notification:
         response = client.post("/orders", json = invalid_order_request)
         assert response.status_code == 422     #Request invalid due to missing criteria (failed payment).
         mock_notification.assert_not_called()
