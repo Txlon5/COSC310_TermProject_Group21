@@ -4,17 +4,14 @@ from typing import List, Union
 class Restaurant(BaseModel):
     restaurant_id: str
     restaurant_name: str
-    category: str
     tags: List[str] = []
 
 class RestaurantCreate(BaseModel):
     restaurant_name: str
-    category: str
     tags: List[str] = []
 
 class RestaurantUpdate(BaseModel):
     restaurant_name : str
-    category:str
     tags: List[str] = []
 
 # Represents a single menu item returned to the client

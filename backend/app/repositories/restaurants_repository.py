@@ -53,11 +53,13 @@ class RestaurantsRepository:
                 if item_name in seen_items[rid]:
                     continue
                 next_id = len(restaurants_map[rid]["menuItems"]) + 1
+                # Use the first tag as the category if available
+                item_category = tag_list[0] if tag_list else "Unknown"
                 restaurants_map[rid]["menuItems"].append({
                     "menuItemId": next_id,
                     "name": item_name,
                     "price": 0.0,
-                    "category": "Unknown",
+                    "category": item_category,
                 })
                 seen_items[rid].add(item_name)
         self._restaurants = [restaurants_map[k] for k in sorted(restaurants_map.keys())]

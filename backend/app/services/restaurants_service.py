@@ -29,11 +29,9 @@ class RestaurantsService:
         }
     def _to_crud_response(self, r):
         base = self._to_schema_restaurant(r)
-
         return {
             "restaurant_id": str(base["restaurant_id"]),
             "restaurant_name": base["restaurant_name"],
-            "category": r.get("category", "Unknown"),
             "tags": base["tags"],
         }
 
@@ -51,7 +49,6 @@ class RestaurantsService:
         new_restaurant = {
             "restaurant_id": str(uuid.uuid4()),
             "restaurant_name": payload.restaurant_name.strip(),
-            "category": payload.category.strip(),
             "tags": payload.tags if payload.tags is not None else [],
             "isOpen": True,
             "menuItems": []

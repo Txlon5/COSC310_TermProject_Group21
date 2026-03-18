@@ -12,7 +12,6 @@ def test_get_restaurants():
 def test_create_restaurant():
     new_restaurant = {
         "restaurant_name": "Test Pizza",
-        "category": "Italian",
         "tags": ["pizza"]
     }
 
@@ -22,7 +21,6 @@ def test_create_restaurant():
     data = response.json()
 
     assert data["restaurant_name"] == "Test Pizza"
-    assert data["category"] == "Italian"
     assert "restaurant_id" in data
 
 
