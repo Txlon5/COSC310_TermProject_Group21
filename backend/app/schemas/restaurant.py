@@ -2,18 +2,18 @@ from pydantic import BaseModel
 from typing import List, Union
 
 class Restaurant(BaseModel):
-    id: str
-    name: str
+    restaurant_id: str
+    restaurant_name: str
     category: str
     tags: List[str] = []
 
 class RestaurantCreate(BaseModel):
-    name: str
+    restaurant_name: str
     category: str
     tags: List[str] = []
 
 class RestaurantUpdate(BaseModel):
-    name : str
+    restaurant_name : str
     category:str
     tags: List[str] = []
 
@@ -26,8 +26,8 @@ class MenuItemOut(BaseModel):
 
 # Represents a restaurant returned to the client
 class RestaurantOut(BaseModel):
-    restaurantId: int
-    name: str
+    restaurant_id: int
+    restaurant_name: str
     tags: List[str]
     isOpen: bool
     menuItems: List[MenuItemOut]

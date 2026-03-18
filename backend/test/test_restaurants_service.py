@@ -17,7 +17,7 @@ def test_service_returns_restaurants():
 
     assert len(data) > 0 # Ensure the list is not empty
 
-    assert "restaurantId" in data[0] # Verify structure matches class diagram
+    assert "restaurant_id" in data[0] # Verify structure matches class diagram
     
     
 class FakeRestaurantsRepository: # As mentioned in the service file, this might change according to what we do with the CSV file
@@ -26,8 +26,8 @@ class FakeRestaurantsRepository: # As mentioned in the service file, this might 
         return [
             {
                 "restaurant_id": 1,
-                "name": "Pizza Place",
-                "tags": "Italian, Pizza",
+                "restaurant_name": "Pizza Place",
+                "tags": ["Italian", "Pizza"],
                 "isOpen": True,
                 "menuItems": [
                     {"menuItemId": 1, "name": "Pepperoni Pizza", "price": 15.0, "category": "Pizza"},
@@ -36,8 +36,8 @@ class FakeRestaurantsRepository: # As mentioned in the service file, this might 
             },
             {
                 "restaurant_id": 2,
-                "name": "Burger House",
-                "tags": "Fast Food, Burgers",
+                "restaurant_name": "Burger House",
+                "tags": ["Fast Food", "Burgers"],
                 "isOpen": False,
                 "menuItems": [
                     {"menuItemId": 1, "name": "Cheeseburger", "price": 10.0, "category": "Burger"},
@@ -89,12 +89,12 @@ def test_filter_by_tag():
     if not all_data:
         pytest.skip("No restaurant data available from CSV.")
     # Pick a valid tag from CSV
-    valid_tag = all_data[0]["tags"].split(",")[0].strip() if all_data[0]["tags"] else None
+    valid_tag = all_data[0]["tags"][0] if all_data[0]["tags"] else None
     if not valid_tag:
         pytest.skip("No tag data available from CSV.")
     data = service.search_restaurants(tag=valid_tag)
     assert len(data) >= 1
-    assert any(valid_tag.lower() in d["tags"].lower() for d in data)
+    assert any(valid_tag.lower() in [t.lower() for t in d["tags"]] for d in data)
 
 
 def test_invalid_empty_tag_rejected():
@@ -109,10 +109,10 @@ def test_search_q_matches_restaurant_name():
     all_data = service.get_restaurants()
     if not all_data:
         pytest.skip("No restaurant data available from CSV.")
-    valid_name = all_data[0]["name"]
+    valid_name = all_data[0]["restaurant_name"]
     data = service.search_restaurants(q=valid_name)
     assert len(data) >= 1
-    assert any(valid_name.lower() in d["name"].lower() for d in data)
+    assert any(valid_name.lower() in d["restaurant_name"].lower() for d in data)
     
 def test_search_q_matches_menu_item_name():
     repo = RestaurantsRepository()
@@ -178,18 +178,21 @@ def test_search_with_pagination_limits_results():
 
 def test_search_with_pagination_page2_no_duplicates():
     repo = RestaurantsRepository()
+    repo._restaurants = None  # Force reload from CSV
     service = RestaurantsService(repo)
     all_data = service.get_restaurants()
-    if len(all_data) < 2:
-        pytest.skip("Not enough restaurant data for pagination test.")
+    assert isinstance(all_data, list)
+    assert len(all_data) >= 2, "Need at least 2 restaurants for pagination test."
     page1 = service.search_restaurants(page=1, page_size=1)
     page2 = service.search_restaurants(page=2, page_size=1)
-    assert page1[0]["restaurantId"] != page2[0]["restaurantId"] # Just have to make sure the first element of each page is different, since we only have one item per page, this ensures no duplicates across pages
+    assert len(page1) == 1, "Page 1 should return one restaurant."
+    assert len(page2) == 1, "Page 2 should return one restaurant."
+    assert page1[0]["restaurant_id"] != page2[0]["restaurant_id"], "Page 1 and Page 2 should return different restaurants."
 
 def get_all(self):
     return [
         {
-            "restaurantId": 1,
+            "restaurant_id": 1,
             "name": "Pizza Place",
             "category": "Italian",
             "tags": ["pizza"],

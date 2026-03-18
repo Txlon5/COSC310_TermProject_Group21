@@ -53,6 +53,27 @@ PICKUP_STATUS_TRANSITIONS = {
 
 @router.post("", response_model = CreateOrderResponse, status_code = status.HTTP_201_CREATED)
 def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
+ logger.debug(f"order_request.restaurant_id={order_request.restaurant_id}")
+ from app.repositories.restaurants_repository import RestaurantsRepository
+ repo = RestaurantsRepository()
+ restaurants = repo.get_all()
+ logger.debug(f"loaded restaurants={restaurants}")
+ restaurant_name = None
+ try:
+     order_rid = int(order_request.restaurant_id)
+ except (ValueError, TypeError):
+     order_rid = str(order_request.restaurant_id)
+ for r in restaurants:
+     rid = r["restaurant_id"]
+     if isinstance(rid, str):
+         try:
+             rid = int(rid)
+         except (ValueError, TypeError):
+             pass
+     if rid == order_rid:
+         restaurant_name = r.get("name") or r.get("restaurant_name")
+         logger.debug(f"matched restaurant_name={restaurant_name}")
+         break
 # This is the endpoint for creating an order. It generates a notification when an order is created. key endpoint for SR1. Updated in SR2 as it now stores in memory.
  if order_request.delivery_method is not None:
      if order_request.delivery_method not in ["delivery", "pickup"]:
@@ -65,12 +86,23 @@ def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
          raise HTTPException(status_code=400,detail="pickup_location is required for pickup orders.")
 
  order_id = str(uuid4())     #Generates a unique order ID using uuid4.
- timestamp = datetime.now(timezone.utc)     #records tiem wfor when order is created/updated/delivered
-    
+ timestamp = datetime.now(timezone.utc)     #records time for when order is created/updated/delivered
+
+ # Lookup restaurant name from CSV
+ from app.repositories.restaurants_repository import RestaurantsRepository
+ repo = RestaurantsRepository()
+ restaurants = repo.get_all()
+ restaurant_name = None
+ for r in restaurants:
+     if str(r["restaurant_id"]) == str(order_request.restaurant_id):
+         restaurant_name = r["name"]
+         break
+
  order = CreateOrderResponse(
      order_id = order_id,
      user_id = order_request.user_id,
      restaurant_id = order_request.restaurant_id,
+     restaurant_name = restaurant_name,
      items = order_request.items,
      status = "Created",
      delivery_method=order_request.delivery_method,
