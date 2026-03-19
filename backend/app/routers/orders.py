@@ -88,10 +88,13 @@ def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
 
     return order
 
-
+@router.get("/", response_model=List[CreateOrderResponse])
+def get_orders() -> List[CreateOrderResponse]:
+    """Retrieves all stored orders."""
+    return list(orders_store.values())
 
 @router.get("/{order_id}", response_model=CreateOrderResponse)
-def get_order(order_id: str) -> CreateOrderResponse:
+def get_order_by_id(order_id: str) -> CreateOrderResponse:
     """Retrieves a stored order by its ID."""
     if order_id not in orders_store:
         raise HTTPException(status_code=404, detail="Order not found.")

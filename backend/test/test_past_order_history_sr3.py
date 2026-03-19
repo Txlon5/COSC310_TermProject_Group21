@@ -10,7 +10,7 @@ def setup_function():
     unauthorized_access_log.clear()     #Clear recorded unauthorized access attempts
     
 def test_get_order_history_requires_authentication():
-    order_request = {"user_id": "user123", "restaurant_id": "restaurantA", "items": ["Burger"]}
+    order_request = {"user_id": "user123", "restaurant_id": "restaurantA", "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Shawarma"}]}
     create_response = client.post("/orders", json=order_request)
     assert create_response.status_code == 201
 
@@ -23,7 +23,7 @@ def test_get_order_history_requires_authentication():
     assert unauthorized_access_log[0]["authenticated_user_id"] is None
     
 def test_get_selected_order_rejects_wrong_authenticated_user():
-    create_response = client.post("/orders", json={"user_id": "user456", "restaurant_id": "restaurantB", "items": ["Shawarma"]})
+    create_response = client.post("/orders", json={"user_id": "user456", "restaurant_id": "restaurantB", "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Shawarma"}]})
     assert create_response.status_code == 201
     order_id = create_response.json()["order_id"]
     
@@ -38,10 +38,10 @@ def test_get_selected_order_rejects_wrong_authenticated_user():
     
 def test_get_order_history_allows_authenticated_user_to_view_own_orders():
     # Create two orders for user123 and one for a different user to verify mismatch
-    response_1 = client.post("/orders", json={"user_id": "userabc", "restaurant_id": "restaurant1", "items": ["Pizza"]})
-    response_2 = client.post("/orders", json={"user_id": "userabc", "restaurant_id": "restaurant2", "items": ["Fries"]})
-    response_3 = client.post("/orders", json={"user_id": "user999", "restaurant_id": "restaurantC", "items": ["Pasta"]})
-    
+    response_1 = client.post("/orders", json={"user_id": "userabc", "restaurant_id": "restaurant1", "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Shawarma"}]})
+    response_2 = client.post("/orders", json={"user_id": "userabc", "restaurant_id": "restaurant2", "items": [{"menuItemId": 2, "quantity": 2, "item_name": "Fries"}]})
+    response_3 = client.post("/orders", json={"user_id": "user999", "restaurant_id": "restaurantC", "items": [{"menuItemId": 3, "quantity": 1, "item_name": "Pasta"}]})
+
     assert response_1.status_code == 201
     assert response_2.status_code == 201
     assert response_3.status_code == 201
@@ -55,7 +55,7 @@ def test_get_order_history_allows_authenticated_user_to_view_own_orders():
     assert all(order["user_id"] == "userabc" for order in data)
     
 def test_get_order_history_rejects_access_to_another_users_orders():
-    create_response = client.post("/orders", json={"user_id": "user123", "restaurant_id": "restaurantA", "items": ["Sushi"]})
+    create_response = client.post("/orders", json={"user_id": "user123", "restaurant_id": "restaurantA", "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Sushi"}]})
     assert create_response.status_code == 201
 
     #When user999 tries to access user123's order history

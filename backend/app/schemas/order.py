@@ -12,7 +12,7 @@ class OrderItem(BaseModel):
 class CreateOrderRequest(BaseModel):
     user_id: Optional[str] = None
     restaurant_id: Union[int, str] = Field(..., alias="restaurant_id")
-    items: List[Union[str, OrderItem]] = Field(..., alias="items")
+    items: List[OrderItem] = Field(..., alias="items")
     delivery_method: Optional[str] = None
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
@@ -21,14 +21,14 @@ class CreateOrderRequest(BaseModel):
 class OrderOut(BaseModel):
     order_id: int
     restaurant_id: Union[int, str]
-    items: List[Union[str, OrderItem]]
+    items: List[OrderItem]
 
 class CreateOrderResponse(BaseModel):
     order_id: str
     user_id: Optional[str] = None
     restaurant_id: Union[int, str] = Field(..., alias="restaurant_id")
     restaurant_name: Optional[str] = None
-    items: List[Union[str, OrderItem]]
+    items: List[OrderItem]
     status: str
     delivery_method: Optional[str] = None
     delivery_address: Optional[str] = None

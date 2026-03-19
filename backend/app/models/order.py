@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 from typing import List, Optional, Literal
+from app.schemas.order import OrderItem
 
 
 class Order(BaseModel):
     id: int
     user_id: str
-    items: List[str]
+    items: List[OrderItem]
     total_price: float
 
     delivery_method: Optional[Literal["delivery", "pickup"]] = None
