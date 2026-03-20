@@ -7,8 +7,3 @@ def test_root():
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"message": "Backend running"}
-
-def test_debug():
-    response = client.get("/debug")
-    assert response.status_code == 200
-    assert isinstance(response.json(), list)

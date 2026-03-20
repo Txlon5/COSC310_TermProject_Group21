@@ -5,8 +5,8 @@ from fastapi.testclient import TestClient
 client = TestClient(app)
 
 def setup_function():
-    notification.clear_notifications()     #Clear notifications before each test 
-    orders_store.clear()     #Clear orders from in-memory store before each test
+    notification.clear_notifications()      #Clear notifications before each test 
+    orders_store.clear()                    #Clear orders from in-memory store before each test
     
 def test_status_change_for_missing_orders_generates_404():
     response = client.patch("/orders/nonexistent-orderid/status",
@@ -15,7 +15,7 @@ def test_status_change_for_missing_orders_generates_404():
     assert response.json() == {"detail": "Order not found."}
     
 def test_same_status_generates_400():
-    order_request = {"user_id" : "user123", "restaurant_id" :"restaurant123", "items": ["Pizza"]}
+    order_request = {"user_id" : "user123", "restaurant_id" : 1, "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Pizza"}]}
     
     create_response = client.post("/orders", json=order_request)
     assert create_response.status_code == 201
@@ -30,7 +30,7 @@ def test_same_status_generates_400():
     assert user_notifications[0].type == "Order_Created"
     
 def test_order_status_change_generates_notification():
-    order_request = {"user_id" : "user333", "restaurant_id" :"restaurant333", "items": ["Biriyani", "Lassi"]}
+    order_request = {"user_id" : "user333", "restaurant_id" : 3, "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Biriyani"}, {"menuItemId": 2, "quantity": 1, "item_name": "Lassi"}]}
     
     create_response = client.post("/orders", json=order_request)
     assert create_response.status_code == 201
@@ -54,7 +54,7 @@ def test_order_status_change_generates_notification():
     assert status_notification.timestamp is not None
     
 def test_status_change_creates_only_one_notification():
-    order_request = {"user_id" : "user999", "restaurant_id" :"restaurant999", "items": ["Sushi"]}
+    order_request = {"user_id" : "user999", "restaurant_id" : 999, "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Sushi"}]}
     
     create_response = client.post("/orders", json=order_request)
     assert create_response.status_code == 201

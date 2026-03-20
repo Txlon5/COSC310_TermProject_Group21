@@ -6,8 +6,8 @@ client = TestClient(app)
 def test_invalid_delivery_method():
     response = client.post("/orders", json={
         "user_id": "u1",
-        "restaurant_id": "r1",
-        "items": ["Pizza"],
+        "restaurant_id": 1,
+        "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Pizza"}],
         "delivery_method": "drone"
     })
     assert response.status_code == 400
@@ -16,8 +16,8 @@ def test_invalid_delivery_method():
 def test_delivery_requires_address():
     response = client.post("/orders", json={
         "user_id": "u1",
-        "restaurant_id": "r1",
-        "items": ["Pizza"],
+        "restaurant_id": 1,
+        "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Pizza"}],
         "delivery_method": "delivery"
     })
     assert response.status_code == 400
@@ -26,8 +26,8 @@ def test_delivery_requires_address():
 def test_pickup_requires_location():
     response = client.post("/orders", json={
         "user_id": "u1",
-        "restaurant_id": "r1",
-        "items": ["Pizza"],
+        "restaurant_id": 1,
+        "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Pizza"}],
         "delivery_method": "pickup"
     })
     assert response.status_code == 400
@@ -36,8 +36,8 @@ def test_pickup_requires_location():
 def test_delivered_status_sets_timestamp():
     create = client.post("/orders", json={
         "user_id": "u1",
-        "restaurant_id": "r1",
-        "items": ["Pizza"]
+        "restaurant_id": 1,
+        "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Pizza"}]
     })
 
     order_id = create.json()["order_id"]

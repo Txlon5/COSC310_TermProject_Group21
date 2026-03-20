@@ -7,8 +7,8 @@ client = TestClient(app)
 def test_assign_delivery_info_to_existing_order():
     create_response = client.post("/orders", json={
         "user_id": "u1",
-        "restaurant_id": "r1",
-        "items": ["Pizza"]
+        "restaurant_id": 21,
+        "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Pizza"}]
     })
     assert create_response.status_code == 201
 

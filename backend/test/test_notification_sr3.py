@@ -16,8 +16,16 @@ def test_get_notifications_for_user_with_no_notifications_returns_empty_list():
     
 def test_get_notifications_for_user_returns_all_notifications():
     #Checks that notificaions created during order creation and status change are correctly retrieved for a user.
-    order_request = {"user_id" : "user456", "restaurant_id" :"restaurant123", "items": ["Burger", "Pizza", "Coke"]}    
-    
+    order_request = {
+        "user_id": "user456",
+        "restaurant_id": 21,
+        "items": [
+            {"menuItemId": 1, "quantity": 1, "item_name": "Burger"},
+            {"menuItemId": 2, "quantity": 1, "item_name": "Pizza"},
+            {"menuItemId": 3, "quantity": 1, "item_name": "Coke"}
+        ]
+    }
+
     create_response = client.post("/orders", json=order_request)
     assert create_response.status_code == 201
     order_id = create_response.json()["order_id"]
@@ -53,8 +61,19 @@ def test_get_notifications_for_user_returns_all_notifications():
 
 def test_get_notifications_returns_requested_users_notifications_only():
     #Checks that when retrieving notifications for a specific user, only that user's notifications are returned and not notifications for other users.
-    order_request1 = {"user_id" : "user1", "restaurant_id" :"restaurant1", "items": ["Pasta"]}
-    order_request2 = {"user_id" : "user2", "restaurant_id" :"restaurant2", "items": ["Salad"]}
+    order_request1 = {"user_id" : "user1",
+        "restaurant_id" : 19,
+        "items": [
+            {"menuItemId": 1, "quantity": 1, "item_name": "Pasta"}
+        ]
+    }
+    order_request2 = {
+        "user_id" : "user2",
+        "restaurant_id" : 34,
+        "items": [
+            {"menuItemId": 1, "quantity": 1, "item_name": "Salad"}
+        ]
+    }
     
     create_response1 = client.post("/orders", json=order_request1)
     assert create_response1.status_code == 201

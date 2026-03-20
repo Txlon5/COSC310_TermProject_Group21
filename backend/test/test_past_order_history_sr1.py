@@ -17,15 +17,33 @@ def test_get_past_order_history_for_user_returns_empty_list():
     
 def test_get_past_order_history_returns_orders_for_that_user_only():
     #Verifies that order history belonging to a specific user is returned.
-    order_1 = {"user_id": "user123", "restaurant_id": "restaurantA", "items": ["Nuggets"]}
+    order_1 = {"user_id": "user123",
+        "restaurant_id": 24,
+        "items": [
+            {"menuItemId": 1, "quantity": 1, "item_name": "Nuggets"}
+        ]
+    }
     response_1 = client.post("/orders", json = order_1)
     assert response_1.status_code == 201
     
-    order_2 = {"user_id": "user123", "restaurant_id": "restaurantB", "items": ["Burger"]}
+    order_2 = {
+        "user_id": "user123", 
+        "restaurant_id": 14, 
+        "items": [
+            {"menuItemId": 1, "quantity": 1, "item_name": "Burger"}
+        ]
+    }
+    
+
     response_2 = client.post("/orders", json = order_2)
     assert response_2.status_code == 201
     
-    order_3 = {"user_id": "user888", "restaurant_id": "restaurantC", "items": ["Pasta"]}
+    order_3 = {"user_id": "user888",
+        "restaurant_id": 34,
+        "items": [
+            {"menuItemId": 1, "quantity": 1, "item_name": "Pasta"}
+        ]
+    }
     response_3 = client.post("/orders", json = order_3)
     assert response_3.status_code == 201
     
@@ -45,7 +63,7 @@ def test_get_past_order_history_returns_orders_for_that_user_only():
     assert created_order_id_3 not in returned_ids       #verifies another user order is not included.
     
     returned_restaurants = {order["restaurant_id"] for order in data}
-    assert returned_restaurants == {"restaurantA", "restaurantB"}       #verifies correct restaurants are associated
+    assert returned_restaurants == {24, 14}       #verifies correct restaurants are associated
     
     for order in data:
         assert order["user_id"] == "user123"

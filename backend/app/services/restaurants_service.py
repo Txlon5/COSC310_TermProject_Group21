@@ -21,19 +21,17 @@ class RestaurantsService:
 
     def _to_schema_restaurant(self, r):
         return {
-            "restaurantId": r.get("restaurantId"),
-            "name": r.get("name", ""),
+            "restaurant_id": r.get("restaurant_id"),
+            "restaurant_name": r.get("restaurant_name", ""),
             "tags": r.get("tags", []),
             "isOpen": r.get("isOpen", True),
             "menuItems": r.get("menuItems", []),
         }
     def _to_crud_response(self, r):
         base = self._to_schema_restaurant(r)
-
         return {
-            "id": str(base["restaurantId"]),
-            "name": base["name"],
-            "category": r.get("category", "Unknown"),
+            "restaurant_id": str(base["restaurant_id"]),
+            "restaurant_name": base["restaurant_name"],
             "tags": base["tags"],
         }
 
@@ -49,9 +47,8 @@ class RestaurantsService:
         restaurants = self.repo.get_all()
 
         new_restaurant = {
-            "restaurantId": str(uuid.uuid4()),
-            "name": payload.name.strip(),
-            "category": payload.category.strip(),
+            "restaurant_id": str(uuid.uuid4()),
+            "restaurant_name": payload.restaurant_name.strip(),
             "tags": payload.tags if payload.tags is not None else [],
             "isOpen": True,
             "menuItems": []
@@ -62,15 +59,13 @@ class RestaurantsService:
         if hasattr(self.repo, "save_all"):
             self.repo.save_all(restaurants)
 
-         #return self._to_schema_restaurant(new_restaurant)
         return self._to_crud_response(new_restaurant)
     # Returns a single restaurant by its restaurantId
     def get_restaurant_by_id(self, restaurant_id: str):
         restaurants = self.repo.get_all()
 
         for r in restaurants:
-            if str(r.get("restaurantId")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
-                 #return self._to_schema_restaurant(r)
+            if str(r.get("restaurant_id")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
                 return self._to_crud_response(r)
 
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
@@ -80,7 +75,7 @@ class RestaurantsService:
         restaurants = self.repo.get_all()
 
         for r in restaurants:
-            if str(r.get("restaurantId")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
+            if str(r.get("restaurant_id")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
                 r["name"] = payload.name.strip()
                 r["category"] = payload.category.strip()
 
@@ -90,7 +85,6 @@ class RestaurantsService:
                 if hasattr(self.repo, "save_all"):
                     self.repo.save_all(restaurants)
 
-                 #return self._to_schema_restaurant(r)
                 return self._to_crud_response(r)
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
 
@@ -99,7 +93,7 @@ class RestaurantsService:
         restaurants = self.repo.get_all()
 
         for i, r in enumerate(restaurants):
-            if str(r.get("restaurantId")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
+            if str(r.get("restaurant_id")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
                 restaurants.pop(i)
 
                 if hasattr(self.repo, "save_all"):
@@ -140,7 +134,7 @@ class RestaurantsService:
         if restaurant_id is not None:
             restaurants = [
                 r for r in restaurants
-                if str(r.get("restaurantId")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id)
+                if str(r.get("restaurant_id")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id)
             ]
 
         # Filter by open/closed status if provided
@@ -182,7 +176,7 @@ class RestaurantsService:
                 # Helper function to check if query matches restaurant name
                 # or any menu item name
                 def matches(r):
-                    name_ok = q_norm in str(r.get("name", "")).lower()
+                    name_ok = q_norm in str(r.get("restaurant_name", "")).lower()
                     items = r.get("menuItems", [])
                     item_ok = any(
                         q_norm in str(it.get("name", "")).lower()
