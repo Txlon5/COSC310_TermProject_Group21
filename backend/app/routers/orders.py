@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 from datetime import datetime, timezone
 from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest, DeliveryInfoUpdateRequest
 from app.services.notification_service import NotificationService
-from fastapi import APIRouter, status, HTTPException, Header, Request
+from fastapi import APIRouter, status, HTTPException, Header, Request, Body
 from uuid import uuid4
 import logging 
  
@@ -179,5 +179,22 @@ def assign_delivery_info(order_id: str, delivery_request: DeliveryInfoUpdateRequ
     order.pickup_location = delivery_request.pickup_location
     order.updated_at = datetime.now(timezone.utc)
 
+    orders_store[order_id] = order
+    return order
+
+
+# Feat4-SR2, updated endpoint according to Siam and Omarion's work regarding order updates
+@router.put("/{order_id}", response_model=CreateOrderResponse)
+def update_order(order_id: str, items: List[dict] = Body(default=None), restaurant_id: int = None):
+    if order_id not in orders_store:
+        raise HTTPException(status_code=404, detail="Order not found.")
+    order = orders_store[order_id]
+    if order.status in ("Delivered", "Picked up"):
+        raise HTTPException(status_code=400, detail="Cannot update a completed (Delivered or Picked up) order.")
+    if restaurant_id is not None:
+        order.restaurant_id = restaurant_id
+    if items is not None:
+        order.items = items
+    order.updated_at = datetime.now(timezone.utc)
     orders_store[order_id] = order
     return order
