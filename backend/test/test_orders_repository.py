@@ -1,13 +1,13 @@
-from app.repositories.orders_repository import OrdersRepository
-
+from app.repositories.orders_repository import load_all, save_all
+from app.schemas.order import Order
 
 # Test that creating an order stores it in the repository
 def test_create_order_stores_order():
-    repo = OrdersRepository() # Quick instance to test the repository without needing to start the server
+    repo = load_all() # Quick instance to test the repository without needing to start the server
     
     # Create an order and check that it is stored correctly, values are arbitrary for testing purposes
-    order = repo.create_order(
-        restaurant_id=101, # Arbitrary value for testing, we just want to make sure the order is created and stored correctly in the repository; value doesn't need to be from csv/changed
+    order = Order(
+        restaurant_id="101", # Arbitrary value for testing, we just want to make sure the order is created and stored correctly in the repository; value doesn't need to be from csv/changed
         items=[{"menuItemId": 5, "quantity": 2}]
     )
     assert order is not None

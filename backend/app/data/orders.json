@@ -1,0 +1,41 @@
+[
+  {
+    "id": "o1",
+    "user_id": "u1",
+    "items": [
+      {
+        "restaurant_id": "r1",
+        "item_name": "Burger",
+        "quantity": 2,
+        "price": 5.99
+      }
+    ],
+    "total_price": 11.98,
+    "delivery_method": "delivery",
+    "delivery_address": "123 Main St",
+    "pickup_location": null,
+    "assigned_driver": "driver1",
+    "status": "pending",
+    "created_at": "2024-06-01T12:00:00Z"
+  },
+  {
+    "order_id": "b8afe34a-819a-4ab0-b2f4-4e0929324fa7",
+    "user_id": "string",
+    "restaurant_id": 0,
+    "restaurant_name": null,
+    "items": [
+      {
+        "menuItemId": 0,
+        "quantity": 0,
+        "item_name": "string"
+      }
+    ],
+    "status": "Created",
+    "delivery_method": "pickup",
+    "delivery_address": "string",
+    "pickup_location": "string",
+    "created_at": "2026-03-21T21:02:04.294972Z",
+    "updated_at": "2026-03-21T21:02:04.294972Z",
+    "delivered_at": null
+  }
+]

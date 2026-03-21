@@ -1,4 +1,4 @@
-from app.models.order import Order
+from app.schemas.order import Order
 
 
 def test_order_can_store_delivery_fields():
