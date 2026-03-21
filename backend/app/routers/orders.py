@@ -88,6 +88,7 @@ def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest)
     old_status = order.status
     new_status = status_request.status
     
+     # Prevent same status update
     if old_status == new_status:
         raise HTTPException(status_code = 400, detail = "Order status remains unchanged.")  
 
@@ -144,6 +145,7 @@ def get_certain_past_order(user_id: str, order_id: str) -> CreateOrderResponse:
 
 @router.put("/{order_id}/delivery", response_model=CreateOrderResponse)
 def assign_delivery_info(order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> CreateOrderResponse:
+    #Updates delivery or pickup information for an order.
     if order_id not in orders_store:
         raise HTTPException(status_code=404, detail="Order not found.")
 

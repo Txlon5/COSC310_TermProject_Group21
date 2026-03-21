@@ -40,7 +40,10 @@ class RestaurantsService:
     # Public method to get all restaurants
     # This is what the API layer will call
     def list_restaurants(self):
+        # Retrieve all raw restaurant data from the repository (data layer)
         restaurants = self.repo.get_all()
+        # Convert each raw restaurant dictionary into a schema-friendly object
+    # using a helper method (_to_schema_restaurant)
         return [self._to_schema_restaurant(r) for r in restaurants]
     def get_restaurants(self):
         return self.list_restaurants()
@@ -56,7 +59,7 @@ class RestaurantsService:
             "isOpen": True,
             "menuItems": []
         }
-
+ # Add the new restaurant to the list
         restaurants.append(new_restaurant)
 
         if hasattr(self.repo, "save_all"):

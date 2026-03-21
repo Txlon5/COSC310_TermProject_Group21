@@ -17,9 +17,7 @@ def calculate_subtotal(items, menu_lookup: dict) -> float:
 
         if item_id not in menu_lookup:
             raise HTTPException(
-                status_code=404,
-                detail=f"Menu item {item_id} not found"
-            )
+                status_code=404,detail=f"Menu item {item_id} not found")
 
         price = menu_lookup[item_id].price
         subtotal += price * quantity
