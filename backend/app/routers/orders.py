@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 from datetime import datetime, timezone
 from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest, DeliveryInfoUpdateRequest
+from app.services.orders_service import OrdersService
 from app.services.notification_service import NotificationService
 from fastapi import APIRouter, status, HTTPException, Header, Request
 from uuid import uuid4
@@ -52,41 +53,9 @@ PICKUP_STATUS_TRANSITIONS = {
 }
 
 @router.post("", response_model = CreateOrderResponse, status_code = status.HTTP_201_CREATED)
-def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
-# This is the endpoint for creating an order. It generates a notification when an order is created. key endpoint for SR1. Updated in SR2 as it now stores in memory.
-    if order_request.delivery_method is not None:
-        if order_request.delivery_method not in ["delivery", "pickup"]:
-            raise HTTPException(status_code=400,detail="delivery_method must be either 'delivery' or 'pickup'.")
-
-        if order_request.delivery_method == "delivery" and not order_request.delivery_address:
-            raise HTTPException(status_code=400,detail="delivery_address is required for delivery orders.")
-
-        if order_request.delivery_method == "pickup" and not order_request.pickup_location:
-            raise HTTPException(status_code=400,detail="pickup_location is required for pickup orders.")
-
-    order_id = str(uuid4())     #Generates a unique order ID using uuid4.
-    timestamp = datetime.now(timezone.utc)     #records tiem wfor when order is created/updated/delivered
-    
-    order = CreateOrderResponse(
-        order_id = order_id,
-        user_id = order_request.user_id,
-        restaurant_id = order_request.restaurant_id,
-        items = order_request.items,
-        status = "Created",
-        delivery_method=order_request.delivery_method,
-        delivery_address=order_request.delivery_address,
-        pickup_location=order_request.pickup_location,
-        created_at = timestamp,
-        updated_at = timestamp,
-        delivered_at = None
-    )
-
-    orders_store[order.order_id] = order     #Store the order in the in-memory orders_store dictionary.
-
-    #Generate a notification for the order creation event.
-    notification.create_order_created_notification(user_id = order_request.user_id, order_id = order.order_id)
-
-    return order
+def create_order(order: CreateOrderRequest) -> CreateOrderResponse:
+    order_service = OrdersService(repo=None, restaurants_repo=None)
+    return order_service.create_order_tariq(order)
 
 @router.get("/", response_model=List[CreateOrderResponse])
 def get_orders() -> List[CreateOrderResponse]:
@@ -98,52 +67,12 @@ def get_order_by_id(order_id: str) -> CreateOrderResponse:
     """Retrieves a stored order by its ID."""
     if order_id not in orders_store:
         raise HTTPException(status_code=404, detail="Order not found.")
-
     return orders_store[order_id]
 
 @router.patch("/{order_id}/status", response_model = CreateOrderResponse)
 def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest) -> CreateOrderResponse:
-    #this updated status of existing order and generates a notif when status changes. Essential for SR2.
-    if order_id not in orders_store:
-        raise HTTPException(status_code = 404, detail = "Order not found.")     #404 - not found if order ID does not exist in the in-memory store.
-    
-    order = orders_store[order_id]
-    
-    old_status = order.status
-    new_status = status_request.status
-    
-    if old_status == new_status:
-        raise HTTPException(status_code = 400, detail = "Order status remains unchanged.")  
-
-    if order.delivery_method == "pickup":
-        allowed_next_statuses = PICKUP_STATUS_TRANSITIONS.get(old_status, [])
-    else:
-        allowed_next_statuses = DELIVERY_STATUS_TRANSITIONS.get(old_status, [])
-
-    if new_status not in allowed_next_statuses:
-        raise HTTPException(status_code=400, detail=f"Invalid status transition from '{old_status}' to '{new_status}'.")
-
-    
-    timestamp = datetime.now(timezone.utc)
-    
-    order.status = new_status     #Update the order status in the in-memory store.
-    order.updated_at = timestamp
-    
-    if new_status =="Delivered":
-        order.delivered_at = timestamp
-        
-    orders_store[order_id] = order     #Save the updated order back to the in-memory store.
-    
-        
-    #Now generate a notification for the order status change event.
-    notification.create_order_status_changed_notification(
-        user_id = order.user_id,
-        order_id = order.order_id,
-        old_status = old_status,
-        new_status = new_status
-    )
-    
-    return order
+    order_service = OrdersService(repo=None, restaurants_repo=None)
+    return order_service.update_order_status(order)
 
 
 @router.get("/history/{user_id}", response_model = List[CreateOrderResponse])
