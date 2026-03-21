@@ -30,3 +30,7 @@ def add_menu(menu_data: MenuCreate):
     )
     menus.append(new_menu)
     return new_menu
+
+def get_menu_items_by_restaurant(restaurant_id):
+    # Returns all menu items that belong to one restaurant.
+    return [item for item in menus if str(item.restaurant_id) == str(restaurant_id)]
