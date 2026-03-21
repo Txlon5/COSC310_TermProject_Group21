@@ -1,3 +1,5 @@
+from enum import Enum
+
 from pydantic import BaseModel, Field
 from typing import List, Optional, Union
 from datetime import datetime
@@ -16,6 +18,22 @@ class CreateOrderRequest(BaseModel):
     delivery_method: Optional[str] = None
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
+
+
+
+# Order Object - [Temp here]
+class Order(BaseModel):
+    id: int
+    user_id: str
+    items: List[OrderItem]
+    total_price: float
+
+    delivery_method: Optional[DeliveryType] = None
+    delivery_address: Optional[str] = None
+    pickup_location: Optional[str] = None
+    assigned_driver: Optional[str] = None
+
+    status: str = "created"
 
 # Response returned after creating/retrieving an order
 class OrderOut(BaseModel):
