@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List,Optional
 
 
 class OrderItemRequest(BaseModel):
@@ -16,8 +16,14 @@ class SubtotalRequest(BaseModel):
 
     # The selected items in the order/cart
     items: List[OrderItemRequest] = Field(..., min_length=1)
+    delivery_method: Optional[str] = None
 
 
 class SubtotalResponse(BaseModel):
     # Cost of all items before fees/taxes
     subtotal: float
+
+    # SR2 ADDITIONS
+    delivery_fee: float
+    tax: float
+    total: float
