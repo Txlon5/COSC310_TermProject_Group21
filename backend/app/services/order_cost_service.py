@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from app.schemas.order_cost import SubtotalRequest, SubtotalResponse
+from typing import Optional
 
 BC_TAX_RATE = 0.12
 
@@ -25,7 +26,7 @@ def calculate_subtotal(items, menu_lookup: dict) -> float:
 
     return round_money(subtotal)
     #sr2
-def calculate_delivery_fee(delivery_method: str | None) -> float:
+def calculate_delivery_fee(delivery_method: Optional[str]) -> float:
     if delivery_method == "delivery":
         return 4.99
     return 0.0
