@@ -12,18 +12,13 @@ class OrderItem(ItemBase):
 
 # Unified CreateOrderRequest
 class CreateOrderRequest(BaseModel):
-    order_id: str
     user_id: str
     restaurant_id: str
     items: List[OrderItem]
     status: DeliveryStatus = DeliveryStatus.created
-    total_price: float = 0 
     delivery_method: DeliveryType = DeliveryType.delivery
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    delivered_at: Optional[datetime] = None
 
 # Order Object - [Temp here]
 class Order(BaseModel):
@@ -72,7 +67,7 @@ class UpdateOrderStatusRequest(BaseModel):
     delivered_at: Optional[datetime] = None
 
 class OrderStatusUpdateRequest(BaseModel):
-    status: str = Field(..., min_length=1)
+    status: DeliveryStatus
 
 class DeliveryInfoUpdateRequest(BaseModel):
     delivery_method: Optional[str] = None

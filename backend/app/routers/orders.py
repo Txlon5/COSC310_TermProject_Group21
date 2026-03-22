@@ -8,7 +8,6 @@ from fastapi import APIRouter, status, HTTPException, Header, Request, Body, Dep
 from app.schemas.user import User
 from uuid import uuid4
 from app.auth.token_utils import get_current_user
-import logging 
  
 router = APIRouter(prefix = "/orders", tags = ["Orders"])
 
@@ -49,10 +48,6 @@ def get_past_order_history(user_id: str, current_user: User = Depends(get_curren
     #The authenticated user must match the requested user id. SR3 security check.
     if current_user.id != user_id or current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized to perform this action.") 
-    
-    #For a specific order, view all past orders.
-    user_orders = [order for order in orders_store.values()      #Reuses current in-memory orders_store, satisfies SR1
-                   if order.user_id == user_id]
     return user_orders
 
 # Get Order by User Id and Order Id
