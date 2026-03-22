@@ -10,8 +10,9 @@ Here, we can:
 """
 from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse,DeliveryInfoUpdateRequest,Order,DeliveryInfoResponse
 from fastapi import APIRouter, status, Depends, HTTPException
-from app.schemas.order import CreateOrderResponse, CreateOrderRequest, Order
+from app.schemas.order import CreateOrderResponse, CreateOrderRequest, Order, OrderItem
 from app.schemas.delivery import DeliveryType, DeliveryStatus
+from app.schemas.menu import MenuItem
 from app.repositories.orders_repository import load_all, save_all
 from typing import List, Dict
 from datetime import datetime, timezone
@@ -82,13 +83,12 @@ class OrdersService:
         # Retrieve the order from the repository
         orders = load_all()
 
+        # Iterate through orders list
         for it in orders:
-            if it.get("id") == order_id:
-                return CreateOrderResponse(**it)  # Return the found order
-        raise ValueError("Order not found") # Quick error handling for not found
-    
-
-
+            # Return the found order
+            if str(it.get("order_id")) == order_id:
+                return CreateOrderResponse(**it)  
+        raise HTTPException(status_code=404, detail="Order not found.") # Quick error handling for not found
 
     def update_order_status(self, order_id: str, status_request: OrderStatusUpdateRequest) -> CreateOrderResponse:
         orders_store = load_all()
@@ -135,23 +135,53 @@ class OrdersService:
         return order
 
 
-
+     # Update Order Delivery Status
     def assign_delivery_info(self, order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> CreateOrderResponse:
         orders = load_all()
         
-        for order in orders:
-            if order.get("order_id") == order_id:
-                order["delivery_method"] = delivery_request.delivery_method
-                order["delivery_address"] = delivery_request.delivery_address
-                order["pickup_location"] = delivery_request.pickup_location
-                order["updated_at"] = datetime.now(timezone.utc)
+        for idx, order in enumerate(orders):
+            if str(order.get("order_id")) == order_id:
+                # Set new values
+                if delivery_request.delivery_method is not None:
+                    order["delivery_method"] = delivery_request.delivery_method
+                if delivery_request.delivery_address is not None:
+                    order["delivery_address"] = delivery_request.delivery_address
+                if delivery_request.pickup_location is not None:
+                    order["pickup_location"] = delivery_request.pickup_location
+                order["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z") # Convert to a string to prevent json save issues
 
-                #model(json)
+                # Set order entry with updated values
+                orders[idx] = order
+
+                # Save changes to order
                 save_all(orders)
                 return CreateOrderResponse(**order)
         raise HTTPException(status_code=404, detail="Order not found.")
 
+    # Update Order Information
+    def update_order_info(self, update_order_id: str, items: List[OrderItem], restaurant_id: str):
+        orders_store = load_all()
+        
+        # Search order list for order associated with update_order_id
+        for idx, o in enumerate(orders_store):
+            # Check if update_restaurant_id matches
+            if str(o.get("order_id")) == str(update_order_id):
+                if o.get("status") in (DeliveryStatus.delivered, DeliveryStatus.picked_up):
+                    raise HTTPException(status_code=400, detail="Cannot update a completed (Delivered or Picked up) order.")
+                if restaurant_id is not None:
+                    o["restaurant_id"] = restaurant_id
+                if items is not None:
+                    o["items"] = [it.model_dump() for it in items]
+                o["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                
+                # Save changes to orders list
+                orders_store[idx] = o
+                save_all(orders_store)
 
+                # Return order
+                return Order(**o)
+        # Throw exception if order does not exist
+        raise HTTPException(status_code=404,detail=f"Order not found.")
 
     # def assign_delivery_info(self, order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> CreateOrderResponse:
     #     if order_id not in orders_store:
