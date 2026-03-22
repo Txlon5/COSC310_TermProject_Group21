@@ -191,3 +191,19 @@ class RestaurantsService:
 
         restaurants = self.paginate(restaurants, page, page_size)
         return [Restaurant(**r) for r in restaurants]
+    
+    def get_restaurant_filtered(self,q=None,restaurant_id=None,is_open=None,tag=None,page=None,page_size=None):
+        if q is not None and str(q).strip() == "":
+            raise HTTPException(status_code=400, detail="q cannot be empty")
+
+        if q is None and restaurant_id is None and is_open is None and tag is None and page is None and page_size is None:
+            return self.get_restaurants()
+
+        return self.search_restaurants(
+            q=q,
+            restaurant_id=restaurant_id,
+            is_open=is_open,
+            tag=tag,
+            page=page,
+            page_size=page_size,
+        )
