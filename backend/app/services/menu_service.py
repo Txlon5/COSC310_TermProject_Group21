@@ -22,7 +22,7 @@ def fetch_menu_by_restaurant_id(restaurant_id: str):
     restaurants = restaurant_repo.load_all()
 
     for it in restaurants:
-        if it.get("restaurant_id") == restaurant_id:
+        if str(it.get("restaurant_id")) == restaurant_id:
             return Restaurant(**it).menuItems
     raise HTTPException(status_code=404, detail=f"Restaurant '{restaurant_id}' not found")
 
@@ -32,34 +32,33 @@ def create_menu_item(restaurant_id: str, payload: CreateMenuItem) -> MenuItem:
     restaurants = restaurant_repo.load_all()
 
     for r in restaurants:
-            if r.get("restaurant_id") == restaurant_id:
-                # Get list of menu items
-                menu_items = r.get("menuItems", [])
+        if r.get("restaurant_id") == restaurant_id:
+            # Get list of menu items
+            menu_items = r.get("menuItems", [])
 
-                # Fetch new_item values
-                new_id = len(menu_items) + 1
-                new_name = payload.name.strip()
-                new_price = payload.price
-                new_category = payload.category.strip()
-                
-                # Create new menu item
-                new_item = MenuItem(
-                     menuItemId=new_id,
-                     name=new_name,
-                     price= new_price,
-                     category= new_category,
-                )
+            # Fetch new_item values
+            new_id = len(menu_items) + 1
+            new_name = payload.name.strip()
+            new_price = payload.price
+            new_category = payload.category.strip()
+            
+            # Create new menu item
+            new_item = MenuItem(
+                    menuItemId=new_id,
+                    name=new_name,
+                    price= new_price,
+                    category= new_category,
+            )
 
-                # Convert back to dictionary and add to menu list
-                menu_items.append(new_item.model_dump())
+            # Convert back to dictionary and add to menu list
+            menu_items.append(new_item.model_dump())
 
-                # Assign restaurant with new menu list and save
-                r["menuItems"] = menu_items
-                restaurant_repo.save_all(restaurants)
+            # Assign restaurant with new menu list and save
+            r["menuItems"] = menu_items
+            restaurant_repo.save_all(restaurants)
 
-                # Return new_item created to user
-                return new_item
-
+            # Return new_item created to user
+            return new_item
             
     raise HTTPException(status_code=400, detail="Restaurant does not exist")
 

@@ -21,11 +21,27 @@ class RestaurantsService:
 
     # Public method to get all restaurants
     # This is what the API layer will call
+
+    # Get all restaurants - return with minimal values (id, name, tags)
     def list_restaurants(self):
         return [RestaurantMinimal(**it) for it in self.repo.load_all()]
     
+    # Get all restaurants - full data
     def get_restaurants(self):
         return [Restaurant(**it) for it in self.repo.load_all()]
+    
+    # Get Restaurant by Id
+    def get_restaurant_by_id(self, restaurant_id: str) -> Restaurant:
+        # Get list of all restaurants and cast to Restaurant schema
+        restaurants = self.repo.load_all()
+
+        # Search list for restaurant by id
+        for r in restaurants:
+            if str(r.get("restaurant_id")) == str(restaurant_id):
+                # Return restaurant
+                return Restaurant(**r)
+        # Error restaurant does not exist
+        raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
     
     # Creates a new restaurant and appends it to the current restaurant list
     def create_restaurant(self, payload):
@@ -48,36 +64,25 @@ class RestaurantsService:
         # Return new_restaurant to user
         return new_restaurant
     
-    # Returns a single restaurant by its restaurantId
-    def get_restaurant_by_id(self, restaurant_id: str) -> Restaurant:
-        # Get list of all restaurants and cast to Restaurant schema
-        restaurants = self.repo.load_all()
-
-        # Search list for restaurant by id
-        for r in restaurants:
-            if r.get("restaurant_id") == str(restaurant_id):
-                # Return restaurant
-                return Restaurant(**r)
-        # Error restaurant does not exist
-        raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
         
     # Updates an existing restaurant by ID
     def update_restaurant(self, update_restaurant_id: str, payload: RestaurantUpdate) -> Restaurant:
         restaurants = self.repo.load_all()
         
         # Search restaurant list for restaurant associated with update_restaurant_id
-        for r in restaurants:
+        for idx, r in enumerate(restaurants):
             # Check if update_restaurant_id matches
-            if r.get("restaurant_id") == update_restaurant_id:
-                # Update fields if entered with restaurant as a dictionary
-                if payload.restaurant_name.strip() is not None:
+            if str(r.get("restaurant_id")) == str(update_restaurant_id):
+                # Update fields if entered
+                if payload.restaurant_name is not None and payload.restaurant_name.strip() != "":
                     r["restaurant_name"] = payload.restaurant_name.strip()
-                if payload.tags is not None or payload.tags != []:
+                if payload.tags is not None and payload.tags != []:
                     r["tags"] = payload.tags
                 if payload.isOpen is not None:
                     r["isOpen"] = payload.isOpen
 
                 # Save changes to restaurant list
+                restaurants[idx] = r
                 self.repo.save_all(restaurants)
 
                 # Return restaurant
@@ -89,13 +94,13 @@ class RestaurantsService:
     def delete_restaurant(self, restaurant_id: str):
         restaurants = self.repo.load_all()
 
-        for i, r in enumerate(restaurants):
+        for idx, r in enumerate(restaurants):
             if str(r.get("restaurant_id")) == str(restaurant_id):
-                restaurants.pop(i)
+                # Remove restaurant entry
+                restaurants.pop(idx)
 
-                if hasattr(self.repo, "save_all"):
-                    self.repo.save_all(restaurants)
-
+                # Save restaurant list changes
+                self.repo.save_all(restaurants)
                 return
 
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
