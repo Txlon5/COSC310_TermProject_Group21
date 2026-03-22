@@ -11,7 +11,7 @@ class DeliveryType (str, Enum):
 
 # Delivery Statuses - Created, Preparing, Ready, Complete
 class DeliveryStatus (str, Enum):
-    created = "Preparing",
-    preparing = "Ready",
-    ready = "Delivered",
+    created = "Preparing"
+    preparing = "Ready"
+    ready = "Delivered"
     complete = []

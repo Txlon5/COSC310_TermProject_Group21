@@ -34,11 +34,8 @@
     ],
     "status": "Preparing",
     "total_price": 0.0,
-    "delivery_method": "delivery",
+    "delivery_method": "pickup",
     "delivery_address": "string",
     "pickup_location": "string",
     "created_at": "2026-03-22T04:06:35.815815Z",
-    "updated_at": "2026-03-22T04:06:35.815815Z",
-    "delivered_at": null
-  }
-]
+    "updated_at": 

@@ -8,9 +8,10 @@ Here, we can:
 - Ensure an order has at least one item
 - Delegate persistence/retrieval to the repository
 """
-from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse
+from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse,DeliveryInfoUpdateRequest,Order,DeliveryInfoResponse
 from fastapi import APIRouter, status, Depends, HTTPException
-from app.schemas.order import CreateOrderResponse, CreateOrderRequest
+from app.schemas.order import CreateOrderResponse, CreateOrderRequest, Order
+from app.schemas.delivery import DeliveryType, DeliveryStatus
 from app.repositories.orders_repository import load_all, save_all
 from typing import List, Dict
 from datetime import datetime, timezone
@@ -19,20 +20,23 @@ from app.services.menu_service import fetch_menu_by_restaurant_id
 
 
 class OrdersService:
-    def create_order_tariq(self, order_request: CreateOrderRequest) -> CreateOrderResponse:
+    def list_orders(self):
+        return [Order(**it) for it in load_all()]
+    
+    def create_order_tariq(self, order_request: CreateOrderRequest):
         # Load orders
         orders = load_all()
 
-        # This is the endpoint for creating an order. It generates a notification when an order is created. key endpoint for SR1. Updated in SR2 as it now stores in memory.
-        if order_request.delivery_method is not None:
-            if order_request.delivery_method not in ["delivery", "pickup"]:
-                raise HTTPException(status_code=400,detail="delivery_method must be either 'delivery' or 'pickup'.")
+        # # This is the endpoint for creating an order. It generates a notification when an order is created. key endpoint for SR1. Updated in SR2 as it now stores in memory.
+        # if order_request.delivery_method is not None:
+        #     if order_request.delivery_method not in DeliveryType:
+        #         raise HTTPException(status_code=400,detail="delivery_method must be either 'delivery' or 'pickup'.")
 
-            if order_request.delivery_method == "delivery" and not order_request.delivery_address:
-                raise HTTPException(status_code=400,detail="delivery_address is required for delivery orders.")
+        #     if order_request.delivery_method == DeliveryType.delivery and not order_request.delivery_address:
+        #         raise HTTPException(status_code=400,detail="delivery_address is required for delivery orders.")
 
-            if order_request.delivery_method == "pickup" and not order_request.pickup_location:
-                raise HTTPException(status_code=400,detail="pickup_location is required for pickup orders.")
+        #     if order_request.delivery_method == DeliveryType.pickup and not order_request.pickup_location:
+        #         raise HTTPException(status_code=400,detail="pickup_location is required for pickup orders.")
 
         order_id = str(uuid4())     #Generates a unique order ID using uuid4.
         timestamp = datetime.now(timezone.utc)     #records time for when order is created/updated/delivered
@@ -42,15 +46,15 @@ class OrdersService:
             user_id = order_request.user_id,
             restaurant_id = order_request.restaurant_id,
             items = order_request.items,
-            status = "Created",
-            delivery_method=order_request.delivery_method,
+            status = DeliveryStatus.created,
+            delivery_method= DeliveryType(order_request.delivery_method),
             delivery_address=order_request.delivery_address,
             pickup_location=order_request.pickup_location,
             created_at = timestamp,
             updated_at = timestamp,
             delivered_at = None
         )
-
+        
         orders.append(new_order.model_dump(mode='json'))
         save_all(orders)
     
@@ -129,3 +133,36 @@ class OrdersService:
         )
         
         return order
+
+
+
+    def assign_delivery_info(self, order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> CreateOrderResponse:
+        orders = load_all()
+        
+        for order in orders:
+            if order.get("order_id") == order_id:
+                order["delivery_method"] = delivery_request.delivery_method
+                order["delivery_address"] = delivery_request.delivery_address
+                order["pickup_location"] = delivery_request.pickup_location
+                order["updated_at"] = datetime.now(timezone.utc)
+
+                #model(json)
+                save_all(orders)
+                return CreateOrderResponse(**order)
+        raise HTTPException(status_code=404, detail="Order not found.")
+
+
+
+    # def assign_delivery_info(self, order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> CreateOrderResponse:
+    #     if order_id not in orders_store:
+    #         raise HTTPException(status_code=404, detail="Order not found.")
+
+    #     order = orders_store[order_id]
+
+    #     order.delivery_method = delivery_request.delivery_method
+    #     order.delivery_address = delivery_request.delivery_address
+    #     order.pickup_location = delivery_request.pickup_location
+    #     order.updated_at = datetime.now(timezone.utc)
+
+    #     orders_store[order_id] = order
+    #     return order

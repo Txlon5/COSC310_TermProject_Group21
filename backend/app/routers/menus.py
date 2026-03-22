@@ -1,10 +1,8 @@
 from fastapi import APIRouter
-from app.schemas.menu import MenuCreate
-from app.services.menu_service import (
-    fetch_all_menus,
-    fetch_menu_by_restaurant_id,
-    create_menu
-)
+from app.schemas.menu import MenuCreate, MenuItem, CreateMenuItem
+from app.services.menu_service import fetch_menu_by_restaurant_id, fetch_all_menus, create_menu_item
+
+from app.repositories.restaurants_repository import RestaurantsRepository
 
 router = APIRouter(tags=["Menu"])
 
@@ -13,9 +11,13 @@ def get_menus():
     return fetch_all_menus()
 
 @router.get("/restaurants/{restaurant_id}/menu")
-def get_restaurant_menu(restaurant_id: int):
+def get_restaurant_menu(restaurant_id: str):
     return fetch_menu_by_restaurant_id(restaurant_id)
 
-@router.post("/menus")
-def add_new_menu(menu_data: MenuCreate):
-    return create_menu(menu_data)
+@router.post("/restaurants/{restaurant_id}/menu-item/add", response_model=CreateMenuItem)
+def create_restaurant_menu_item(restaurant_id: str, payload: CreateMenuItem):
+    return create_menu_item(restaurant_id, payload)
+
+# @router.post("/menus")
+# def add_new_menu(menu_data: MenuCreate):
+#     return create_menu(menu_data)

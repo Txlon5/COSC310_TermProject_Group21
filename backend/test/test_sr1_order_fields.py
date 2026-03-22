@@ -3,7 +3,7 @@ from app.schemas.order import Order
 
 def test_order_can_store_delivery_fields():
     order = Order(
-        id=1,
+        id="test",
         user_id="101",
         items=[{"menuItemId": 1, "quantity": 1, "item_name": "Shawarma"}],
         total_price=12.99,
@@ -21,7 +21,7 @@ def test_order_can_store_delivery_fields():
 
 def test_order_can_store_pickup_fields():
     order = Order(
-        id=2,
+        id="test",
         user_id="102",
         items=[{"menuItemId": 2, "quantity": 1, "item_name": "Pizza"}],
         total_price=18.50,

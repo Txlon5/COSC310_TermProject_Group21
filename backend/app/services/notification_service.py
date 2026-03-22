@@ -22,9 +22,7 @@ class NotificationService:
         self.notifications.append(notification)     #Store the notification in memory to retrieve it later if needed.
         return notification
     
-    def get_notifications_for_user(self, user_id: str) -> List[Notification]:
-        return [n for n in self.notifications if n.user_id == user_id]      #This allows  returns all notifs for a specific user. will need this in SR3
-    
+   
     def create_order_status_changed_notification(self, user_id: str, order_id: str, old_status: str, new_status: str) -> Notification:
         """A notification is generated when an order status is changed. A requirement for SR2"""
         notification = Notification(
@@ -37,6 +35,8 @@ class NotificationService:
         )
         self.notifications.append(notification)     #Store the notification in memory to retrieve it later if needed.
         return notification
-    
+    def get_notifications_for_user(self, user_id: str) -> List[Notification]:
+        return [n for n in self.notifications if n.user_id == user_id]
+        
     def clear_notifications(self) -> None:
         self.notifications.clear()     #This clears all notifs from memory. 

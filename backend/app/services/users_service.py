@@ -109,7 +109,7 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
             )
             
             # Store updated user information
-            users[idx] = updated.model_dump()
+            users[idx] = updated.model_dump(mode='json')
             save_all(users)
             return updated
     raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")

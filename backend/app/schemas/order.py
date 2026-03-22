@@ -12,41 +12,50 @@ class OrderItem(ItemBase):
 
 # Unified CreateOrderRequest
 class CreateOrderRequest(BaseModel):
-    user_id: Optional[str] = None
-    restaurant_id: Union[int, str] = Field(..., alias="restaurant_id")
-    items: List[OrderItem] = Field(..., alias="items")
-    delivery_method: Optional[str] = None
+    order_id: str
+    user_id: str
+    restaurant_id: str
+    items: List[OrderItem]
+    status: DeliveryStatus = DeliveryStatus.created
+    total_price: float = 0 
+    delivery_method: DeliveryType = DeliveryType.delivery
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    delivered_at: Optional[datetime] = None
 
 # Order Object - [Temp here]
 class Order(BaseModel):
-    id: int
+    order_id: str
     user_id: str
+    restaurant_id: str
     items: List[OrderItem]
-    total_price: float
-
+    total_price: Optional[float] = None
+    status: Optional[DeliveryStatus]
     delivery_method: Optional[DeliveryType] = None
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
     assigned_driver: Optional[str] = None
-
-    status: str = "created"
+    created_at: datetime
+    updated_at: datetime
+    delivered_at: Optional[datetime]
+    
 
 # Response returned after creating/retrieving an order
 class OrderOut(BaseModel):
     order_id: int
-    restaurant_id: Union[int, str]
+    restaurant_id: str
     items: List[OrderItem]
 
 class CreateOrderResponse(BaseModel):
     order_id: str
-    user_id: Optional[str] = None
-    restaurant_id: Union[int, str] = Field(..., alias="restaurant_id")
-    restaurant_name: Optional[str] = None
+    user_id: str
+    restaurant_id: str
     items: List[OrderItem]
-    status: str
-    delivery_method: Optional[str] = None
+    status: DeliveryStatus = DeliveryStatus.created
+    total_price: float = 0 
+    delivery_method: DeliveryType = DeliveryType.delivery
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
     created_at: Optional[datetime] = None

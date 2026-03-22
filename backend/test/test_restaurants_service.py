@@ -1,31 +1,16 @@
 # Import service and repository
 from app.services.restaurants_service import RestaurantsService
 from app.repositories.restaurants_repository import RestaurantsRepository
+from app.schemas.restaurant import RestaurantUpdate
 import pytest # Will be helpful to test raising errors
 from fastapi import HTTPException
 
-# Test that the service correctly returns restaurant data
-def test_service_returns_restaurants():
-
-    repo = RestaurantsRepository() # Create repository instance
-
-    service = RestaurantsService(repo) # Putting repository into service
-
-    data = service.get_restaurants() # Calling the service method
-
-    assert isinstance(data, list) # Ensure the result is a list
-
-    assert len(data) > 0 # Ensure the list is not empty
-
-    assert "restaurant_id" in data[0] # Verify structure matches class diagram
-    
-    
-class FakeRestaurantsRepository: # As mentioned in the service file, this might change according to what we do with the CSV file
+class FakeRestaurantsRepository(RestaurantsRepository): # As mentioned in the service file, this might change according to what we do with the JSON file
 # For now, we're going to make a class with a specific structure
-    def get_all(self):
-        return [
+    def __init__(self):
+        self.restaurants = [
             {
-                "restaurant_id": 1,
+                "restaurant_id": "1",
                 "restaurant_name": "Pizza Place",
                 "tags": ["Italian", "Pizza"],
                 "isOpen": True,
@@ -35,7 +20,7 @@ class FakeRestaurantsRepository: # As mentioned in the service file, this might 
                 ],
             },
             {
-                "restaurant_id": 2,
+                "restaurant_id": "2",
                 "restaurant_name": "Burger House",
                 "tags": ["Fast Food", "Burgers"],
                 "isOpen": False,
@@ -44,6 +29,12 @@ class FakeRestaurantsRepository: # As mentioned in the service file, this might 
                 ],
             },
         ]
+
+    def load_all(self):
+        return self.restaurants
+
+    def save_all(self, restaurants):
+        self.restaurants = restaurants
 
 # Test that the service correctly returns restaurant data
 def test_service_returns_restaurants():
@@ -58,7 +49,7 @@ def test_service_returns_restaurants():
 
     assert len(data) > 0 # Ensure the list is not empty
 
-    assert "restaurant_id" in data[0] # Verify structure matches class diagram
+    assert hasattr(data[0], "restaurant_id") # Verify structure matches class diagram
     
     
 def test_filter_by_restaurant_id():
@@ -67,8 +58,8 @@ def test_filter_by_restaurant_id():
     all_data = service.get_restaurants()
     if not all_data:
         pytest.skip("No restaurant data available from CSV.")
-    # Pick a valid restaurant_id from CSV
-    valid_id = all_data[0]["restaurant_id"]
+    # Pick a valid restaurant_id from JSON
+    valid_id = all_data[0].restaurant_id
     data = service.search_restaurants(restaurant_id=valid_id)
     assert len(data) >= 1
     assert all(d["restaurant_id"] == valid_id for d in data)
@@ -88,8 +79,8 @@ def test_filter_by_tag():
     all_data = service.get_restaurants()
     if not all_data:
         pytest.skip("No restaurant data available from CSV.")
-    # Pick a valid tag from CSV
-    valid_tag = all_data[0]["tags"][0] if all_data[0]["tags"] else None
+    # Pick a valid tag from JSON
+    valid_tag = all_data[0].tags[0] if all_data[0].tags else None
     if not valid_tag:
         pytest.skip("No tag data available from CSV.")
     data = service.search_restaurants(tag=valid_tag)
@@ -109,7 +100,7 @@ def test_search_q_matches_restaurant_name():
     all_data = service.get_restaurants()
     if not all_data:
         pytest.skip("No restaurant data available from CSV.")
-    valid_name = all_data[0]["restaurant_name"]
+    valid_name = all_data[0].restaurant_name
     data = service.search_restaurants(q=valid_name)
     assert len(data) >= 1
     assert any(valid_name.lower() in d["restaurant_name"].lower() for d in data)
@@ -120,10 +111,10 @@ def test_search_q_matches_menu_item_name():
     all_data = service.get_restaurants()
     if not all_data:
         pytest.skip("No restaurant data available from CSV.")
-    menu_items = all_data[0]["menuItems"]
+    menu_items = all_data[0].menuItems
     if not menu_items:
         pytest.skip("No menu items available from CSV.")
-    valid_item = menu_items[0]["name"]
+    valid_item = menu_items[0].name
     data = service.search_restaurants(q=valid_item)
     assert len(data) >= 1
     assert any(valid_item.lower() in [it["name"].lower() for it in d["menuItems"]] for d in data)
@@ -189,22 +180,6 @@ def test_search_with_pagination_page2_no_duplicates():
     assert len(page2) == 1, "Page 2 should return one restaurant."
     assert page1[0]["restaurant_id"] != page2[0]["restaurant_id"], "Page 1 and Page 2 should return different restaurants."
 
-def get_all(self):
-    return [
-        {
-            "restaurant_id": 1,
-            "name": "Pizza Place",
-            "category": "Italian",
-            "tags": ["pizza"],
-            "isOpen": True,
-            "menuItems": []
-        }
-    ]
-
-def save_all(self, restaurants):
-    self.restaurants = restaurants
-
-
 def test_get_restaurant_by_id_not_found():
     service = RestaurantsService(FakeRestaurantsRepository())
 
@@ -217,13 +192,10 @@ def test_get_restaurant_by_id_not_found():
 def test_update_restaurant_not_found():
     service = RestaurantsService(FakeRestaurantsRepository())
 
-    class Payload:
-        name = "Updated"
-        category = "Test"
-        tags = []
+    payload = RestaurantUpdate(restaurant_name="Updated", tags=[])
 
     with pytest.raises(HTTPException) as exc:
-        service.update_restaurant("999", Payload())
+        service.update_restaurant("999", payload)
 
     assert exc.value.status_code == 404
 

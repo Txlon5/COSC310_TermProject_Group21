@@ -5,10 +5,10 @@ from app.schemas.menu import MenuCreate, Menu
 
 
 def test_fetch_all_menus_returns_all_menus(monkeypatch):
-    fake_menus = [
-        Menu(id=1, restaurant_id=1, name="Burger", price=8.99),
-        Menu(id=2, restaurant_id=1, name="Fries", price=3.99),
-    ]
+    # fake_menus = [
+    #     Menu(id=1, restaurant_id=1, name="Burger", price=8.99),
+    #     Menu(id=2, restaurant_id=1, name="Fries", price=3.99),
+    # ]
 
     monkeypatch.setattr(menu_service, "get_all_menus", lambda: fake_menus)
 

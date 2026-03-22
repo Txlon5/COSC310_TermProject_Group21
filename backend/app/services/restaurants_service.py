@@ -1,7 +1,7 @@
 import uuid  # Used to generate a unique ID for newly created restaurants
 from fastapi import HTTPException  # Used to raise API-friendly errors
 from app.repositories.restaurants_repository import RestaurantsRepository  # Repository layer for restaurant data
-
+from app.schemas.restaurant import Restaurant, RestaurantUpdate, RestaurantMinimal
 
 """
 FULL DISCLAIMER
@@ -19,81 +19,78 @@ class RestaurantsService:
         # This allows the service to call repository methods
         self.repo = repo
 
-    def _to_schema_restaurant(self, r):
-        return {
-            "restaurant_id": r.get("restaurant_id"),
-            "restaurant_name": r.get("restaurant_name", ""),
-            "tags": r.get("tags", []),
-            "isOpen": r.get("isOpen", True),
-            "menuItems": r.get("menuItems", []),
-        }
-    def _to_crud_response(self, r):
-        base = self._to_schema_restaurant(r)
-        return {
-            "restaurant_id": str(base["restaurant_id"]),
-            "restaurant_name": base["restaurant_name"],
-            "tags": base["tags"],
-        }
-
     # Public method to get all restaurants
     # This is what the API layer will call
     def list_restaurants(self):
-        restaurants = self.repo.get_all()
-        return [self._to_schema_restaurant(r) for r in restaurants]
+        return [RestaurantMinimal(**it) for it in self.repo.load_all()]
+    
     def get_restaurants(self):
-        return self.list_restaurants()
+        return [Restaurant(**it) for it in self.repo.load_all()]
+    
     # Creates a new restaurant and appends it to the current restaurant list
     def create_restaurant(self, payload):
-        restaurants = self.repo.get_all()
+        # Load in existing restaurant list
+        restaurants = self.repo.load_all()
 
-        new_restaurant = {
-            "restaurant_id": str(uuid.uuid4()),
-            "restaurant_name": payload.restaurant_name.strip(),
-            "tags": payload.tags if payload.tags is not None else [],
-            "isOpen": True,
-            "menuItems": []
-        }
+        # Create restaurant
+        new_restaurant = Restaurant(
+            restaurant_id = str(uuid.uuid4()),
+            restaurant_name = payload.restaurant_name.strip(),
+            tags = payload.tags if payload.tags is not None else [],
+            isOpen = bool(payload.isOpen),
+            menuItems = []
+        )
 
-        restaurants.append(new_restaurant)
+        # Add new_restaurant to restaurant list and save changes
+        restaurants.append(new_restaurant.model_dump(mode='json'))
+        self.repo.save_all(restaurants)
 
-        if hasattr(self.repo, "save_all"):
-            self.repo.save_all(restaurants)
-
-        return self._to_crud_response(new_restaurant)
+        # Return new_restaurant to user
+        return new_restaurant
+    
     # Returns a single restaurant by its restaurantId
-    def get_restaurant_by_id(self, restaurant_id: str):
-        restaurants = self.repo.get_all()
+    def get_restaurant_by_id(self, restaurant_id: str) -> Restaurant:
+        # Get list of all restaurants and cast to Restaurant schema
+        restaurants = self.repo.load_all()
 
+        # Search list for restaurant by id
         for r in restaurants:
-            if str(r.get("restaurant_id")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
-                return self._to_crud_response(r)
-
+            if r.get("restaurant_id") == str(restaurant_id):
+                # Return restaurant
+                return Restaurant(**r)
+        # Error restaurant does not exist
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
         
     # Updates an existing restaurant by ID
-    def update_restaurant(self, restaurant_id: str, payload):
-        restaurants = self.repo.get_all()
-
+    def update_restaurant(self, update_restaurant_id: str, payload: RestaurantUpdate) -> Restaurant:
+        restaurants = self.repo.load_all()
+        
+        # Search restaurant list for restaurant associated with update_restaurant_id
         for r in restaurants:
-            if str(r.get("restaurant_id")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
-                r["name"] = payload.name.strip()
-                r["category"] = payload.category.strip()
-
-                if payload.tags is not None:
+            # Check if update_restaurant_id matches
+            if r.get("restaurant_id") == update_restaurant_id:
+                # Update fields if entered with restaurant as a dictionary
+                if payload.restaurant_name.strip() is not None:
+                    r["restaurant_name"] = payload.restaurant_name.strip()
+                if payload.tags is not None or payload.tags != []:
                     r["tags"] = payload.tags
+                if payload.isOpen is not None:
+                    r["isOpen"] = payload.isOpen
 
-                if hasattr(self.repo, "save_all"):
-                    self.repo.save_all(restaurants)
+                # Save changes to restaurant list
+                self.repo.save_all(restaurants)
 
-                return self._to_crud_response(r)
-        raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
+                # Return restaurant
+                return Restaurant(**r)
+        # Throw exception if restaurant does not exist
+        raise HTTPException(status_code=404,detail=f"Restaurant '{update_restaurant_id}' not found")
 
     # Deletes a restaurant by ID
     def delete_restaurant(self, restaurant_id: str):
-        restaurants = self.repo.get_all()
+        restaurants = self.repo.load_all()
 
         for i, r in enumerate(restaurants):
-            if str(r.get("restaurant_id")) == str(restaurant_id) or str(r.get("id")) == str(restaurant_id):
+            if str(r.get("restaurant_id")) == str(restaurant_id):
                 restaurants.pop(i)
 
                 if hasattr(self.repo, "save_all"):
@@ -128,7 +125,7 @@ class RestaurantsService:
     # SR2 - Search and Filter Functionality
     def search_restaurants(self,q=None,restaurant_id=None,is_open=None,tag=None,page=None,page_size=None):
         # Get all restaurants from the repository
-        restaurants = self.repo.get_all()
+        restaurants = self.repo.load_all()
 
         # Filter by restaurant ID if provided
         if restaurant_id is not None:
@@ -188,4 +185,4 @@ class RestaurantsService:
                 restaurants = [r for r in restaurants if matches(r)]
 
         restaurants = self.paginate(restaurants, page, page_size)
-        return [self._to_schema_restaurant(r) for r in restaurants]
+        return [Restaurant(**r) for r in restaurants]

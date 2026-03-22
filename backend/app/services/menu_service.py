@@ -1,43 +1,79 @@
 from fastapi import HTTPException
-from app.repositories.menu_repository import (get_all_restaurants, get_all_menus, add_menu)
-from app.schemas.menu import MenuCreate
+from app.repositories.restaurants_repository import RestaurantsRepository
+from app.schemas.menu import MenuItem, CreateMenuItem
+from app.schemas.restaurant import Restaurant
+
 
 def fetch_all_menus():
-    return get_all_menus()
+    restaurant_repo = RestaurantsRepository()
+    restaurants = restaurant_repo.load_all()
 
-def fetch_menu_by_restaurant_id(restaurant_id: int):
-    restaurants = get_all_restaurants()
-    menus = get_all_menus()
+    all_menus = []
+    for it in restaurants:
+        restaurant = Restaurant(**it)
+        all_menus.append({
+            "restaurant_id": restaurant.restaurant_id,
+            "menuItems": restaurant.menuItems
+        })
+    return all_menus
 
-    restaurant_exists = False
+def fetch_menu_by_restaurant_id(restaurant_id: str):
+    restaurant_repo = RestaurantsRepository()
+    restaurants = restaurant_repo.load_all()
 
-    for restaurant in restaurants:
-        if restaurant["id"] == restaurant_id:
-            restaurant_exists = True
-            break
+    for it in restaurants:
+        if it.get("restaurant_id") == restaurant_id:
+            return Restaurant(**it).menuItems
+    raise HTTPException(status_code=404, detail=f"Restaurant '{restaurant_id}' not found")
 
-    if not restaurant_exists:
-        raise HTTPException(status_code=404, detail="Restaurant not found")
 
-    restaurant_menu = []
+def create_menu_item(restaurant_id: str, payload: CreateMenuItem) -> MenuItem:
+    restaurant_repo = RestaurantsRepository()
+    restaurants = restaurant_repo.load_all()
 
-    for item in menus:
-        if item.restaurant_id == restaurant_id:
-            restaurant_menu.append(item)
+    for r in restaurants:
+            if r.get("restaurant_id") == restaurant_id:
+                # Get list of menu items
+                menu_items = r.get("menuItems", [])
 
-    return restaurant_menu
+                # Fetch new_item values
+                new_id = len(menu_items) + 1
+                new_name = payload.name.strip()
+                new_price = payload.price
+                new_category = payload.category.strip()
+                
+                # Create new menu item
+                new_item = MenuItem(
+                     menuItemId=new_id,
+                     name=new_name,
+                     price= new_price,
+                     category= new_category,
+                )
 
-def create_menu(menu_data: MenuCreate):
-    restaurants = get_all_restaurants()
+                # Convert back to dictionary and add to menu list
+                menu_items.append(new_item.model_dump())
 
-    restaurant_exists = False
+                # Assign restaurant with new menu list and save
+                r["menuItems"] = menu_items
+                restaurant_repo.save_all(restaurants)
 
-    for restaurant in restaurants:
-        if restaurant["id"] == menu_data.restaurant_id:
-            restaurant_exists = True
-            break
+                # Return new_item created to user
+                return new_item
 
-    if not restaurant_exists:
-        raise HTTPException(status_code=400, detail="Restaurant does not exist")
+            
+    raise HTTPException(status_code=400, detail="Restaurant does not exist")
 
-    return add_menu(menu_data)
+        
+
+
+
+
+    # for restaurant in restaurants:
+    #     if restaurant["id"] == menu_data.restaurant_id:
+    #         restaurant_exists = True
+    #         break
+
+    # if not restaurant_exists:
+    #     raise HTTPException(status_code=400, detail="Restaurant does not exist")
+
+    # return add_menu(menu_data)

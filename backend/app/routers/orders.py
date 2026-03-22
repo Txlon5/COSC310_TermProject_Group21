@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 from datetime import datetime, timezone
-from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest, DeliveryInfoUpdateRequest
+from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest, DeliveryInfoUpdateRequest, Order
 from app.services.orders_service import OrdersService
 from app.services.notification_service import NotificationService
 from fastapi import APIRouter, status, HTTPException, Header, Request
@@ -38,10 +38,11 @@ def create_order(order: CreateOrderRequest) -> CreateOrderResponse:
     order_service = OrdersService()
     return order_service.create_order_tariq(order)
 
-@router.get("/", response_model=List[CreateOrderResponse])
-def get_orders() -> List[CreateOrderResponse]:
+@router.get("/", response_model=List[Order])
+def get_orders() -> List[Order]:
+    order_service = OrdersService()
     """Retrieves all stored orders."""
-    return list(orders_store.values())
+    return order_service.list_orders()
 
 @router.get("/{order_id}", response_model=CreateOrderResponse)
 def get_order_by_id(order_id: str) -> CreateOrderResponse:
@@ -78,16 +79,6 @@ def get_certain_past_order(user_id: str, order_id: str, request: Request, x_user
     return order 
 
 @router.put("/{order_id}/delivery", response_model=CreateOrderResponse)
-def assign_delivery_info(order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> CreateOrderResponse:
-    if order_id not in orders_store:
-        raise HTTPException(status_code=404, detail="Order not found.")
-
-    order = orders_store[order_id]
-
-    order.delivery_method = delivery_request.delivery_method
-    order.delivery_address = delivery_request.delivery_address
-    order.pickup_location = delivery_request.pickup_location
-    order.updated_at = datetime.now(timezone.utc)
-
-    orders_store[order_id] = order
-    return order
+def a_delivery_info(order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> CreateOrderResponse:
+    order_service = OrdersService()
+    return order_service.assign_delivery_info(order_id, delivery_request)
