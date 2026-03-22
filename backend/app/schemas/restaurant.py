@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 from app.schemas.menu import MenuItem
 from typing import List, Optional
 
@@ -14,12 +14,23 @@ class Restaurant(BaseModel):
 class RestaurantCreate(BaseModel):
     restaurant_name: str
     isOpen: bool = True
-    tags: List[str] = []
+    tags: List[str]
 
 class RestaurantUpdate(BaseModel):
-    restaurant_name: str
+    restaurant_name: Optional[str] = None
     isOpen: Optional[bool] = None
     tags: Optional[List[str]] = None
+    
+    # Set FASTAPI docs route example
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "restaurant_name": "",
+                "isOpen": True,
+                "tags": []
+            }
+        }
+    )
 
 class RestaurantMinimal(BaseModel):
     restaurant_id: str

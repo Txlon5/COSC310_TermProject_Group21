@@ -28,7 +28,7 @@ def get_self(current_user: User = Depends(get_current_user)):
 @router.get("/{user_id}", response_model=User)
 def get_user(user_id: str, current_user: User = Depends(get_current_user)):
     # Check if user authorized, raise exception otherwise
-    if current_user.id != user_id and current_user.role != "admin":
+    if current_user.id != user_id or current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized to fetch this user.")
     return get_user_by_id(user_id)
 

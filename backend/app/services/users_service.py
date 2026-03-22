@@ -100,12 +100,16 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
             # Conflict checks
             check_email_collision(payload.email.strip(), user_id)
 
+            # Fetch role or set to default if none
+            user_role = it.get("role", "user")
+
             # Create updated user object
             updated = User(
                 id=user_id,
                 name=payload.name.strip(),
                 email=payload.email.strip(),
                 password=PasswordHandler.hash_password(payload.password.strip()),
+                role=user_role
             )
             
             # Store updated user information

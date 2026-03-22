@@ -16,7 +16,7 @@ restaurants_service = RestaurantsService(restaurants_repository)
 @router.get("", response_model=List[Restaurant])
 def get_restaurants(
     q: Optional[str] = Query(default=None),
-    restaurant_id: Optional[str] = Query(default=None, ge=1),
+    restaurant_id: Optional[str] = Query(default=None),
     isOpen: Optional[bool] = Query(default=None),
     tag: Optional[str] = Query(default=None),
     page: Optional[int] = Query(default=None, ge=1),
