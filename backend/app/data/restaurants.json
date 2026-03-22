@@ -1,48 +1,193 @@
 [
   {
-    "id": "r1",
-    "name": "Demo Diner",
-    "address": "6767 Back St",
-    "category": "Diner"
-  },
-  {
-    "id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
-    "name": "Omar’s Pizza",
-    "category": "Italian",
-    "tags": [
-      "pizza"
+    "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
+    "restaurant_name": "meadty",
+    "tags": [],
+    "isOpen": true,
+    "menuItems": [
+      {
+        "menuItemId": 1,
+        "name": "Biriyani",
+        "price": 20.0,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 1,
+        "name": "Curry",
+        "price": 25.0,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 1,
+        "name": "Lashy",
+        "price": 12.0,
+        "category": "Food"
+      }
     ]
   },
   {
-    "id": "2d7470ba-a38a-4402-a0de-54059faf625c",
-    "name": "Test Pizza",
-    "category": "Italian",
+    "restaurant_id": "85590c53-fc55-4837-a3ef-283345df572a",
+    "restaurant_name": "string",
     "tags": [
-      "pizza"
+      "string"
+    ],
+    "isOpen": true,
+    "menuItems": [
+      {
+        "menuItemId": 1,
+        "name": "Onion Pizza",
+        "price": 26.0,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 2,
+        "name": "Cheesey Bread",
+        "price": 15.0,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 3,
+        "name": "Canadian Pizza",
+        "price": 23.0,
+        "category": "Food"
+      }
     ]
   },
   {
-    "id": "d94acd2d-d617-452b-9365-93bdae80feb7",
-    "name": "Test Burger",
-    "category": "Fast Food",
+    "restaurant_id": "facf5d81-4bd9-4003-9c08-1b98471b2c34",
+    "restaurant_name": "Test Burger",
     "tags": [
       "burger"
+    ],
+    "isOpen": true,
+    "menuItems": [
+      {
+        "menuItemId": 1,
+        "name": "Onion Burger",
+        "price": 21.0,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 2,
+        "name": "Super meat Burger",
+        "price": 19.0,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 3,
+        "name": "Bob's Burger",
+        "price": 27.0,
+        "category": "Food"
+      }
     ]
   },
   {
-    "id": "89b89555-2ce8-4a67-b422-815cba58f4de",
-    "name": "Test Pizza",
-    "category": "Italian",
+    "restaurant_id": "d7096bf9-189e-44a8-b795-0a8b8405657e",
+    "restaurant_name": "Test Pizza",
     "tags": [
       "pizza"
-    ]
+    ],
+    "isOpen": true,
+    "menuItems": []
   },
   {
-    "id": "a545318d-a02a-41bc-a8b7-1d92c7f789ad",
-    "name": "Test Burger",
-    "category": "Fast Food",
+    "restaurant_id": "42bee77f-642b-4c84-89c8-e9a851de2a73",
+    "restaurant_name": "Test Burger",
     "tags": [
       "burger"
-    ]
+    ],
+    "isOpen": true,
+    "menuItems": []
+  },
+  {
+    "restaurant_id": "4e724e49-518b-4219-a892-a9870b962605",
+    "restaurant_name": "Delete Me",
+    "tags": [],
+    "isOpen": true,
+    "menuItems": []
+  },
+  {
+    "restaurant_id": "a57fb894-0fdc-4f94-9702-a67b0c056058",
+    "restaurant_name": "Omar's beastro",
+    "tags": [
+      "Meat"
+    ],
+    "isOpen": true,
+    "menuItems": []
+  },
+  {
+    "restaurant_id": "d86139bf-0af5-43a0-a0d4-b79711b0224b",
+    "restaurant_name": "Test Pizza",
+    "tags": [
+      "pizza"
+    ],
+    "isOpen": true,
+    "menuItems": []
+  },
+  {
+    "restaurant_id": "ebdfe62f-ac75-4857-892e-577fe46a1b83",
+    "restaurant_name": "Test Burger",
+    "tags": [
+      "burger"
+    ],
+    "isOpen": true,
+    "menuItems": []
+  },
+  {
+    "restaurant_id": "290ba530-cd1b-4fb2-a283-a60a23fc37b4",
+    "restaurant_name": "Delete Me",
+    "tags": [],
+    "isOpen": true,
+    "menuItems": []
+  },
+  {
+    "restaurant_id": "718baf2b-e71f-4d4b-b539-17e7b91364e9",
+    "restaurant_name": "Test Pizza",
+    "tags": [
+      "pizza"
+    ],
+    "isOpen": true,
+    "menuItems": []
+  },
+  {
+    "restaurant_id": "1820e1bc-0036-486f-9f0d-b3701c506cad",
+    "restaurant_name": "Test Burger",
+    "tags": [
+      "burger"
+    ],
+    "isOpen": true,
+    "menuItems": []
+  },
+  {
+    "restaurant_id": "f175db3f-8acc-4579-a023-a1f954c0e0a9",
+    "restaurant_name": "Delete Me",
+    "tags": [],
+    "isOpen": true,
+    "menuItems": []
+  },
+  {
+    "restaurant_id": "a165056f-a73a-4b53-ad5c-2fbb4becd2b9",
+    "restaurant_name": "Test Pizza",
+    "tags": [
+      "pizza"
+    ],
+    "isOpen": true,
+    "menuItems": []
+  },
+  {
+    "restaurant_id": "6bbece1e-8880-4b8e-8896-d8708b388095",
+    "restaurant_name": "Test Burger",
+    "tags": [
+      "burger"
+    ],
+    "isOpen": true,
+    "menuItems": []
+  },
+  {
+    "restaurant_id": "189fbb64-c83e-4058-8965-c67680966249",
+    "restaurant_name": "Delete Me",
+    "tags": [],
+    "isOpen": true,
+    "menuItems": []
   }
 ]
