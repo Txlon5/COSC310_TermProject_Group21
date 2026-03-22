@@ -1,14 +1,14 @@
 from enum import Enum
-
+from app.schemas.delivery import DeliveryType, DeliveryStatus
+from app.schemas.item import ItemBase
 from pydantic import BaseModel, Field
 from typing import List, Optional, Union
 from datetime import datetime
 
 # One item inside an order request/response
-class OrderItem(BaseModel):
-    menuItemId: int
+class OrderItem(ItemBase):
+    price: float
     quantity: int 
-    item_name: Optional[str] = None
 
 # Unified CreateOrderRequest
 class CreateOrderRequest(BaseModel):
@@ -18,8 +18,6 @@ class CreateOrderRequest(BaseModel):
     delivery_method: Optional[str] = None
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
-
-
 
 # Order Object - [Temp here]
 class Order(BaseModel):

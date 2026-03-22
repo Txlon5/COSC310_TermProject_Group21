@@ -11,36 +11,14 @@ Here, we can:
 from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse
 from fastapi import APIRouter, status, Depends, HTTPException
 from app.schemas.order import CreateOrderResponse, CreateOrderRequest
-from app.repositories.orders_repository import save_all, load_all
+from app.repositories.orders_repository import load_all, save_all
 from typing import List, Dict
 from datetime import datetime, timezone
 from uuid import uuid4
-DELIVERY_STATUS_TRANSITIONS = {
-                #"Created": ["Preparing"],
-                #"Preparing": ["Ready"],
-                #"Ready": []
-            "Created": ["Preparing"],
-            "Preparing": ["Ready"],
-            "Ready": ["Delivered"],
-            "Delivered": []
-            }
+from app.services.menu_service import fetch_menu_by_restaurant_id
 
-PICKUP_STATUS_TRANSITIONS = {
-            # "Created": ["Preparing"],
-                #"Preparing": ["Ready"],
-            # "Ready": []
-                "Created": ["Preparing"],
-                "Preparing": ["Ready"],
-                "Ready": ["Picked up"],
-                "Picked up": []
-            }
 
 class OrdersService:
-    def __init__(self, repo, restaurants_repo):
-        self.repo = repo
-        self.restaurants_repo = restaurants_repo
-
-    # 
     def create_order_tariq(self, order_request: CreateOrderRequest) -> CreateOrderResponse:
         # Load orders
         orders = load_all()
@@ -87,26 +65,23 @@ class OrdersService:
             raise ValueError("Order must contain at least one item")
 
         # Validate menuItemIds against restaurant's menuItems
-        restaurants = self.restaurants_repo.get_all()
-        restaurant = next((r for r in restaurants if r["restaurant_id"] == restaurant_id), None)
-        if not restaurant:
-            raise ValueError("Restaurant not found")
+        menu = fetch_menu_by_restaurant_id(restaurant_id)
 
-        valid_menu_ids = {item["menuItemId"] for item in restaurant["menuItems"]}
+        valid_menu_ids = {item.menuItemId for item in menu}
         for order_item in items:
-            if order_item["menuItemId"] not in valid_menu_ids:
+            if order_item.menuItemId not in valid_menu_ids:
                 raise ValueError(f"Invalid menuItemId: {order_item['menuItemId']} for restaurant {restaurant_id}")
 
-        return self.repo.create_order(restaurant_id, items)
+        return None #repo.create_order(restaurant_id, items)
 
     def get_order_by_id(self, order_id):
         # Retrieve the order from the repository
-        order = self.repo.get_order_by_id(order_id)
+        orders = load_all()
 
-        if order is None:
-            raise ValueError("Order not found") # Quick error handling for not found
-
-        return order # Return the found order
+        for it in orders:
+            if it.get("id") == order_id:
+                return CreateOrderResponse(**it)  # Return the found order
+        raise ValueError("Order not found") # Quick error handling for not found
     
 
 

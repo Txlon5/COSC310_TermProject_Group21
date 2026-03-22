@@ -32,29 +32,10 @@ def validate_access_to_order_history(requested_user_id: str, authenticated_user_
         logger.warning("Unauthorized attempt: forbidden order history access: %s", attempt)
         raise HTTPException(status_code = 403, detail = "Not authorized to access this order history.")
     
-DELIVERY_STATUS_TRANSITIONS = {
-    #"Created": ["Preparing"],
-    #"Preparing": ["Ready"],
-    #"Ready": []
-   "Created": ["Preparing"],
-   "Preparing": ["Ready"],
-   "Ready": ["Delivered"],
-   "Delivered": []
-}
-
-PICKUP_STATUS_TRANSITIONS = {
-   # "Created": ["Preparing"],
-    #"Preparing": ["Ready"],
-   # "Ready": []
-    "Created": ["Preparing"],
-    "Preparing": ["Ready"],
-    "Ready": ["Picked up"],
-    "Picked up": []
-}
 
 @router.post("", response_model = CreateOrderResponse, status_code = status.HTTP_201_CREATED)
 def create_order(order: CreateOrderRequest) -> CreateOrderResponse:
-    order_service = OrdersService(repo=None, restaurants_repo=None)
+    order_service = OrdersService()
     return order_service.create_order_tariq(order)
 
 @router.get("/", response_model=List[CreateOrderResponse])
@@ -71,8 +52,8 @@ def get_order_by_id(order_id: str) -> CreateOrderResponse:
 
 @router.patch("/{order_id}/status", response_model = CreateOrderResponse)
 def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest) -> CreateOrderResponse:
-    order_service = OrdersService(repo=None, restaurants_repo=None)
-    return order_service.update_order_status(order)
+    order_service = OrdersService()
+    return order_service.update_order_status(order_id, status_request)
 
 
 @router.get("/history/{user_id}", response_model = List[CreateOrderResponse])
