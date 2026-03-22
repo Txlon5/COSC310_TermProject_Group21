@@ -35,6 +35,7 @@ class NotificationService:
         )
         self.notifications.append(notification)     #Store the notification in memory to retrieve it later if needed.
         return notification
+    
     def get_notifications_for_user(self, user_id: str) -> List[Notification]:
         return [n for n in self.notifications if n.user_id == user_id]
         

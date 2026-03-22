@@ -6,18 +6,19 @@
     "restaurant_name": null,
     "items": [
       {
-        "menuItemId": 2,
-        "name": "Cheesey Bread",
-        "price": 15.0,
-        "quantity": 3
+        "menuItemId": 0,
+        "name": "Wowie Zowie",
+        "price": 0.0,
+        "quantity": 0
       }
     ],
     "status": "Preparing",
+    "total_price": 20,
     "delivery_method": "pickup",
     "delivery_address": "string",
     "pickup_location": "string",
     "created_at": "2026-03-22T03:36:23.955760Z",
-    "updated_at": "2026-03-22T03:36:23.955760Z",
+    "updated_at": "2026-03-22T09:21:31.997842Z",
     "delivered_at": null
   },
   {
@@ -34,11 +35,32 @@
     ],
     "status": "Preparing",
     "total_price": 0.0,
-    "delivery_method": "delivery",
+    "delivery_method": "pickup",
     "delivery_address": "string",
     "pickup_location": "string",
     "created_at": "2026-03-22T04:06:35.815815Z",
-    "updated_at": "2026-03-22T04:06:35.815815Z",
+    "updated_at": "2026-03-22T08:08:18.338806Z",
+    "delivered_at": null
+  },
+  {
+    "order_id": "ae31f7f7-061a-4995-a1db-704be9691fad",
+    "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "restaurant_id": "85590c53-fc55-4837-a3ef-283345df572a",
+    "items": [
+      {
+        "menuItemId": 0,
+        "name": "string",
+        "price": 0.0,
+        "quantity": 0
+      }
+    ],
+    "status": "created",
+    "total_price": 0.0,
+    "delivery_method": "delivery",
+    "delivery_address": "string",
+    "pickup_location": "string",
+    "created_at": "2026-03-22T19:10:55.624061Z",
+    "updated_at": "2026-03-22T19:10:55.624061Z",
     "delivered_at": null
   }
 ]

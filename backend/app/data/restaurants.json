@@ -27,11 +27,12 @@
   },
   {
     "restaurant_id": "85590c53-fc55-4837-a3ef-283345df572a",
-    "restaurant_name": "Overwatch1",
+    "restaurant_name": "Overwatch2",
     "tags": [
-      "tracer"
+      "hi",
+      "hello"
     ],
-    "isOpen": false,
+    "isOpen": true,
     "menuItems": [
       {
         "menuItemId": 1,

@@ -13,12 +13,26 @@ from fastapi import APIRouter, status, Depends, HTTPException
 from app.schemas.order import CreateOrderResponse, CreateOrderRequest, Order, OrderItem
 from app.schemas.delivery import DeliveryType, DeliveryStatus
 from app.schemas.menu import MenuItem
+from app.services.notification_service import Notification, NotificationService
 from app.repositories.orders_repository import load_all, save_all
 from typing import List, Dict
 from datetime import datetime, timezone
 from uuid import uuid4
 from app.services.menu_service import fetch_menu_by_restaurant_id
 
+# Order Status Dictionary
+PICKUP_STATUS_TRANSITIONS = {
+    DeliveryStatus.created.value: [DeliveryStatus.preparing.value],
+    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value],
+    DeliveryStatus.ready.value: [DeliveryStatus.picked_up.value],
+    DeliveryStatus.picked_up.value: [DeliveryStatus.complete.value],
+}
+DELIVERY_STATUS_TRANSITIONS = {
+    DeliveryStatus.created.value: [DeliveryStatus.preparing.value],
+    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value],
+    DeliveryStatus.ready.value: [DeliveryStatus.delivered.value],
+    DeliveryStatus.delivered.value: [DeliveryStatus.complete.value],
+}
 
 class OrdersService:
     def list_orders(self):
@@ -59,8 +73,9 @@ class OrdersService:
         orders.append(new_order.model_dump(mode='json'))
         save_all(orders)
     
-        #Generate a notification for the order creation event.
-        #notification.create_order_created_notification(user_id = order_request.user_id, order_id = order.order_id)
+        # Generate a notification for the order creation event.
+        notify = NotificationService()
+        notify.create_order_created_notification(user_id = new_order.user_id, order_id = new_order.order_id)
 
         return new_order
 
@@ -90,57 +105,56 @@ class OrdersService:
                 return CreateOrderResponse(**it)  
         raise HTTPException(status_code=404, detail="Order not found.") # Quick error handling for not found
 
-    def update_order_status(self, order_id: str, status_request: OrderStatusUpdateRequest) -> CreateOrderResponse:
-        orders_store = load_all()
+    def update_order_status(self, update_order_id: str, status_request: OrderStatusUpdateRequest) -> CreateOrderResponse:
+        orders = load_all()
+        # Search order list for order associated with update_order_id
         #this updated status of existing order and generates a notif when status changes. Essential for SR2.
-        if order_id not in orders_store:
-            raise HTTPException(status_code = 404, detail = "Order not found.")     #404 - not found if order ID does not exist in the in-memory store.
-        
-        order = orders_store[order_id]
-        
-        old_status = order.status
-        new_status = status_request.status
-        
-        if old_status == new_status:
-            raise HTTPException(status_code = 400, detail = "Order status remains unchanged.")  
+        for idx, o in enumerate(orders):
+            if str(o.get("order_id")) == update_order_id:        
+                old_status = DeliveryStatus(o.get("status"))
+                new_status = status_request.status
+                
+                if old_status == new_status:
+                    raise HTTPException(status_code = 400, detail = "Order status remains unchanged.")  
 
-        if order.delivery_method == "pickup":
-            allowed_next_statuses = PICKUP_STATUS_TRANSITIONS.get(old_status, [])
-        else:
-            allowed_next_statuses = DELIVERY_STATUS_TRANSITIONS.get(old_status, [])
+                if DeliveryType(o.get("delivery_method")) == DeliveryType.pickup:
+                    allowed_next_statuses = PICKUP_STATUS_TRANSITIONS.get(old_status.value, [])
+                else:
+                    allowed_next_statuses = DELIVERY_STATUS_TRANSITIONS.get(old_status.value, [])
 
-        if new_status not in allowed_next_statuses:
-            raise HTTPException(status_code=400, detail=f"Invalid status transition from '{old_status}' to '{new_status}'.")
+                if new_status.value not in allowed_next_statuses:
+                    raise HTTPException(status_code=400, detail=f"Invalid status transition from '{old_status.value}' to '{new_status.value}'.")
 
-        
-        timestamp = datetime.now(timezone.utc)
-        
-        order.status = new_status     #Update the order status in the in-memory store.
-        order.updated_at = timestamp
-        
-        if new_status =="Delivered":
-            order.delivered_at = timestamp
-            
-        orders_store[order_id] = order     #Save the updated order back to the in-memory store.
-        
-            
-        #Now generate a notification for the order status change event.
-        notification.create_order_status_changed_notification(
-            user_id = order.user_id,
-            order_id = order.order_id,
-            old_status = old_status,
-            new_status = new_status
-        )
-        
-        return order
-
+                timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                
+                o["status"] = new_status.value     #Update the order status 
+                o["updated_at"] = timestamp
+                
+                if new_status == DeliveryStatus.delivered:
+                    o["delivered_at"] = timestamp
+                    
+                orders[idx] = o     #Save the updated order 
+                save_all(orders)
+                    
+                #Now generate a notification for the order status change event.
+                notify = NotificationService()
+                notify.create_order_status_changed_notification(
+                    user_id = o["user_id"],
+                    order_id = o["order_id"],
+                    old_status = old_status,
+                    new_status = new_status
+                )
+                
+                return CreateOrderResponse(**o)
+        #404 - not found if order ID does not exist 
+        raise HTTPException(status_code = 404, detail = "Order not found.")    
 
      # Update Order Delivery Status
-    def assign_delivery_info(self, order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> CreateOrderResponse:
+    def assign_delivery_info(self, update_order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> CreateOrderResponse:
         orders = load_all()
-        
+        # Search order list for order associated with update_order_id
         for idx, order in enumerate(orders):
-            if str(order.get("order_id")) == order_id:
+            if str(order.get("order_id")) == update_order_id:
                 # Set new values
                 if delivery_request.delivery_method is not None:
                     order["delivery_method"] = delivery_request.delivery_method
@@ -166,7 +180,7 @@ class OrdersService:
         for idx, o in enumerate(orders_store):
             # Check if update_restaurant_id matches
             if str(o.get("order_id")) == str(update_order_id):
-                if o.get("status") in (DeliveryStatus.delivered, DeliveryStatus.picked_up):
+                if DeliveryStatus(o.get("status")) in (DeliveryStatus.delivered, DeliveryStatus.picked_up):
                     raise HTTPException(status_code=400, detail="Cannot update a completed (Delivered or Picked up) order.")
                 if restaurant_id is not None:
                     o["restaurant_id"] = restaurant_id
