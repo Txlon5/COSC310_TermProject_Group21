@@ -7,7 +7,6 @@ from datetime import datetime
 
 # One item inside an order request/response
 class OrderItem(ItemBase):
-    
     name:str
     price: float
     quantity: int 
@@ -44,6 +43,7 @@ class OrderOut(BaseModel):
     order_id: int
     restaurant_id: str
     items: List[OrderItem]
+#
 
 class CreateOrderResponse(BaseModel):
     order_id: str
