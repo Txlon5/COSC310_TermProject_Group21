@@ -7,6 +7,8 @@ from datetime import datetime
 
 # One item inside an order request/response
 class OrderItem(ItemBase):
+    
+    name:str
     price: float
     quantity: int 
 

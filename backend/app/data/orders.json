@@ -1,66 +1,23 @@
 [
   {
-    "order_id": "7a550162-6270-4601-a0bf-d761a2c4bcf7",
+    "order_id": "df29a91a-901d-4826-a668-813c1c1b5c81",
     "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    "restaurant_id": "85590c53-fc55-4837-a3ef-283345df572a",
-    "restaurant_name": null,
+    "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
     "items": [
       {
-        "menuItemId": 0,
-        "name": "Wowie Zowie",
-        "price": 0.0,
-        "quantity": 0
+        "menuItemId": 2,
+        "name": "Heya",
+        "price": 20.0,
+        "quantity": 2
       }
     ],
-    "status": "Preparing",
-    "total_price": 20,
-    "delivery_method": "pickup",
-    "delivery_address": "string",
-    "pickup_location": "string",
-    "created_at": "2026-03-22T03:36:23.955760Z",
-    "updated_at": "2026-03-22T09:21:31.997842Z",
-    "delivered_at": null
-  },
-  {
-    "order_id": "2e35a447-5de6-42ba-8887-7b2bf16777db",
-    "user_id": "string",
-    "restaurant_id": "string",
-    "items": [
-      {
-        "menuItemId": 0,
-        "name": "string",
-        "price": 0.0,
-        "quantity": 0
-      }
-    ],
-    "status": "Preparing",
+    "status": "ready",
     "total_price": 0.0,
     "delivery_method": "pickup",
     "delivery_address": "string",
     "pickup_location": "string",
-    "created_at": "2026-03-22T04:06:35.815815Z",
-    "updated_at": "2026-03-22T08:08:18.338806Z",
-    "delivered_at": null
-  },
-  {
-    "order_id": "ae31f7f7-061a-4995-a1db-704be9691fad",
-    "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    "restaurant_id": "85590c53-fc55-4837-a3ef-283345df572a",
-    "items": [
-      {
-        "menuItemId": 0,
-        "name": "string",
-        "price": 0.0,
-        "quantity": 0
-      }
-    ],
-    "status": "created",
-    "total_price": 0.0,
-    "delivery_method": "delivery",
-    "delivery_address": "string",
-    "pickup_location": "string",
-    "created_at": "2026-03-22T19:10:55.624061Z",
-    "updated_at": "2026-03-22T19:10:55.624061Z",
+    "created_at": "2026-03-22T23:55:28.013937Z",
+    "updated_at": "2026-03-23T00:03:40.165443Z",
     "delivered_at": null
   }
 ]

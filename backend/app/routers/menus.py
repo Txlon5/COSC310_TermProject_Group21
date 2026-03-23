@@ -14,10 +14,6 @@ def get_menus():
 def get_restaurant_menu(restaurant_id: str):
     return fetch_menu_by_restaurant_id(restaurant_id)
 
-@router.post("/restaurants/{restaurant_id}/menu-item/add", response_model=CreateMenuItem)
+@router.post("/restaurants/{restaurant_id}/menu-item/add", response_model=MenuItem)
 def create_restaurant_menu_item(restaurant_id: str, payload: CreateMenuItem):
     return create_menu_item(restaurant_id, payload)
-
-# @router.post("/menus")
-# def add_new_menu(menu_data: MenuCreate):
-#     return create_menu(menu_data)

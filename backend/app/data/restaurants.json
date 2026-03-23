@@ -1,8 +1,10 @@
 [
   {
     "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
-    "restaurant_name": "meadty",
-    "tags": [],
+    "restaurant_name": "Demo Diner",
+    "tags": [
+      "diner"
+    ],
     "isOpen": true,
     "menuItems": [
       {
@@ -12,13 +14,13 @@
         "category": "Food"
       },
       {
-        "menuItemId": 2,
+        "menuItemId": 1,
         "name": "Curry",
         "price": 25.0,
         "category": "Food"
       },
       {
-        "menuItemId": 3,
+        "menuItemId": 1,
         "name": "Lashy",
         "price": 12.0,
         "category": "Food"
@@ -27,10 +29,9 @@
   },
   {
     "restaurant_id": "85590c53-fc55-4837-a3ef-283345df572a",
-    "restaurant_name": "Overwatch2",
+    "restaurant_name": "Test Pizza",
     "tags": [
-      "hi",
-      "hello"
+      "pizza"
     ],
     "isOpen": true,
     "menuItems": [
@@ -51,6 +52,12 @@
         "name": "Canadian Pizza",
         "price": 23.0,
         "category": "Food"
+      },
+      {
+        "menuItemId": 4,
+        "name": "Cheesy Strips",
+        "price": 100.0,
+        "category": "Premium Organic Foods"
       }
     ]
   },
