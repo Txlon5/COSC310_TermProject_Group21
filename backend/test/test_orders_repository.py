@@ -28,10 +28,11 @@ def get_valid_restaurant_and_item():
         return None, None, None, None
 
 
-def test_create_order_stores_order(monkeypatch):
+def test_create_order_stores_order(monkeypatch, tmp_path):
     restaurant_id, menuItemId, name, price = get_valid_restaurant_and_item()
     if not restaurant_id or menuItemId is None:
         pytest.skip("No valid restaurant/menu item in restaurants.json")
+    monkeypatch.setattr("app.repositories.orders_repository.DATA_PATH", tmp_path / "orders.json")
     # Bypass menu validation to decouple from restaurant data state
     monkeypatch.setattr(
         "app.services.orders_service.fetch_menu_by_restaurant_id",
@@ -52,10 +53,11 @@ def test_create_order_stores_order(monkeypatch):
     assert data["restaurant_id"] == restaurant_id
 
 
-def test_get_order_by_id_returns_correct_order(monkeypatch):
+def test_get_order_by_id_returns_correct_order(monkeypatch, tmp_path):
     restaurant_id, menuItemId, name, price = get_valid_restaurant_and_item()
     if not restaurant_id or menuItemId is None:
         pytest.skip("No valid restaurant/menu item in restaurants.json")
+    monkeypatch.setattr("app.repositories.orders_repository.DATA_PATH", tmp_path / "orders.json")
     monkeypatch.setattr(
         "app.services.orders_service.fetch_menu_by_restaurant_id",
         lambda rid: [MenuItem(menuItemId=menuItemId, name=name, price=price, category="Food")]
@@ -75,10 +77,11 @@ def test_get_order_by_id_returns_correct_order(monkeypatch):
     assert data["restaurant_id"] == restaurant_id
 
 
-def test_update_completed_order_raises_error(monkeypatch):
+def test_update_completed_order_raises_error(monkeypatch, tmp_path):
     restaurant_id, menuItemId, name, price = get_valid_restaurant_and_item()
     if not restaurant_id or menuItemId is None:
         pytest.skip("No valid restaurant/menu item in restaurants.json")
+    monkeypatch.setattr("app.repositories.orders_repository.DATA_PATH", tmp_path / "orders.json")
     monkeypatch.setattr(
         "app.services.orders_service.fetch_menu_by_restaurant_id",
         lambda rid: [MenuItem(menuItemId=menuItemId, name=name, price=price, category="Food")]
