@@ -1,14 +1,6 @@
-import csv # Implementing our CSV parsing logic
 from pathlib import Path
 import json, os
 from typing import List, Dict, Any
-
-"""
-This file is responsible for reading the CSV file and converting it into a list of restaurant dictionaries with the structure we want. 
-The RestaurantsService will then use this repository to get the data it needs to filter and return to the API layer. The structure of 
-the restaurant dictionaries is designed to match what we expect in our service and API layers, with fields like restaurant_id, name, 
-tags, isOpen, and menuItems.
-"""
 
 class RestaurantsRepository:
     def __init__(self, json_path=None):

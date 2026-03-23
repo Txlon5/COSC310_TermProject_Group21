@@ -1,8 +1,7 @@
-from enum import Enum
 from app.schemas.delivery import DeliveryType, DeliveryStatus
 from app.schemas.item import ItemBase
 from pydantic import BaseModel, Field
-from typing import List, Optional, Union
+from typing import List, Optional
 from datetime import datetime
 
 # One item inside an order request/response
@@ -39,11 +38,12 @@ class Order(BaseModel):
     
 
 # Response returned after creating/retrieving an order
+# LEGACY CODE - FOR REFERENCE
 class OrderOut(BaseModel):
     order_id: int
     restaurant_id: str
     items: List[OrderItem]
-#
+    
 
 class CreateOrderResponse(BaseModel):
     order_id: str
@@ -59,6 +59,7 @@ class CreateOrderResponse(BaseModel):
     updated_at: Optional[datetime] = None
     delivered_at: Optional[datetime] = None
 
+# POTENTIAL LEGACY CODE - FOR REFERENCE
 class UpdateOrderStatusRequest(BaseModel):
     new_status: str
     delivery_method: Optional[str] = None

@@ -1,13 +1,3 @@
-"""
-Feat4-SR1
-The system shall allow users to create food orders
-
-This file contains business logic for creating and retrieving orders.
-Here, we can:
-- Validate order contents
-- Ensure an order has at least one item
-- Delegate persistence/retrieval to the repository
-"""
 from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse,DeliveryInfoUpdateRequest,Order,DeliveryInfoResponse
 from fastapi import APIRouter, status, Depends, HTTPException
 from app.schemas.order import CreateOrderResponse, CreateOrderRequest, Order, OrderItem
