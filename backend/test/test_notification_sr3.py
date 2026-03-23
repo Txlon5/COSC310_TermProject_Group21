@@ -1,15 +1,17 @@
 from fastapi.testclient import TestClient
 from app.services.notification_service import NotificationService
-from app.routers.orders import orders_store
+from app.repositories.orders_repository import save_all
 from app.main import app
 
 client = TestClient(app)
 notification = NotificationService()
 
+RESTAURANT_ID = "85590c53-fc55-4837-a3ef-283345df572a"
+
 def setup_function():
     notification.clear_notifications()     #Clear notifications before each test 
-    orders_store.clear()     #Clear orders from in-memory store before each test
-    
+    save_all([])
+
 def test_get_notifications_for_user_with_no_notifications_returns_empty_list():
     #checks that when no notifications exist for a user, an empty list is returned.
     response = client.get("/notifications/userabc")
@@ -20,17 +22,18 @@ def test_get_notifications_for_user_returns_all_notifications():
     #Checks that notificaions created during order creation and status change are correctly retrieved for a user.
     order_request = {
         "user_id": "user456",
-        "restaurant_id": 21,
+        "restaurant_id": RESTAURANT_ID,
         "items": [
-            {"menuItemId": 1, "quantity": 1, "item_name": "Burger"},
-            {"menuItemId": 2, "quantity": 1, "item_name": "Pizza"},
-            {"menuItemId": 3, "quantity": 1, "item_name": "Coke"}
+            {"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "quantity": 1},
+            
         ]
     }
 
     create_response = client.post("/orders", json=order_request)
     assert create_response.status_code == 201
     order_id = create_response.json()["order_id"]
+
+    # Update the status so a second notification is generated.
     update_response = client.patch(f"/orders/{order_id}/status", json={"status": "Preparing"})
     assert update_response.status_code == 200
     
@@ -64,26 +67,24 @@ def test_get_notifications_for_user_returns_all_notifications():
 def test_get_notifications_returns_requested_users_notifications_only():
     #Checks that when retrieving notifications for a specific user, only that user's notifications are returned and not notifications for other users.
     order_request1 = {"user_id" : "user1",
-        "restaurant_id" : 19,
-        "items": [
-            {"menuItemId": 1, "quantity": 1, "item_name": "Pasta"}
-        ]
+        "restaurant_id" : RESTAURANT_ID,
+        "items": [{"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "quantity": 1}]
     }
     order_request2 = {
         "user_id" : "user2",
-        "restaurant_id" : 34,
-        "items": [
-            {"menuItemId": 1, "quantity": 1, "item_name": "Salad"}
-        ]
+        "restaurant_id" : RESTAURANT_ID,
+        "items": [{"menuItemId": 2, "name": "Cheesey Bread", "price": 15.0, "quantity": 1}]
     }
     
     create_response1 = client.post("/orders", json=order_request1)
-    assert create_response1.status_code == 201
-    order_id1 = create_response1.json()["order_id"]
-    
     create_response2 = client.post("/orders", json=order_request2)
+    assert create_response1.status_code == 201
     assert create_response2.status_code == 201
-    order_id2 = create_response2.json()["order_id"]
+    #order_id1 = create_response1.json()["order_id"]
+    
+    
+   
+    #order_id2 = create_response2.json()["order_id"]
     
     #Now we retrieve notifications for user1 and check that only user1's notification is returned, not user2's notification.
     response = client.get("/notifications/user1")

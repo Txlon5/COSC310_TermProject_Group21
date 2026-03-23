@@ -1,17 +1,24 @@
 from fastapi.testclient import TestClient
 from app.main import app
+from app.repositories.orders_repository import save_all
 
 client = TestClient(app)
+RESTAURANT_ID = "85590c53-fc55-4837-a3ef-283345df572a"
 
+
+
+def setup_function():
+    # Clear orders so each test starts with a clean state.
+    save_all([])
 
 def test_assign_delivery_info_to_existing_order():
+     # First create an order that we can later update with delivery information
     create_response = client.post("/orders", json={
         "user_id": "u1",
-        "restaurant_id": 21,
-        "items": [{"menuItemId": 1, "quantity": 1, "item_name": "Pizza"}]
+        "restaurant_id": RESTAURANT_ID,
+        "items": [{"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "quantity": 1}]
     })
     assert create_response.status_code == 201
-
     order_id = create_response.json()["order_id"]
 
     update_response = client.put(f"/orders/{order_id}/delivery", json={
@@ -19,7 +26,7 @@ def test_assign_delivery_info_to_existing_order():
         "delivery_address": "123 Test St",
         
     })
-    print(update_response.json())
+   
     assert update_response.status_code == 200
 
     body = update_response.json()
