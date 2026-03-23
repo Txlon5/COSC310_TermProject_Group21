@@ -1,13 +1,15 @@
 from fastapi.testclient import TestClient
 from app.main import app
-from app.routers.orders import orders_store, notification, unauthorized_access_log
+from app.routers.orders import orders_store#, unauthorized_access_log
+from app.services.notification_service import NotificationService
 
 client = TestClient(app)
+notification = NotificationService()
 
 def setup_function():
     orders_store.clear()        #Clear orders from in-memory store before each test 
     notification.clear_notifications()      #Clear notifications before each test
-    unauthorized_access_log.clear()     #Clear recorded unauthorized access attempts
+    #unauthorized_access_log.clear()     #Clear recorded unauthorized access attempts
     
 def test_get_certain_past_order_not_found_when_order_does_not_exist():
     response = client.get("/orders/history/user123/nonexistent-order-id", headers = {"X-User-Id": "user123"})       #Attempt to retrieve an order that does not exist in memory store

@@ -1,9 +1,10 @@
 from app.main import app
-from app.routers.orders import notification
+from app.services.notification_service import NotificationService
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 
 client = TestClient(app)
+notification = NotificationService()
 
 def setup_function():
     notification.clear_notifications()     #Clear notifications before each test 
@@ -11,7 +12,7 @@ def setup_function():
 def test_create_order_notification():
     order_request = {
         "user_id": "user123",
-        "restaurant_id": 21,
+        "restaurant_id": "21",
        "items": [ 
         {"menuItemId": 1, "quantity": 1, "item_name": "Pizza"}, 
         {"menuItemId": 2, "quantity": 1, "item_name": "Soda"}
@@ -37,7 +38,7 @@ def test_create_order_notification():
 def test_notification_associated_with_correct_user():
     order_request = {
         "user_id": "Adam22",
-        "restaurant_id": 22,
+        "restaurant_id": "22",
         "items": [
             {"menuItemId": 1, "quantity": 1, "item_name": "Burger"}
         ]
@@ -53,7 +54,7 @@ def test_each_created_order_generates_its_own_notification():
     #two notifs should be generated for two different orders
     order_request1 = {
         "user_id": "Charlie33",
-        "restaurant_id": 47,
+        "restaurant_id": "47",
         "items": [
             {"menuItemId": 1, "quantity": 1, "item_name": "Pasta"}
         ]
@@ -84,7 +85,7 @@ def test_invalid_order_request_does_not_generate_notification():
     #If order creation fails, no notification should be generated. This tests the validation of the order creation endpoint and ensures that notifications are only created for valid orders.
     invalid_order_request = {
         "user_id": "Dave44",
-        "restaurant_id": 34,
+        "restaurant_id": "34",
         "items": [{}]
     }
     
@@ -99,7 +100,7 @@ def test_failed_order_creation_does_not_generate_notification():
     """
     invalid_order_request = {
         "user_id": "Eve44",
-        "restaurant_id": 19,
+        "restaurant_id": "19",
         "items": [{}]
     }
     

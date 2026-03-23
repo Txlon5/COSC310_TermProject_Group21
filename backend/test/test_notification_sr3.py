@@ -1,8 +1,10 @@
 from fastapi.testclient import TestClient
-from app.routers.orders import notification, orders_store
+from app.services.notification_service import NotificationService
+from app.routers.orders import orders_store
 from app.main import app
 
 client = TestClient(app)
+notification = NotificationService()
 
 def setup_function():
     notification.clear_notifications()     #Clear notifications before each test 

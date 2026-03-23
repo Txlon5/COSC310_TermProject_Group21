@@ -62,7 +62,7 @@ def test_filter_by_restaurant_id():
     valid_id = all_data[0].restaurant_id
     data = service.search_restaurants(restaurant_id=valid_id)
     assert len(data) >= 1
-    assert all(d["restaurant_id"] == valid_id for d in data)
+    assert all(d.restaurant_id == valid_id for d in data)
 
 def test_filter_by_is_open():
     repo = RestaurantsRepository()
@@ -70,7 +70,7 @@ def test_filter_by_is_open():
     data = service.search_restaurants(is_open=True)
     assert isinstance(data, list)
     # All returned restaurants should be open
-    assert all(d["isOpen"] is True for d in data)
+    assert all(d.isOpen is True for d in data)
 
 
 def test_filter_by_tag():
@@ -85,7 +85,7 @@ def test_filter_by_tag():
         pytest.skip("No tag data available from CSV.")
     data = service.search_restaurants(tag=valid_tag)
     assert len(data) >= 1
-    assert any(valid_tag.lower() in [t.lower() for t in d["tags"]] for d in data)
+    assert any(valid_tag.lower() in [t.lower() for t in d.tags] for d in data)
 
 
 def test_invalid_empty_tag_rejected():
@@ -103,7 +103,7 @@ def test_search_q_matches_restaurant_name():
     valid_name = all_data[0].restaurant_name
     data = service.search_restaurants(q=valid_name)
     assert len(data) >= 1
-    assert any(valid_name.lower() in d["restaurant_name"].lower() for d in data)
+    assert any(valid_name.lower() in d.restaurant_name.lower() for d in data)
     
 def test_search_q_matches_menu_item_name():
     repo = RestaurantsRepository()
@@ -117,7 +117,7 @@ def test_search_q_matches_menu_item_name():
     valid_item = menu_items[0].name
     data = service.search_restaurants(q=valid_item)
     assert len(data) >= 1
-    assert any(valid_item.lower() in [it["name"].lower() for it in d["menuItems"]] for d in data)
+    assert any(valid_item.lower() in [it.name.lower() for it in d.menuItems] for d in data)
 
 
 def test_empty_q_returns_empty_list():
@@ -178,7 +178,7 @@ def test_search_with_pagination_page2_no_duplicates():
     page2 = service.search_restaurants(page=2, page_size=1)
     assert len(page1) == 1, "Page 1 should return one restaurant."
     assert len(page2) == 1, "Page 2 should return one restaurant."
-    assert page1[0]["restaurant_id"] != page2[0]["restaurant_id"], "Page 1 and Page 2 should return different restaurants."
+    assert page1[0].restaurant_id != page2[0].restaurant_id, "Page 1 and Page 2 should return different restaurants."
 
 def test_get_restaurant_by_id_not_found():
     service = RestaurantsService(FakeRestaurantsRepository())

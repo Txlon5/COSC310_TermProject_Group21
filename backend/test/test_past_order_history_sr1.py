@@ -1,8 +1,10 @@
-from app.routers.orders import orders_store, notification, unauthorized_access_log
+from app.services.notification_service import NotificationService
+from app.routers.orders import orders_store, unauthorized_access_log
 from fastapi.testclient import TestClient
 from app.main import app
 
 client = TestClient(app)
+notification = NotificationService()
 
 def setup_function():
     orders_store.clear()        #Clear orders from in-memory store before each test 
