@@ -4,7 +4,6 @@ from app.schemas.restaurant import Restaurant, RestaurantCreate, RestaurantUpdat
 from app.repositories.restaurants_repository import RestaurantsRepository
 from app.services.restaurants_service import RestaurantsService
 
-
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 
 # Create repository instance

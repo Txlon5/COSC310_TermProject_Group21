@@ -40,6 +40,19 @@ def test_service_rejects_empty_order():
         service.create_order(CreateOrderRequest(user_id="user-1", restaurant_id=RESTAURANT_ID, items=[]))
 
 
+def test_create_order_rejects_no_items():
+    service = OrdersService()
+    with pytest.raises(ValueError) as exc_info:
+        service.create_order(
+            CreateOrderRequest(
+                user_id="user-1",
+                restaurant_id=RESTAURANT_ID,
+                items=[]
+            )
+        )
+    assert "Order must contain at least one item" in str(exc_info.value)
+
+
 def test_service_retrieves_created_order_for_matching_user():
     service = OrdersService()
     created = service.create_order(
@@ -83,7 +96,7 @@ def test_service_rejects_access_for_wrong_user():
 
 
 
-
+# LEGACY CODE BELOW - FOR REFERENCE
 # def test_service_creates_valid_order():
 #     service = OrdersService(OrdersRepository(), RestaurantsRepository())
 #     order = service.create_order(
