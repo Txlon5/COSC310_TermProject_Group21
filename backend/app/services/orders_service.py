@@ -41,9 +41,23 @@ class OrdersService:
         menu = fetch_menu_by_restaurant_id(order_request.restaurant_id)
         valid_menu_ids = {item.menuItemId for item in menu}
         
+
+        # Check for at least one valid menu item with quantity >= 1
+        has_valid_quantity = False
         for order_item in order_request.items:
             if order_item.menuItemId not in valid_menu_ids:
-                raise ValueError(f"Invalid menuItemId: {order_item.menuItemId} for restaurant {order_request.restaurant_id}")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid menuItemId: {order_item.menuItemId} for restaurant {order_request.restaurant_id}. Please check the menu items for this restaurant and use a valid menuItemId."
+                )
+            if order_item.quantity and order_item.quantity >= 1:
+                has_valid_quantity = True
+
+        if not has_valid_quantity:
+            raise HTTPException(
+                status_code=400,
+                detail="Order must include at least one valid menu item with quantity of 1 or more."
+            )
 
         orders = load_all()
 

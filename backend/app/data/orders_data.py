@@ -1,4 +1,4 @@
-from app.models.order import Order
+from app.schemas.order import Order
 
 orders_db = [
     Order(
