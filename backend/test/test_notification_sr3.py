@@ -37,6 +37,9 @@ def setup_test_environment():
          patch("app.services.orders_service.save_all", side_effect=mock_save), \
          patch("app.services.orders_service.fetch_menu_by_restaurant_id", return_value=[mock_menu_item1, mock_menu_item2]):
         yield
+    
+    # Clear overrides after test is done
+    app.dependency_overrides = {}
         
 def test_get_notifications_for_user_with_no_notifications_returns_empty_list():
     #checks that when no notifications exist for a user, an empty list is returned.
