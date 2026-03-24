@@ -2,6 +2,7 @@ import uuid
 from typing import List
 from fastapi import HTTPException
 from app.schemas.payment_method import CreditCard, CreditCardCreate
+from app.schemas.user import User
 from app.repositories.payment_methods_repository import load_all, save_all
 
 def create_card(user_id: str, payload: CreditCardCreate) -> CreditCard:
@@ -44,6 +45,38 @@ def get_card_by_id(card_id: str) -> CreditCard:
             # Retrieve Card
             card = CreditCard(**c)
 
+            # Mask Details
+            card.card_num = "*"*(len(card.card_num)-4) + card.card_num[len(card.card_num)-4:] # Mask card number and show only last 4 digits
+            card.card_cvc = "***" # Mask cvc
+
             # Return Card
             return card
-    raise HTTPException(status_code=404, detail="Credit card not found.")
+    raise HTTPException(status_code=404, detail="Credit Card {card_id} not found.")
+
+def delete_card(card_id: str, current_user: User) -> None:
+    """
+    Deletes the card matching the given card_id
+    Raises 403 if user not authorized to delete this card
+    Raises 404 if no card exists
+    """
+    # Load card list
+    cards = load_all()
+    new_cards = []
+
+    # Search card list
+    for c in cards:
+        # Check card is associated with card_id
+        if c.get("id") != card_id:
+            new_cards.append(c)
+        # Check user is authorized to remove card
+        elif c.get("id") == card_id:
+            if c.get("user_id") != current_user.id or current_user.role != "admin":
+                raise HTTPException(status_code=403, detail="Not authorized to delete this card.")
+
+    # Check if new card list does not contain card        
+    if len(new_cards) == len(cards):
+        raise HTTPException(status_code=404, detail="Credit card not found.")
+    
+    # Save new card list
+    new_cards = [c for c in cards if c.get("id") != card_id]
+    save_all(new_cards)
