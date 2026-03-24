@@ -35,17 +35,36 @@ def apply_admin_override():
 
 # Card Retrival by ID - Valid
 def test_get_card():
-    r = client.get("/payments/cards/83abbe8d-00fa-4a30-94e9-61ca5016022f")
+    # Create test card
+    r = client.post(
+        "/payments/cards/",
+        json={
+            "card_num": "4868719196829038",
+            "card_cvc": "344",
+            "card_exp": "2029-11",
+            "holder_name": "John Smith",
+            "holder_address": "556 Sarsons Rd, V1W5H5, Kelowna, BC"
+        }
+    )
+    # Check card was created successfully
+    assert r.status_code == 201
+
+    # Retrieve test card_id
+    card_id = r.json()["id"]
+
+    r = client.get(f"/payments/cards/{card_id}")
     assert r.status_code == 200
     assert r.json() == {
-        "id": "83abbe8d-00fa-4a30-94e9-61ca5016022f",
-        "user_id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7",
-        "card_num": "string",
-        "card_cvc": "string",
-        "card_exp": "string",
-        "holder_name": "string",
-        "holder_address": "string"
+        "id": card_id,
+        "user_id": "8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7",        
+        "card_num": "************9038",
+        "card_cvc": "***",
+        "card_exp": "2029-11",
+        "holder_name": "John Smith",
+        "holder_address": "556 Sarsons Rd, V1W5H5, Kelowna, BC"
     }
+    # Clean up test data
+    r = client.delete(f"/payments/cards/{card_id}")
 
 # Card Retrival by ID - Not Found
 def test_get_card_na():
@@ -54,6 +73,7 @@ def test_get_card_na():
 
 # Card Create - Valid
 def test_create_user():
+    # Create test card
     r = client.post(
         "/payments/cards/",
         json={
@@ -81,3 +101,30 @@ def test_create_user():
     assert data["card_exp"] == "2029-11"
     assert data["holder_name"] == "John Smith"
     assert data["holder_address"] == "556 Sarsons Rd, V1W5H5, Kelowna, BC"
+
+    # Clean up test data
+    r = client.delete(f"/payments/cards/{data["id"]}")
+
+
+# Card Delete - Valid
+def test_delete_user():
+    # Create test card
+    r = client.post(
+        "/payments/cards/",
+        json={
+            "card_num": "4868719196829038",
+            "card_cvc": "344",
+            "card_exp": "2029-11",
+            "holder_name": "John Smith",
+            "holder_address": "556 Sarsons Rd, V1W5H5, Kelowna, BC"
+        }
+    )
+    # Check card was created successfully
+    assert r.status_code == 201
+
+    # Delete card
+    card_id = r.json()["id"]
+    r = client.delete(f"/payments/cards/{card_id}")
+    
+    # Check card was deleted successfully
+    assert r.status_code == 204
