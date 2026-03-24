@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.repositories.orders_repository import save_all
@@ -5,10 +6,9 @@ from app.repositories.orders_repository import save_all
 client = TestClient(app)
 RESTAURANT_ID = "85590c53-fc55-4837-a3ef-283345df572a"
 
-
-
-def setup_function():
-    # Clear orders so each test starts with a clean state.
+@pytest.fixture(autouse=True)
+def isolated_orders(monkeypatch, tmp_path):
+    monkeypatch.setattr("app.repositories.orders_repository.DATA_PATH", tmp_path / "orders.json")
     save_all([])
 
 def test_assign_delivery_info_to_existing_order():
