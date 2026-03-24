@@ -31,7 +31,7 @@ class OrdersService:
     def list_orders(self):
         return [Order(**it) for it in load_all()]
     
-
+    # Tariq/Siam [Notification]
     def create_order(self, order_request: CreateOrderRequest) -> CreateOrderResponse:
         # Order must contain at least one item
         if not order_request.items or len(order_request.items) == 0:
@@ -89,7 +89,7 @@ class OrdersService:
         #return None #repo.create_order(restaurant_id, items)
 
      
-
+    # Tariq
     def get_order_by_id(self, order_id: str, current_user: User) -> Order:
         # Retrieve the order from the repository
         orders = load_all()
@@ -105,6 +105,7 @@ class OrdersService:
                  
         raise HTTPException(status_code=404, detail="Order not found.") # Quick error handling for not found
 
+    # Omarion/Siam [Notification]
     def update_order_status(self, update_order_id: str, status_request: OrderStatusUpdateRequest) -> Order:
         orders = load_all()
         # Search order list for order associated with update_order_id
@@ -148,7 +149,8 @@ class OrdersService:
         #404 - not found if order ID does not exist 
         raise HTTPException(status_code = 404, detail = "Order not found.")    
 
-     # Update Order Delivery Status
+    # Omarion
+    # Update Order Delivery Status
     def assign_delivery_info(self, update_order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> Order:
         orders = load_all()
         # Search order list for order associated with update_order_id
@@ -171,6 +173,7 @@ class OrdersService:
                 return Order(**order)
         raise HTTPException(status_code=404, detail="Order not found.")
 
+    # Omarion
     # Update Order Information
     def update_order_info(self, update_order_id: str, items: List[OrderItem]):
         orders_store = load_all()
@@ -194,7 +197,8 @@ class OrdersService:
         # Throw exception if order does not exist
         raise HTTPException(status_code=404,detail=f"Order not found.")
 
-    def get_order_history_by_id(self, user_id: str) -> List[Order]:
+    # Siam
+    def get_order_history_by_user_id(self, user_id: str) -> List[Order]:
         orders_store = load_all()
         user_orders: List[Order] = []
         

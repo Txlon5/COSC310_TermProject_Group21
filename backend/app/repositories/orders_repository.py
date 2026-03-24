@@ -19,10 +19,10 @@ def load_all() -> List[Dict[str, Any]]:
     with DATA_PATH.open("r", encoding="utf-8") as f:
         return json.load(f)
     
-def save_all(users: List[Dict[str, Any]]) -> None:
+def save_all(orders: List[Dict[str, Any]]) -> None:
     tmp = DATA_PATH.with_suffix(".tmp")
     with tmp.open("w", encoding="utf-8") as f:
-        json.dump(users, f, ensure_ascii=False, indent=2)
+        json.dump(orders, f, ensure_ascii=False, indent=2)
     os.replace(tmp, DATA_PATH)
 
 """

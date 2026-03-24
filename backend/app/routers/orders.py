@@ -39,12 +39,11 @@ def get_past_order_history(user_id: str, current_user: User = Depends(get_curren
     #The authenticated user must match the requested user id. SR3 security check.
     if current_user.id != user_id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized to perform this action.") 
-    return order_service.get_order_history_by_id(user_id)
+    return order_service.get_order_history_by_user_id(user_id)
 
 # Update Order Delivery Status
 @router.put("/{order_id}/delivery", response_model=Order)
 def update_delivery_info(order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> Order:
-
     return order_service.assign_delivery_info(order_id, delivery_request)
 
 

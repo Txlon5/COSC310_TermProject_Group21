@@ -3,7 +3,7 @@ from app.repositories.restaurants_repository import RestaurantsRepository
 from app.schemas.menu import MenuItem, CreateMenuItem
 from app.schemas.restaurant import Restaurant
 
-
+# Omarion
 def fetch_all_menus():
     restaurant_repo = RestaurantsRepository()
     restaurants = restaurant_repo.load_all()
@@ -17,6 +17,7 @@ def fetch_all_menus():
         })
     return all_menus
 
+# Omarion
 def fetch_menu_by_restaurant_id(restaurant_id: str):
     restaurant_repo = RestaurantsRepository()
     restaurants = restaurant_repo.load_all()
@@ -26,7 +27,7 @@ def fetch_menu_by_restaurant_id(restaurant_id: str):
             return Restaurant(**it).menuItems
     raise HTTPException(status_code=404, detail=f"Restaurant '{restaurant_id}' not found")
 
-
+# Omarion
 def create_menu_item(restaurant_id: str, payload: CreateMenuItem) -> MenuItem:
     restaurant_repo = RestaurantsRepository()
     restaurants = restaurant_repo.load_all()

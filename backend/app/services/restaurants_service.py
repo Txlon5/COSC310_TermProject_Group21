@@ -22,14 +22,17 @@ class RestaurantsService:
     # Public method to get all restaurants
     # This is what the API layer will call
 
+    # Omarion
     # Get all restaurants - return with minimal values (id, name, tags)
     def list_restaurants(self):
         return [RestaurantMinimal(**it) for it in self.repo.load_all()]
     
+    # Tariq
     # Get all restaurants - full data
     def get_restaurants(self):
         return [Restaurant(**it) for it in self.repo.load_all()]
     
+    # Omarion
     # Get Restaurant by Id
     def get_restaurant_by_id(self, restaurant_id: str) -> Restaurant:
         # Get list of all restaurants and cast to Restaurant schema
@@ -43,6 +46,7 @@ class RestaurantsService:
         # Error restaurant does not exist
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
     
+    # Omarion
     # Creates a new restaurant and appends it to the current restaurant list
     def create_restaurant(self, payload):
         # Load in existing restaurant list
@@ -64,7 +68,7 @@ class RestaurantsService:
         # Return new_restaurant to user
         return new_restaurant
     
-        
+    # Omarion
     # Updates an existing restaurant by ID
     def update_restaurant(self, update_restaurant_id: str, payload: RestaurantUpdate) -> Restaurant:
         restaurants = self.repo.load_all()
@@ -90,6 +94,7 @@ class RestaurantsService:
         # Throw exception if restaurant does not exist
         raise HTTPException(status_code=404,detail=f"Restaurant '{update_restaurant_id}' not found")
 
+    # Omarion
     # Deletes a restaurant by ID
     def delete_restaurant(self, restaurant_id: str):
         restaurants = self.repo.load_all()
@@ -105,6 +110,7 @@ class RestaurantsService:
 
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
 
+    # Tariq
     # THE BELOW FUNCTION IS FOR SR3 - PAGINATION
     # Users can put in a page count and how many items they want per page
     def paginate(self, items, page, page_size):
@@ -127,6 +133,7 @@ class RestaurantsService:
         # Return only the requested page of items
         return items[start:end]
 
+    # Tariq
     # SR2 - Search and Filter Functionality
     def search_restaurants(self,q=None,restaurant_id=None,is_open=None,tag=None,page=None,page_size=None):
         # Get all restaurants from the repository
@@ -192,6 +199,7 @@ class RestaurantsService:
         restaurants = self.paginate(restaurants, page, page_size)
         return [Restaurant(**r) for r in restaurants]
     
+    # Tariq
     def get_restaurant_filtered(self,q=None,restaurant_id=None,is_open=None,tag=None,page=None,page_size=None):
         if q is not None and str(q).strip() == "":
             raise HTTPException(status_code=400, detail="q cannot be empty")
