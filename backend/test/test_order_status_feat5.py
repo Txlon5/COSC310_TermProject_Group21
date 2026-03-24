@@ -25,14 +25,14 @@ def test_delivery_without_address_is_currently_accepted():
     assert response.status_code == 201
 
 
-def test_pickup_without_location_is_currently_accepted():
+def test_pickup_without_location_is_not_accepted():
     response = client.post("/orders", json={
         "user_id": "u1",
         "restaurant_id": 1,
         "items": [{"menuItemId": 1,"name": "Onion Pizza", "price": 26.0, "quantity": 1}],
         "delivery_method": "pickup"
     })
-    assert response.status_code == 201
+    assert response.status_code == 422
 
 
 def test_delivered_status_sets_timestamp():

@@ -33,13 +33,10 @@ class FakeRestaurantsRepository(RestaurantsRepository): # As mentioned in the se
     def load_all(self):
         return self.restaurants
 
-    def save_all(self, restaurants):
-        self.restaurants = restaurants
-
 # Test that the service correctly returns restaurant data
 def test_service_returns_restaurants():
 
-    repo = RestaurantsRepository() # Create repository instance
+    repo = FakeRestaurantsRepository() # Create repository instance
 
     service = RestaurantsService(repo) # Putting repository into service
 
@@ -53,11 +50,9 @@ def test_service_returns_restaurants():
     
     
 def test_filter_by_restaurant_id():
-    repo = RestaurantsRepository()
+    repo = FakeRestaurantsRepository() # Create repository instance
     service = RestaurantsService(repo)
     all_data = service.get_restaurants()
-    if not all_data:
-        pytest.skip("No restaurant data available from CSV.")
     # Pick a valid restaurant_id from JSON
     valid_id = all_data[0].restaurant_id
     data = service.search_restaurants(restaurant_id=valid_id)
@@ -65,7 +60,7 @@ def test_filter_by_restaurant_id():
     assert all(d.restaurant_id == valid_id for d in data)
 
 def test_filter_by_is_open():
-    repo = RestaurantsRepository()
+    repo = FakeRestaurantsRepository() # Create repository instance
     service = RestaurantsService(repo)
     data = service.search_restaurants(is_open=True)
     assert isinstance(data, list)
@@ -74,46 +69,40 @@ def test_filter_by_is_open():
 
 
 def test_filter_by_tag():
-    repo = RestaurantsRepository()
+    repo = FakeRestaurantsRepository() # Create repository instance
     service = RestaurantsService(repo)
     all_data = service.get_restaurants()
-    if not all_data:
-        pytest.skip("No restaurant data available from CSV.")
     # Pick a valid tag from JSON
     valid_tag = all_data[0].tags[0] if all_data[0].tags else None
-    if not valid_tag:
-        pytest.skip("No tag data available from CSV.")
     data = service.search_restaurants(tag=valid_tag)
     assert len(data) >= 1
-    assert any(valid_tag.lower() in [t.lower() for t in d.tags] for d in data)
+    assert any(str(valid_tag).lower() in [t.lower() for t in d.tags] for d in data)
 
 
 def test_invalid_empty_tag_rejected():
-    repo = RestaurantsRepository()
+    repo = FakeRestaurantsRepository() # Create repository instance
     service = RestaurantsService(repo)
-    with pytest.raises(ValueError):
+    with pytest.raises(HTTPException) as response:
         service.search_restaurants(tag="  ")
+    # Check response 
+    assert response.value.status_code == 400
+    assert response.value.detail == "tag cannot be empty"
+    
 
 def test_search_q_matches_restaurant_name():
-    repo = RestaurantsRepository()
+    repo = FakeRestaurantsRepository() # Create repository instance
     service = RestaurantsService(repo)
     all_data = service.get_restaurants()
-    if not all_data:
-        pytest.skip("No restaurant data available from CSV.")
     valid_name = all_data[0].restaurant_name
     data = service.search_restaurants(q=valid_name)
     assert len(data) >= 1
     assert any(valid_name.lower() in d.restaurant_name.lower() for d in data)
     
 def test_search_q_matches_menu_item_name():
-    repo = RestaurantsRepository()
+    repo = FakeRestaurantsRepository() # Create repository instance
     service = RestaurantsService(repo)
     all_data = service.get_restaurants()
-    if not all_data:
-        pytest.skip("No restaurant data available from CSV.")
     menu_items = all_data[0].menuItems
-    if not menu_items:
-        pytest.skip("No menu items available from CSV.")
     valid_item = menu_items[0].name
     data = service.search_restaurants(q=valid_item)
     assert len(data) >= 1
@@ -121,7 +110,7 @@ def test_search_q_matches_menu_item_name():
 
 
 def test_empty_q_returns_empty_list():
-    repo = RestaurantsRepository()
+    repo = FakeRestaurantsRepository() # Create repository instance
     service = RestaurantsService(repo)
     result = service.search_restaurants(q="")
     assert result == []
@@ -159,16 +148,13 @@ def test_paginate_invalid_page_size_rejected():
         service.paginate([1, 2, 3], page=1, page_size=0) # Page size less than 1 should raise an error
         
 def test_search_with_pagination_limits_results():
-    repo = RestaurantsRepository()
+    repo = FakeRestaurantsRepository() # Create repository instance
     service = RestaurantsService(repo)
-    all_data = service.get_restaurants()
-    if not all_data:
-        pytest.skip("No restaurant data available from CSV.")
     data = service.search_restaurants(page=1, page_size=1)
     assert len(data) == 1
 
 def test_search_with_pagination_page2_no_duplicates():
-    repo = RestaurantsRepository()
+    repo = FakeRestaurantsRepository() # Create repository instance
     repo._restaurants = None  # Force reload from CSV
     service = RestaurantsService(repo)
     all_data = service.get_restaurants()

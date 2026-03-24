@@ -36,6 +36,9 @@ def setup_test_environment():
          patch("app.services.orders_service.save_all", side_effect=mock_save), \
          patch("app.services.orders_service.fetch_menu_by_restaurant_id", return_value=[mock_menu_item1, mock_menu_item2]):
         yield
+    
+    # Clear overrides after test is done
+    app.dependency_overrides = {}
 
 # Notification Tests (Matched to Older Style)
 def test_create_order_notification():

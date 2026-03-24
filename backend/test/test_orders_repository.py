@@ -5,33 +5,47 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.repositories.orders_repository import load_all, save_all
 from app.schemas.menu import MenuItem
+from app.auth.token_utils import get_current_user
+from app.schemas.user import User
 
 client = TestClient(app)
 
+# Create mock admin for testing
+def override_get_current_user():
+    return User(
+        id="8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7",
+        name="Admin",
+        email="admin@example.com",
+        password="password123!",
+        role="admin"
+    )
+
+# Overide get_current_user() function to return the mock admin
+@pytest.fixture(autouse=True)
+def apply_admin_override():
+    # Set the override
+    app.dependency_overrides[get_current_user] = override_get_current_user
+    # Pause to allow test to run with override
+    yield 
+    # Clear the override after test is done
+    app.dependency_overrides = {}
 
 # Utility: reads restaurants.json without modifying it
 def get_valid_restaurant_and_item():
     json_path = Path(__file__).resolve().parent.parent / "app" / "data" / "restaurants.json"
-    try:
-        with json_path.open("r", encoding="utf-8") as f:
-            data = _json.load(f)
-        if not data:
-            return None, None, None, None
-        rest = data[0]
-        restaurant_id = rest.get("restaurant_id")
-        items = rest.get("menuItems", [])
-        if not items:
-            return restaurant_id, None, None, None
-        item = items[0]
-        return restaurant_id, item["menuItemId"], item["name"], item["price"]
-    except Exception:
-        return None, None, None, None
+    with json_path.open("r", encoding="utf-8") as f:
+        data = _json.load(f)
+    
+    rest = data[0]
+    restaurant_id = rest.get("restaurant_id")
+    items = rest.get("menuItems", [])
+    item = items[0]
+    return restaurant_id, item["menuItemId"], item["name"], item["price"]
 
 
 def test_create_order_stores_order(monkeypatch, tmp_path):
     restaurant_id, menuItemId, name, price = get_valid_restaurant_and_item()
-    if not restaurant_id or menuItemId is None:
-        pytest.skip("No valid restaurant/menu item in restaurants.json")
+    assert menuItemId is not None and name is not None and price is not None
     monkeypatch.setattr("app.repositories.orders_repository.DATA_PATH", tmp_path / "orders.json")
     # Bypass menu validation to decouple from restaurant data state
     monkeypatch.setattr(
@@ -55,8 +69,7 @@ def test_create_order_stores_order(monkeypatch, tmp_path):
 
 def test_get_order_by_id_returns_correct_order(monkeypatch, tmp_path):
     restaurant_id, menuItemId, name, price = get_valid_restaurant_and_item()
-    if not restaurant_id or menuItemId is None:
-        pytest.skip("No valid restaurant/menu item in restaurants.json")
+    assert menuItemId is not None and name is not None and price is not None
     monkeypatch.setattr("app.repositories.orders_repository.DATA_PATH", tmp_path / "orders.json")
     monkeypatch.setattr(
         "app.services.orders_service.fetch_menu_by_restaurant_id",
@@ -69,19 +82,23 @@ def test_get_order_by_id_returns_correct_order(monkeypatch, tmp_path):
         "delivery_method": "pickup",
         "pickup_location": "Front Desk"
     }
-    response = client.post("/orders", json=order_request)
-    assert response.status_code == 201
-    data = response.json()
-    assert "order_id" in data
+    create_response = client.post("/orders", json=order_request)
+    assert create_response.status_code == 201
+    
+    order_id = create_response.json()["order_id"]
+    get_response = client.get(f"/orders/{order_id}")
+    assert get_response.status_code == 200
+
+    data = get_response.json()
+    assert data["order_id"] == order_id
     assert data["user_id"] == "testuser2"
     assert data["restaurant_id"] == restaurant_id
 
 
 def test_update_completed_order_raises_error(monkeypatch, tmp_path):
     restaurant_id, menuItemId, name, price = get_valid_restaurant_and_item()
-    if not restaurant_id or menuItemId is None:
-        pytest.skip("No valid restaurant/menu item in restaurants.json")
     monkeypatch.setattr("app.repositories.orders_repository.DATA_PATH", tmp_path / "orders.json")
+    assert menuItemId is not None and name is not None and price is not None
     monkeypatch.setattr(
         "app.services.orders_service.fetch_menu_by_restaurant_id",
         lambda rid: [MenuItem(menuItemId=menuItemId, name=name, price=price, category="Food")]

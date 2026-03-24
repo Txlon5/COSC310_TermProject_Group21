@@ -153,7 +153,7 @@ class RestaurantsService:
 
             # Reject empty tag input
             if tag_norm == "":
-                raise ValueError("tag cannot be empty")
+                raise HTTPException(status_code=400, detail="tag cannot be empty")
 
             def has_tag(r):
                 tags = r.get("tags", [])

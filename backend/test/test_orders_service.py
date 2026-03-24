@@ -8,9 +8,11 @@ from fastapi import HTTPException
 # Use a restaurant id that exists in the packaged restaurant data.
 RESTAURANT_ID = "85590c53-fc55-4837-a3ef-283345df572a"
 
-
-def setup_function():
-    # Start every test with no saved orders.
+# Making sure we don't override the orders JSON file
+# Automatic fixture to isolate tests, it runs per test 
+@pytest.fixture(autouse=True)
+def isolated_orders(monkeypatch, tmp_path):
+    monkeypatch.setattr("app.repositories.orders_repository.DATA_PATH", tmp_path / "orders.json")
     save_all([])
 
 

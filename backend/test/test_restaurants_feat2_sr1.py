@@ -1,7 +1,38 @@
+import pytest
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from app.main import app
 
 client = TestClient(app)
+
+# Test Setup - Setup Mock data/function calls for Fetching/Saving Restaurants
+@pytest.fixture(autouse=True)
+def setup_fake_repo():
+    # Mock Restaurant Database
+    fake_db = [
+        {
+            "restaurant_id": "facf5d81-4bd9-4003-9c08-1b98471b2c34",
+            "restaurant_name": "Pizza Place",
+            "tags": ["Italian", "Pizza"],
+            "isOpen": True,
+            "menuItems": []
+        }
+    ]
+
+    # Return mock list
+    def mock_load():
+        return fake_db.copy() 
+    
+    # Save mock list
+    def mock_save(data):
+        fake_db.clear()
+        fake_db.extend(data)
+
+    # Apply mock functions
+    with patch("app.repositories.restaurants_repository.RestaurantsRepository.load_all", side_effect=mock_load), \
+         patch("app.repositories.restaurants_repository.RestaurantsRepository.save_all", side_effect=mock_save):
+        yield
+
 
 def test_get_restaurants():
     response = client.get("/restaurants")
@@ -12,12 +43,13 @@ def test_get_restaurants():
 def test_create_restaurant():
     new_restaurant = {
         "restaurant_name": "Test Pizza",
-        "tags": ["pizza"]
+        "tags": ["pizza"],
+        "isOpen": True
     }
 
     response = client.post("/restaurants", json=new_restaurant)
 
-    assert response.status_code == 201
+    assert response.status_code == 201 # Check that restaurant created successfully
     data = response.json()
 
     assert data["restaurant_name"] == "Test Pizza"
@@ -28,10 +60,12 @@ def test_get_restaurant_by_id():
     new_restaurant = {
         "restaurant_name": "Test Burger",
         "category": "Fast Food",
-        "tags": ["burger"]
+        "tags": ["burger"],
+        "isOpen": True
     }
 
     create_response = client.post("/restaurants", json=new_restaurant)
+    assert create_response.status_code == 201 # Check that restaurant created successfully
     restaurant_id = create_response.json()["restaurant_id"]
 
     response = client.get(f"/restaurants/{restaurant_id}")
@@ -44,10 +78,12 @@ def test_delete_restaurant():
     new_restaurant = {
         "restaurant_name": "Delete Me",
         "category": "Test",
-        "tags": []
+        "tags": [],
+        "isOpen": False
     }
 
     create_response = client.post("/restaurants", json=new_restaurant)
+    assert create_response.status_code == 201 # Check that restaurant created successfully
     restaurant_id = create_response.json()["restaurant_id"]
 
     delete_response = client.delete(f"/restaurants/{restaurant_id}")
