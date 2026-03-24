@@ -5,6 +5,29 @@ from app.schemas.payment_method import CreditCard, CreditCardCreate
 from app.schemas.user import User
 from app.repositories.payment_methods_repository import load_all, save_all
 
+def list_user_cards(user_id: str) -> List[CreditCard]:
+    """Returns all cards belonging to a specific user"""
+    #
+    cards = load_all()
+    user_cards = []
+
+    # Fetch cards that are owned by the userid
+    for c in cards:
+        # If card is owned by user then mask details and add it to return list
+        if c.get("user_id") == user_id:   
+            # Retrieve Card
+            card = CreditCard(**c)
+
+            # Mask Details
+            card.card_num = "*"*(len(card.card_num)-4) + card.card_num[len(card.card_num)-4:] # Mask card number and show only last 4 digits
+            card.card_cvc = "***" # Mask cvc
+
+            # Add card to return list
+            user_cards.append(card)
+    # Return list of cards to user
+    return user_cards
+
+
 def create_card(user_id: str, payload: CreditCardCreate) -> CreditCard:
     """Creates a new card for a user"""
     # Load card list

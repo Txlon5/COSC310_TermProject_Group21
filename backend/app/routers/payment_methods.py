@@ -2,10 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.schemas.payment_method import CreditCard, CreditCardCreate
 from app.schemas.user import User
-from app.services.payments_service import get_card_by_id, create_card, delete_card
+from app.services.payments_service import get_card_by_id, create_card, delete_card, list_user_cards
 from app.auth.token_utils import get_current_user
 
 router = APIRouter(prefix="/payments/cards", tags=["Payment Methods"])
+
+# Get all user owned credit cards
+@router.get("", response_model=List[CreditCard])
+def get_my_cards(current_user: User = Depends(get_current_user)):
+    return list_user_cards(current_user.id)
 
 # Get credit card by id
 @router.get("/{card_id}", response_model=CreditCard)
