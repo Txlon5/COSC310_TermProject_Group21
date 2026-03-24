@@ -3,14 +3,6 @@ from fastapi import HTTPException  # Used to raise API-friendly errors
 from app.repositories.restaurants_repository import RestaurantsRepository  # Repository layer for restaurant data
 from app.schemas.restaurant import Restaurant, RestaurantUpdate, RestaurantMinimal
 
-"""
-FULL DISCLAIMER
-I need to have a chat with the team about how we will do tags.
-As of right now, everyone is busy, but I have to continue working regardless.
-So for now, SR2 will start like SR1, not using the CSV file, but working with mock data (for now)
-"""
-
-
 # This class represents the Business Logic Layer for restaurants.
 # The router talks to this service, and this service talks to the repository.
 class RestaurantsService:
