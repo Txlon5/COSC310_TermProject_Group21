@@ -4,3 +4,4 @@ pytest
 pylint
 pwdlib
 pyjwt
+pytest-cov
