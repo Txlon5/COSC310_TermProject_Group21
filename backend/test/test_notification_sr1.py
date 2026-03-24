@@ -1,33 +1,66 @@
 from app.main import app
 from app.services.notification_service import NotificationService
 from fastapi.testclient import TestClient
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+import pytest
 
 client = TestClient(app)
 notification = NotificationService()
 
+
 def setup_function():
     notification.clear_notifications()     #Clear notifications before each test 
+
+# Test Setup - Setup Mock data/function calls for MenuItem Checks and Fetching/Saving Orders
+@pytest.fixture(autouse=True)
+def setup_test_environment():
+    # Mock Order Database
+    fake_db = []
+    # Mock MenuItems
+    mock_menu_item1 = MagicMock()
+    mock_menu_item1.menuItemId = 1
+    mock_menu_item2 = MagicMock()
+    mock_menu_item2.menuItemId = 2
+
+    # Return mock list
+    def mock_load():
+        return fake_db.copy() 
     
+    # Save mock list
+    def mock_save(data):
+        fake_db.clear()
+        fake_db.extend(data)
+    
+    # Apply mock functions
+    with patch("app.services.orders_service.load_all", side_effect=mock_load), \
+         patch("app.services.orders_service.save_all", side_effect=mock_save), \
+         patch("app.services.orders_service.fetch_menu_by_restaurant_id", return_value=[mock_menu_item1, mock_menu_item2]):
+        yield
+
+# Notification Tests (Matched to Older Style)
 def test_create_order_notification():
     order_request = {
         "user_id": "user123",
-        "restaurant_id": "21",
-       "items": [ 
-        {"menuItemId": 1, "quantity": 1, "item_name": "Pizza"}, 
-        {"menuItemId": 2, "quantity": 1, "item_name": "Soda"}
-    ]
+        "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
+        "items": [
+            {"menuItemId": 1, "quantity": 1, "name": "Pizza", "price": 12.99},
+            {"menuItemId": 2, "quantity": 1, "name": "Soda", "price": 2.99}
+        ],
+        "delivery_method": "delivery",
+        "status": "created"
     }
     
     response = client.post("/orders", json=order_request)
     assert response.status_code == 201
     data = response.json()
     created_order_id = data["order_id"]
-    user_notifications = notification.get_notifications_for_user("user123")     #fetch notification for specific user from the in-memory store.
-    assert len(user_notifications) == 1     #Assert that one notification was created for the user.
+    
+    # fetch notification for specific user from the in-memory store.
+    user_notifications = notification.get_notifications_for_user("user123")     #fetch notification for specific user 
+    assert len(user_notifications) == 1     # Assert that one notification was created for the user.
     
     notif = user_notifications[0]
-    #validate notif contents
+    # validate notif contents
     assert notif.user_id == "user123"
     assert notif.order_id == created_order_id
     assert notif.type == "Order_Created"
@@ -35,36 +68,47 @@ def test_create_order_notification():
     assert notif.message == f"Your order {created_order_id} has been created successfully."
     assert notif.timestamp is not None
     
+
 def test_notification_associated_with_correct_user():
     order_request = {
         "user_id": "Adam22",
-        "restaurant_id": "22",
+        "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
         "items": [
-            {"menuItemId": 1, "quantity": 1, "item_name": "Burger"}
-        ]
+            {"menuItemId": 1, "quantity": 1, "name": "Pizza", "price": 12.99}
+        ],
+        "delivery_method": "delivery",
+        "status": "created"
     }
+    
     client.post("/orders", json=order_request)
+    
     adam22_notifications = notification.get_notifications_for_user("Adam22")
     bob99_notifications = notification.get_notifications_for_user("Bob99")
     
-    assert len(adam22_notifications) == 1     #Assert that Adam22 has one notification.
-    assert len(bob99_notifications) == 0     #Assert that Bob99 has no notifications.
+    assert len(adam22_notifications) == 1     # Assert that Adam22 has one notification.
+    assert len(bob99_notifications) == 0      # Assert that Bob99 has no notifications.
     
+
 def test_each_created_order_generates_its_own_notification():
-    #two notifs should be generated for two different orders
+    # two notifs should be generated for two different orders
     order_request1 = {
         "user_id": "Charlie33",
-        "restaurant_id": "47",
+        "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
         "items": [
-            {"menuItemId": 1, "quantity": 1, "item_name": "Pasta"}
-        ]
+            {"menuItemId": 1, "quantity": 1, "name": "Pizza", "price": 12.99}
+        ],
+        "delivery_method": "delivery",
+        "status": "created"
     }
+    
     order_request2 = {
         "user_id": "Charlie33",
-        "restaurant_id": 19,
+        "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
         "items": [
-            {"menuItemId": 1, "quantity": 1, "item_name": "Salad"}
-        ]
+            {"menuItemId": 2, "quantity": 1, "name": "Soda", "price": 2.99}
+        ],
+        "delivery_method": "delivery",
+        "status": "created"
     }
     
     response_1 = client.post("/orders", json=order_request1)
@@ -74,41 +118,40 @@ def test_each_created_order_generates_its_own_notification():
     assert response_2.status_code == 201
     
     charlie_notifications = notification.get_notifications_for_user("Charlie33")
-    assert len(charlie_notifications) == 2     #Assert that Charlie33 has two notifications for the two orders created.
+    assert len(charlie_notifications) == 2     # Assert that Charlie33 has two notifications for the two orders created.
     
     order_ids = {response_1.json()["order_id"], response_2.json()["order_id"]}
     notif_order_ids = {n.order_id for n in charlie_notifications}
     
-    assert order_ids == notif_order_ids     #Assert that the notifications are associated with the correct order IDs.
+    assert order_ids == notif_order_ids        # Assert that the notifications are associated with the correct order IDs.
+
 
 def test_invalid_order_request_does_not_generate_notification():
-    #If order creation fails, no notification should be generated. This tests the validation of the order creation endpoint and ensures that notifications are only created for valid orders.
+    # If order creation fails, no notification should be generated. This tests the validation of the order creation endpoint and ensures that notifications are only created for valid orders.
     invalid_order_request = {
         "user_id": "Dave44",
-        "restaurant_id": "34",
-        "items": [{}]
+        "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
+        "items": [{}] # Invalid item
     }
-    
     response = client.post("/orders", json=invalid_order_request)
-    assert response.status_code == 422     #Assert that the request is invalid due to missing items field.
-    
+    assert response.status_code == 422      # Assert that the request is invalid due to missing items field.
     dave_notifications = notification.get_notifications_for_user("Dave44")
-    assert len(dave_notifications) == 0     #Assert that no notification was generated for the invalid order request.
+    assert len(dave_notifications) == 0    # Assert that no notification was generated for the invalid order request.
     
+
 def test_failed_order_creation_does_not_generate_notification():
     """Simulates a payment failed situation where a bad request is sent, and ensures that no notification is generated for the failed order creation attempt.
     """
     invalid_order_request = {
         "user_id": "Eve44",
-        "restaurant_id": "19",
-        "items": [{}]
+        "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
+        "items": [{}] # Invalid item
     }
     
-    with patch("app.routers.orders.notification.create_order_created_notification") as mock_notification:
-        response = client.post("/orders", json = invalid_order_request)
+    with patch("app.services.orders_service.NotificationService.create_order_created_notification") as mock_notification:
+        response = client.post("/orders", json=invalid_order_request)
         assert response.status_code == 422     #Request invalid due to missing criteria (failed payment).
         mock_notification.assert_not_called()
         
     eve_notifications = notification.get_notifications_for_user("Eve44")
-    assert len(eve_notifications) == 0     #Validate that no notification was generated for the failed order creation attempt.
-         
+    assert len(eve_notifications) == 0         #Validate that no notification was generated for the failed order creation attempt.
