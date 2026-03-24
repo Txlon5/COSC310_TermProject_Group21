@@ -126,7 +126,7 @@ class RestaurantsService:
         return items[start:end]
 
     # Tariq
-    # SR2 - Search and Filter Functionality
+    # Feat3SR2 - Search and Filter Functionality
     def search_restaurants(self,q=None,restaurant_id=None,is_open=None,tag=None,page=None,page_size=None):
         # Get all restaurants from the repository
         restaurants = self.repo.load_all()
@@ -139,7 +139,7 @@ class RestaurantsService:
             ]
 
         # Filter by open/closed status if provided
-        # From SR1, the repository sets isOpen = True for now
+        # From Feat3SR1, the repository sets isOpen = True
         if is_open is not None:
             restaurants = [
                 r for r in restaurants
@@ -157,11 +157,6 @@ class RestaurantsService:
 
             def has_tag(r):
                 tags = r.get("tags", [])
-
-                 # If tags is a string, convert it into a list
-                if isinstance(tags, str):
-                    tags = [t.strip() for t in tags.split(",") if t.strip()]
-                    
                 return any(tag_norm == str(t).strip().lower() for t in tags)
             restaurants = [r for r in restaurants if has_tag(r)]
 
