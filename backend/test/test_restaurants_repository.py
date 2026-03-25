@@ -1,16 +1,28 @@
-# # Import the repository class we want to test
-# from app.repositories.restaurants_repository import RestaurantsRepository
+from app.repositories.restaurants_repository import RestaurantsRepository
 
 
-# # Test that the repository returns a list of restaurants
-# def test_repository_returns_restaurants():
+def test_load_all_returns_empty_list_when_file_missing(tmp_path):
+    repo = RestaurantsRepository(tmp_path / "missing_restaurants.json")
+    data = repo.load_all()
 
-#     repo = RestaurantsRepository() # Create an instance of the repository
+    assert data == []
 
-#     data = repo.get_all() # Call the method we are testing
 
-#     assert isinstance(data, list) # Verify the returned value is a list
+def test_save_all_and_load_all_work_together(tmp_path):
+    path = tmp_path / "restaurants.json"
+    repo = RestaurantsRepository(path)
 
-#     assert len(data) > 0 # Ensure the list is not empty
+    restaurants = [
+        {
+            "restaurant_id": "123",
+            "restaurant_name": "Round Trip Cafe",
+            "tags": ["coffee"],
+            "isOpen": True,
+            "menuItems": [],
+        }
+    ]
 
-#     assert "restaurant_id" in data[0] # Verify the structure matches our class diagram
+    repo.save_all(restaurants)
+
+    assert path.exists()
+    assert repo.load_all() == restaurants
