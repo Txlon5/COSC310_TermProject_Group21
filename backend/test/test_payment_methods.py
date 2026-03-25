@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from app.main import app
-from app.schemas.user_validator import UserValidator
+from app.schemas.card_validator import CardValidator
 from app.auth.password_utils import PasswordHandler
 from app.auth.token_utils import get_current_user
 from app.schemas.user import User
@@ -29,6 +29,58 @@ def apply_admin_override():
     yield 
     # Clear the override after test is done
     app.dependency_overrides = {}
+
+
+# Unit Tests
+
+# Card Number Validation
+def test_card_num_validation():
+    assert CardValidator.is_valid_card_num("1234567890123")         # True - 13 digits
+    assert CardValidator.is_valid_card_num("1234567890123456")      # True - 16 digits
+    assert CardValidator.is_valid_card_num("1234567890123456789")   # True - 19 digits
+    assert not CardValidator.is_valid_card_num("123456789012")      # False - 12 digits (too short)
+    assert not CardValidator.is_valid_card_num("12345678901234567890") # False - 20 digits (too long)
+    assert not CardValidator.is_valid_card_num("123456789012a")     # False - contains letter
+    assert not CardValidator.is_valid_card_num("1234-5678-9012")    # False - contains special characters
+    assert not CardValidator.is_valid_card_num("")                  # False - blank entry
+
+# CVC Validation
+def test_cvc_validation():
+    assert CardValidator.is_valid_cvc("123")                        # True - 3 digits
+    assert CardValidator.is_valid_cvc("1234")                       # True - 4 digits
+    assert not CardValidator.is_valid_cvc("12")                     # False - 2 digits (too short)
+    assert not CardValidator.is_valid_cvc("12345")                  # False - 5 digits (too short)
+    assert not CardValidator.is_valid_cvc("12a")                    # False - contains letter
+    assert not CardValidator.is_valid_cvc("")                       # False - blank entry
+
+# Expiry Validation
+def test_expiry_validation():
+    assert CardValidator.is_valid_expiry("2026-03")                 # True
+    assert CardValidator.is_valid_expiry("2024-12")                 # True
+    assert not CardValidator.is_valid_expiry("26-03")               # False - wrong year format
+    assert not CardValidator.is_valid_expiry("2026/03")             # False - wrong separator
+    assert not CardValidator.is_valid_expiry("2026-13")             # False - month > 12
+    assert not CardValidator.is_valid_expiry("2026-00")             # False - month < 01
+    assert not CardValidator.is_valid_expiry("abcd-ef")             # False - contains letter
+    assert not CardValidator.is_valid_expiry("")                    # False - blank entry
+
+# Name Validation
+def test_name_validation():
+    assert CardValidator.is_valid_name("John Smith")                # True
+    assert CardValidator.is_valid_name("Mary Ann")                  # True
+    assert not CardValidator.is_valid_name("John123")               # False - contains numbers
+    assert not CardValidator.is_valid_name("John Smith!")           # False - special character
+    assert not CardValidator.is_valid_name("John_Smith")            # False - special character
+    assert not CardValidator.is_valid_name("")                      # False - blank entry
+
+# Address Validation
+def test_address_validation():
+    assert CardValidator.is_valid_address("123 Main St")            # True
+    assert CardValidator.is_valid_address("556 Sarsons Rd, Kelowna, BC") # True
+    assert CardValidator.is_valid_address("Apt-4B 123 Main")        # True
+    assert not CardValidator.is_valid_address("123 Main St!")       # False - invalid special character
+    assert not CardValidator.is_valid_address("123 Main #4")        # False - invalid special character
+    assert not CardValidator.is_valid_address("")                   # False - blank entry
 
 
 # Integration Tests
