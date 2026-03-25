@@ -155,7 +155,7 @@ def test_create_user():
     assert data["holder_address"] == "556 Sarsons Rd, V1W5H5, Kelowna, BC"
 
     # Clean up test data
-    r = client.delete(f"/payments/cards/{data["id"]}")
+    r = client.delete(f"/payments/cards/{data['id']}")
 
 
 # Card Delete - Valid
