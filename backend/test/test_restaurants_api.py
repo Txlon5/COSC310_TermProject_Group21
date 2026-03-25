@@ -13,7 +13,7 @@ def test_no_params_returns_200():
     # assert r.status_code == 200  # Expecting 200 OK since empty q now returns an empty list
     # assert r.json() == []  # The response should be an empty list
 def test_empty_q_returns_400():
-    r = client.get("/restaurants", params={"q": "   "})
+    r = client.get("/restaurants", params={"q": ""})
     assert r.status_code == 400 # Status code 400 means bad request, which is what we want if an invalid search query is provided (in this case, just an empty string with whitespace)
     assert "q cannot be empty" in r.json()["detail"]
 

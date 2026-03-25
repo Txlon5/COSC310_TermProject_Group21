@@ -1,73 +1,53 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 from datetime import datetime, timezone
-from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest, DeliveryInfoUpdateRequest
-from app.services.notification_service import NotificationService
-from fastapi import APIRouter, status, HTTPException
-from uuid import uuid4 
+from app.schemas.menu import MenuItem
+from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest, DeliveryInfoUpdateRequest, Order, OrderItem
+from app.services.orders_service import OrdersService
+from fastapi import APIRouter, status, HTTPException, Depends
+from app.schemas.user import User
+from uuid import uuid4
+from app.auth.token_utils import get_current_user
  
 router = APIRouter(prefix = "/orders", tags = ["Orders"])
+order_service = OrdersService()
 
-notification = NotificationService()     #Creates an instance of NotificationService class. This will be used to generate notifications when orders are created.
-orders_store: Dict[str, CreateOrderResponse] = {}   #In-memory storage for orders in a dictionary. However, orders disappear when application restarts.
-
-DELIVERY_STATUS_TRANSITIONS = {
-    #"Created": ["Preparing"],
-    #"Preparing": ["Ready"],
-    #"Ready": []
-   "Created": ["Preparing"],
-   "Preparing": ["Ready"],
-   "Ready": ["Delivered"],
-   "Delivered": []
-}
-
-PICKUP_STATUS_TRANSITIONS = {
-   # "Created": ["Preparing"],
-    #"Preparing": ["Ready"],
-   # "Ready": []
-    "Created": ["Preparing"],
-    "Preparing": ["Ready"],
-    "Ready": ["Picked up"],
-    "Picked up": []
-}
-
+# Create Order
 @router.post("", response_model = CreateOrderResponse, status_code = status.HTTP_201_CREATED)
-def create_order(order_request: CreateOrderRequest) -> CreateOrderResponse:
-# This is the endpoint for creating an order. It generates a notification when an order is created. key endpoint for SR1. Updated in SR2 as it now stores in memory.
- if order_request.delivery_method is not None:
-     if order_request.delivery_method not in ["delivery", "pickup"]:
-         raise HTTPException(status_code=400,detail="delivery_method must be either 'delivery' or 'pickup'.")
+def create_order(order: CreateOrderRequest) -> CreateOrderResponse:
+    return order_service.create_order(order)
 
-     if order_request.delivery_method == "delivery" and not order_request.delivery_address:
-         raise HTTPException(status_code=400,detail="delivery_address is required for delivery orders.")
+# Get All Orders
+@router.get("/", response_model=List[Order])
+def get_orders() -> List[Order]:
+    """Retrieves all stored orders."""
+    return order_service.list_orders()
 
-     if order_request.delivery_method == "pickup" and not order_request.pickup_location:
-         raise HTTPException(status_code=400,detail="pickup_location is required for pickup orders.")
+# Get Order By Id
+@router.get("/{order_id}", response_model=Order, dependencies=[Depends(get_current_user)])
+def get_order_by_id(order_id: str, current_user: User = Depends(get_current_user)) -> Order:
+    """Retrieves a stored order by its ID. Performs security check in function before return"""
+    return order_service.get_order_by_id(order_id, current_user)
 
- order_id = str(uuid4())     #Generates a unique order ID using uuid4.
- now = datetime.now(timezone.utc)     #records tiem wfor when order is created/updated/delivered
-    
- order = CreateOrderResponse(
-     order_id = order_id,
-     user_id = order_request.user_id,
-     restaurant_id = order_request.restaurant_id,
-     items = order_request.items,
-     status = "Created",
-     delivery_method=order_request.delivery_method,
-     delivery_address=order_request.delivery_address,
-     pickup_location=order_request.pickup_location,
-     created_at = now,
-     updated_at = now,
-     delivered_at = None
- )
+# Update Order Status
+@router.patch("/{order_id}/status", response_model = Order)
+def update_order_status(order_id: str, status_request: OrderStatusUpdateRequest) -> Order:
+    return order_service.update_order_status(order_id, status_request)
 
- orders_store[order.order_id] = order     #Store the order in the in-memory orders_store dictionary.
+# Get all Orders by User Id
+@router.get("/history/{user_id}", response_model = List[Order])
+def get_past_order_history(user_id: str, current_user: User = Depends(get_current_user)) -> List[Order]:
+    #The authenticated user must match the requested user id. SR3 security check.
+    if current_user.id != user_id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized to perform this action.") 
+    return order_service.get_order_history_by_user_id(user_id)
 
- #Generate a notification for the order creation event.
- notification.create_order_created_notification(user_id = order_request.user_id, order_id = order.order_id)
-
- return order
+# Update Order Delivery Status
+@router.put("/{order_id}/delivery", response_model=Order)
+def update_delivery_info(order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> Order:
+    return order_service.assign_delivery_info(order_id, delivery_request)
 
 
+<<<<<<< HEAD
 
 @router.get("/{order_id}", response_model=CreateOrderResponse)
 def get_order(order_id: str) -> CreateOrderResponse:
@@ -158,3 +138,10 @@ def assign_delivery_info(order_id: str, delivery_request: DeliveryInfoUpdateRequ
 
     orders_store[order_id] = order
     return order
+=======
+# Feat4-SR2, updated endpoint according to Siam and Omarion's work regarding order updates
+# Update Order Information
+@router.put("/{order_id}", response_model=CreateOrderResponse)
+def update_order(order_id: str, items: List[OrderItem]) -> Order:
+    return order_service.update_order_info(order_id, items)
+>>>>>>> feat-6-sr1-subtotal

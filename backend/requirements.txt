@@ -4,3 +4,5 @@ pytest
 pylint
 pwdlib
 pyjwt
+coverage
+pytest-cov

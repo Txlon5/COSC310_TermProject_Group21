@@ -1,0 +1,23 @@
+[
+  {
+    "order_id": "df29a91a-901d-4826-a668-813c1c1b5c81",
+    "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
+    "items": [
+      {
+        "menuItemId": 2,
+        "name": "Heya",
+        "price": 20.0,
+        "quantity": 2
+      }
+    ],
+    "status": "ready",
+    "total_price": 0.0,
+    "delivery_method": "pickup",
+    "delivery_address": "string",
+    "pickup_location": "string",
+    "created_at": "2026-03-22T23:55:28.013937Z",
+    "updated_at": "2026-03-23T00:03:40.165443Z",
+    "delivered_at": null
+  }
+]

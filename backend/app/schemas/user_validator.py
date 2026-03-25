@@ -49,3 +49,11 @@ class UserValidator:
         
         # Return if conditions not met and has not returned yet
         return False
+
+    @staticmethod
+    def is_valid_role(role: str) -> bool:
+        """
+        Returns True if role is either user or admin
+        Returns False otherwise
+        """
+        return role in ["user", "admin"]

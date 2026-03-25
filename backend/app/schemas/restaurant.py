@@ -1,33 +1,38 @@
-from pydantic import BaseModel
-from typing import List, Union
-
-class Restaurant(BaseModel):
-    id: str
-    name: str
-    category: str
-    tags: List[str] = []
-
-class RestaurantCreate(BaseModel):
-    name: str
-    category: str
-    tags: List[str] = []
-
-class RestaurantUpdate(BaseModel):
-    name : str
-    category:str
-    tags: List[str] = []
+from pydantic import BaseModel, Field, ConfigDict
+from app.schemas.menu import MenuItem
+from typing import List, Optional
 
 # Represents a single menu item returned to the client
-class MenuItemOut(BaseModel):
-    menuItemId: int
-    name: str
-    price: float
-    category: str
 
-# Represents a restaurant returned to the client
-class RestaurantOut(BaseModel):
-    restaurantId: Union[str, int]
-    name: str
-    tags: List[str]
+class Restaurant(BaseModel):
+    restaurant_id: str
+    restaurant_name: str
     isOpen: bool
-    menuItems: List[MenuItemOut]
+    tags: List[str]
+    menuItems: List[MenuItem]
+
+class RestaurantCreate(BaseModel):
+    restaurant_name: str
+    isOpen: bool = True
+    tags: List[str]
+
+class RestaurantUpdate(BaseModel):
+    restaurant_name: Optional[str] = None
+    isOpen: Optional[bool] = None
+    tags: Optional[List[str]] = None
+    
+    # Set FASTAPI docs route example
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "restaurant_name": "",
+                "isOpen": True,
+                "tags": []
+            }
+        }
+    )
+
+class RestaurantMinimal(BaseModel):
+    restaurant_id: str
+    restaurant_name: str
+    tags: List[str]

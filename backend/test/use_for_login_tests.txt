@@ -1,0 +1,29 @@
+from fastapi.testclient import TestClient
+from app.main import app
+from app.auth.token_utils import get_current_user
+from app.schemas.user import User
+import pytest
+client = TestClient(app)
+
+
+# Test Preparation
+
+# Create mock admin for testing
+def override_get_current_user():
+    return User(
+        id="8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7",
+        name="Admin",
+        email="admin@example.com",
+        password="password123!",
+        role="admin"
+    )
+
+# Overide get_current_user() function to return the mock admin
+@pytest.fixture(autouse=True)
+def apply_admin_override():
+    # Set the override
+    app.dependency_overrides[get_current_user] = override_get_current_user
+    # Pause to allow test to run with override
+    yield 
+    # Clear the override after test is done
+    app.dependency_overrides = {}

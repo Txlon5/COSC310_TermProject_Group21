@@ -2,9 +2,7 @@
   {
     "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
     "restaurant_name": "Demo Diner",
-    "tags": [
-      "diner"
-    ],
+    "tags": ["diner"],
     "isOpen": true,
     "menuItems": [
       {
@@ -25,14 +23,13 @@
         "price": 12.0,
         "category": "Food"
       }
+
     ]
   },
   {
     "restaurant_id": "85590c53-fc55-4837-a3ef-283345df572a",
     "restaurant_name": "Test Pizza",
-    "tags": [
-      "pizza"
-    ],
+    "tags": ["pizza"],
     "isOpen": true,
     "menuItems": [
       {
@@ -52,21 +49,13 @@
         "name": "Canadian Pizza",
         "price": 23.0,
         "category": "Food"
-      },
-      {
-        "menuItemId": 4,
-        "name": "Cheesy Strips",
-        "price": 100.0,
-        "category": "Premium Organic Foods"
       }
     ]
   },
   {
     "restaurant_id": "facf5d81-4bd9-4003-9c08-1b98471b2c34",
     "restaurant_name": "Test Burger",
-    "tags": [
-      "burger"
-    ],
+    "tags": ["burger"],
     "isOpen": true,
     "menuItems": [
       {
