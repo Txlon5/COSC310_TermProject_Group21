@@ -50,11 +50,12 @@ def setup_test_environment():
     app.dependency_overrides = {}
 
 def test_invalid_delivery_method():
-    response = client.post("/orders", params={"delivery_method": "drone"}, json={
+    response = client.post("/orders", json={
         "user_id": "u1",
         "card_id": "test-card-id",
         "restaurant_id":RESTAURANT_ID ,
         "items": [{"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "quantity": 1}],
+        "delivery_method": "drone"
     })
     assert response.status_code == 422
 
