@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
-from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusResponse
+from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusResponse, PaymentUpdate
 from app.schemas.user import User
-from app.services.payments_service import get_transaction_by_id
+from app.services.payments_service import get_transaction_by_id, update_transaction
 from app.auth.token_utils import get_current_user
 
 router = APIRouter(prefix="/payments", tags=["Transactions"])
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/payments", tags=["Transactions"])
 def get_transaction_by_order_id(order_id: str, current_user: User = Depends(get_current_user)):
     payment = get_transaction_by_id(order_id, current_user.id)
     if payment.user_id != current_user.id and current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Not authorized to view this card.")
+        raise HTTPException(status_code=403, detail="Not authorized to view this transaction.")
     return payment
 
 # Get transaction status by order_id
@@ -25,7 +25,7 @@ def get_transaction_by_order_id(order_id: str, current_user: User = Depends(get_
 def get_payment_status_by_order_id(order_id: str, current_user: User = Depends(get_current_user)):
     payment = get_transaction_by_id(order_id, current_user.id)
     if payment.user_id != current_user.id and current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Not authorized to view this card.")
+        raise HTTPException(status_code=403, detail="Not authorized to view this transaction.")
     status = PaymentStatusResponse(
         card_num = str(payment.card.card_num),
         status = payment.status,
@@ -35,10 +35,12 @@ def get_payment_status_by_order_id(order_id: str, current_user: User = Depends(g
     return status
 
 
-# # Update credit card
-# @router.put("/{card_id}", response_model=CreditCard)
-# def put_card(card_id: str, payload: CreditCardUpdate, current_user: User = Depends(get_current_user)):
-#     return update_card(card_id, current_user, payload)
+# Update transaction
+@router.put("/{order_id}", response_model=PaymentUpdate)
+def put_transaction(order_id: str, payload: PaymentUpdate, current_user: User = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized to update this transaction.")
+    return update_transaction(order_id, current_user, payload)
 
 # # Create credit card
 # @router.post("", response_model=CreditCard, status_code=201)

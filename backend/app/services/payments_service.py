@@ -3,7 +3,7 @@ import random
 from typing import List
 from fastapi import HTTPException
 from app.schemas.payment_method import CreditCard, CreditCardCreate, CreditCardUpdate
-from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusType
+from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusType, PaymentUpdate
 from app.schemas.user import User
 from app.repositories import payment_methods_repository as card_repo
 from app.repositories import transactions_repository as transaction_repo
@@ -252,13 +252,13 @@ def create_transaction(payment: PaymentTransaction) -> PaymentTransaction:
     cards = card_repo.load_all()
 
     # Collision check transaction list 
-    for idx, t in enumerate(payments):
+    for t in payments:
         # Check if transaction already exists
         if str(t.get("order_id")) == str(payment.order_id):
             raise HTTPException(status_code=409, detail="Transaction already exists.")
     
     # Card Validation
-    for idx, c in enumerate(cards):
+    for c in cards:
         # Check if transaction already exists
         if str(c.get("id")) == str(payment.card.id):
             # Simulate payment by random selection 
@@ -268,4 +268,23 @@ def create_transaction(payment: PaymentTransaction) -> PaymentTransaction:
             transaction_repo.save_all(payments)
             return payment
         
-    raise HTTPException(status_code=404, detail="Credit card not found.")
+    raise HTTPException(status_code=404, detail="Transaction not found.")
+
+def update_transaction(order_id: str, current_user: User, payload: PaymentUpdate) -> PaymentTransaction:
+    """
+    Updates transaction details if it belongs to the user
+    Raises 403 if user not authorized to update this transaction
+    Raises 422 if any input is invalid
+    Raises 404 if no transaction exists
+    """
+    payments = transaction_repo.load_all()
+    
+    # Search transaction list
+    for idx, t in enumerate(payments):
+        # Check if order_id matches
+        if str(t.get("order_id")) == str(order_id):
+            # Check if user is authorized to update transaction
+
+            return transaction 
+    # Throw exception if card does not exist
+    raise HTTPException(status_code=404, detail=f"Transaction '{order_id}' not found")

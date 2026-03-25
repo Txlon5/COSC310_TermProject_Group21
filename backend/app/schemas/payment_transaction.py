@@ -21,8 +21,14 @@ class PaymentTransaction(BaseModel):
     updated_at: datetime
     price_total: float
 
+# Payment Status Details
 class PaymentStatusResponse(BaseModel):
     card_num: str
     status: PaymentStatusType
     updated_at: datetime
+    price_total: float
+
+# Payment Update Details
+class PaymentUpdate(BaseModel):
+    status: PaymentStatusType
     price_total: float
