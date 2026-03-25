@@ -1,42 +1,65 @@
+from app.schemas.delivery import DeliveryType, DeliveryStatus
+from app.schemas.item import ItemBase
 from pydantic import BaseModel, Field
-from typing import List, Optional, Union
+from typing import List, Optional
 from datetime import datetime
 
 # One item inside an order request/response
-class OrderItem(BaseModel):
-    menuItemId: int
+class OrderItem(ItemBase):
+    name:str
+    price: float
     quantity: int 
-    item_name: Optional[str] = None
 
 # Unified CreateOrderRequest
 class CreateOrderRequest(BaseModel):
-    user_id: Optional[str] = None
-    restaurant_id: Union[int, str] = Field(..., alias="restaurant_id")
-    items: List[OrderItem] = Field(..., alias="items")
-    delivery_method: Optional[str] = None
+    user_id: str
+    restaurant_id: str
+    items: List[OrderItem]
+    status: DeliveryStatus = DeliveryStatus.created
+    delivery_method: DeliveryType = DeliveryType.delivery
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
 
+# Order Object - [Temp here]
+class Order(BaseModel):
+    order_id: str
+    user_id: str
+    restaurant_id: str
+    items: List[OrderItem]
+    total_price: Optional[float] = None
+    status: Optional[DeliveryStatus]
+    delivery_method: Optional[DeliveryType] = None
+    delivery_address: Optional[str] = None
+    pickup_location: Optional[str] = None
+    assigned_driver: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    delivered_at: Optional[datetime]
+    
+
 # Response returned after creating/retrieving an order
+# LEGACY CODE - FOR REFERENCE
 class OrderOut(BaseModel):
     order_id: int
-    restaurant_id: Union[int, str]
+    restaurant_id: str
     items: List[OrderItem]
+    
 
 class CreateOrderResponse(BaseModel):
     order_id: str
-    user_id: Optional[str] = None
-    restaurant_id: Union[int, str] = Field(..., alias="restaurant_id")
-    restaurant_name: Optional[str] = None
+    user_id: str
+    restaurant_id: str
     items: List[OrderItem]
-    status: str
-    delivery_method: Optional[str] = None
+    status: DeliveryStatus = DeliveryStatus.created
+    total_price: float = 0 
+    delivery_method: DeliveryType = DeliveryType.delivery
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     delivered_at: Optional[datetime] = None
 
+# POTENTIAL LEGACY CODE - FOR REFERENCE
 class UpdateOrderStatusRequest(BaseModel):
     new_status: str
     delivery_method: Optional[str] = None
@@ -47,7 +70,7 @@ class UpdateOrderStatusRequest(BaseModel):
     delivered_at: Optional[datetime] = None
 
 class OrderStatusUpdateRequest(BaseModel):
-    status: str = Field(..., min_length=1)
+    status: DeliveryStatus
 
 class DeliveryInfoUpdateRequest(BaseModel):
     delivery_method: Optional[str] = None

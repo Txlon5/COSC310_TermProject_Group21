@@ -1,42 +1,215 @@
-"""
-Feat4-SR1
-The system shall allow users to create food orders
+from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse,DeliveryInfoUpdateRequest,Order,DeliveryInfoResponse
+from fastapi import APIRouter, status, Depends, HTTPException
+from app.schemas.order import CreateOrderResponse, CreateOrderRequest, Order, OrderItem
+from app.schemas.delivery import DeliveryType, DeliveryStatus
+from app.schemas.user import User
+from app.services.notification_service import Notification, NotificationService
+from app.repositories.orders_repository import load_all, save_all
+from typing import List, Dict
+from datetime import datetime, timezone
+from uuid import uuid4
+from app.services.menu_service import fetch_menu_by_restaurant_id
 
-This file contains business logic for creating and retrieving orders.
-Here, we can:
-- Validate order contents
-- Ensure an order has at least one item
-- Delegate persistence/retrieval to the repository
-"""
+# Order Status Dictionary
+PICKUP_STATUS_TRANSITIONS = {
+    DeliveryStatus.created.value: [DeliveryStatus.preparing.value],
+    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value],
+    DeliveryStatus.ready.value: [DeliveryStatus.picked_up.value],
+    DeliveryStatus.picked_up.value: [DeliveryStatus.complete.value],
+}
+DELIVERY_STATUS_TRANSITIONS = {
+    DeliveryStatus.created.value: [DeliveryStatus.preparing.value],
+    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value],
+    DeliveryStatus.ready.value: [DeliveryStatus.delivered.value],
+    DeliveryStatus.delivered.value: [DeliveryStatus.complete.value],
+}
 
 class OrdersService:
-    def __init__(self, repo, restaurants_repo):
-        self.repo = repo
-        self.restaurants_repo = restaurants_repo
+    def __init__(self):
+        self.notification = NotificationService()     #Creates an instance of NotificationService class. This will be used to generate notifications when orders are created.
 
-    def create_order(self, restaurant_id, items):
+    def list_orders(self):
+        return [Order(**it) for it in load_all()]
+    
+    # Tariq/Siam [Notification]
+    def create_order(self, order_request: CreateOrderRequest) -> CreateOrderResponse:
         # Order must contain at least one item
-        if not items or len(items) == 0:
+        if not order_request.items or len(order_request.items) == 0:
             raise ValueError("Order must contain at least one item")
 
         # Validate menuItemIds against restaurant's menuItems
-        restaurants = self.restaurants_repo.get_all()
-        restaurant = next((r for r in restaurants if r["restaurant_id"] == restaurant_id), None)
-        if not restaurant:
-            raise ValueError("Restaurant not found")
+        menu = fetch_menu_by_restaurant_id(order_request.restaurant_id)
+        valid_menu_ids = {item.menuItemId for item in menu}
+        
 
-        valid_menu_ids = {item["menuItemId"] for item in restaurant["menuItems"]}
-        for order_item in items:
-            if order_item["menuItemId"] not in valid_menu_ids:
-                raise ValueError(f"Invalid menuItemId: {order_item['menuItemId']} for restaurant {restaurant_id}")
+        # Check for at least one valid menu item with quantity >= 1
+        has_valid_quantity = False
+        for order_item in order_request.items:
+            if order_item.menuItemId not in valid_menu_ids:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid menuItemId: {order_item.menuItemId} for restaurant {order_request.restaurant_id}. Please check the menu items for this restaurant and use a valid menuItemId."
+                )
+            if order_item.quantity and order_item.quantity >= 1:
+                has_valid_quantity = True
 
-        return self.repo.create_order(restaurant_id, items)
+        if not has_valid_quantity:
+            raise HTTPException(
+                status_code=400,
+                detail="Order must include at least one valid menu item with quantity of 1 or more."
+            )
 
-    def get_order_by_id(self, order_id):
+        orders = load_all()
+
+
+        order_id = str(uuid4())     #Generates a unique order ID using uuid4.
+        timestamp = datetime.now(timezone.utc)     #records time for when order is created/updated/delivered
+        
+        new_order = CreateOrderResponse(
+            order_id = order_id,
+            user_id = order_request.user_id,
+            restaurant_id = order_request.restaurant_id,
+            items = order_request.items,
+            status = DeliveryStatus.created,
+            delivery_method= DeliveryType(order_request.delivery_method),
+            delivery_address=order_request.delivery_address,
+            pickup_location=order_request.pickup_location,
+            created_at = timestamp,
+            updated_at = timestamp,
+            delivered_at = None
+        )
+        
+        orders.append(new_order.model_dump(mode='json'))
+        save_all(orders)
+    
+        # Generate a notification for the order creation event.
+        self.notification.create_order_created_notification(user_id = new_order.user_id, order_id = new_order.order_id)
+
+        return new_order
+        #return None #repo.create_order(restaurant_id, items)
+
+     
+    # Tariq
+    def get_order_by_id(self, order_id: str, current_user: User) -> Order:
         # Retrieve the order from the repository
-        order = self.repo.get_order_by_id(order_id)
+        orders = load_all()
 
-        if order is None:
-            raise ValueError("Order not found") # Quick error handling for not found
+        # Iterate through orders list
+        for o in orders:
+            # Return the found order
+            if str(o.get("order_id")) == order_id:
+                #The authenticated user must match the requested user id. SR3 security check.
+                if (current_user.id != str(o.get("user_id")) and current_user.role != "admin"):
+                    raise HTTPException(status_code=403, detail=f"Not authorized to perform this action.")
+                return Order(**o) 
+                 
+        raise HTTPException(status_code=404, detail="Order not found.") # Quick error handling for not found
 
-        return order # Return the found order
+    # Omarion/Siam [Notification]
+    def update_order_status(self, update_order_id: str, status_request: OrderStatusUpdateRequest) -> Order:
+        orders = load_all()
+        # Search order list for order associated with update_order_id
+        #this updated status of existing order and generates a notif when status changes. Essential for SR2.
+        for idx, o in enumerate(orders):
+            if str(o.get("order_id")) == update_order_id:        
+                old_status = DeliveryStatus(o.get("status"))
+                new_status = status_request.status
+                
+                if old_status == new_status:
+                    raise HTTPException(status_code = 400, detail = "Order status remains unchanged.")  
+
+                if DeliveryType(o.get("delivery_method")) == DeliveryType.pickup:
+                    allowed_next_statuses = PICKUP_STATUS_TRANSITIONS.get(old_status.value, [])
+                else:
+                    allowed_next_statuses = DELIVERY_STATUS_TRANSITIONS.get(old_status.value, [])
+
+                if new_status.value not in allowed_next_statuses:
+                    raise HTTPException(status_code=400, detail=f"Invalid status transition from '{old_status.value}' to '{new_status.value}'.")
+
+                timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                
+                o["status"] = new_status.value     #Update the order status 
+                o["updated_at"] = timestamp
+                
+                if new_status == DeliveryStatus.delivered:
+                    o["delivered_at"] = timestamp
+                    
+                orders[idx] = o     #Save the updated order 
+                save_all(orders)
+                    
+                #Now generate a notification for the order status change event.
+                self.notification.create_order_status_changed_notification(
+                    user_id = o["user_id"],
+                    order_id = o["order_id"],
+                    old_status = old_status,
+                    new_status = new_status
+                )
+                
+                return Order(**o)
+        #404 - not found if order ID does not exist 
+        raise HTTPException(status_code = 404, detail = "Order not found.")    
+
+    # Omarion
+    # Update Order Delivery Status
+    def assign_delivery_info(self, update_order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> Order:
+        orders = load_all()
+        # Search order list for order associated with update_order_id
+        for idx, order in enumerate(orders):
+            if str(order.get("order_id")) == update_order_id:
+                # Set new values
+                if delivery_request.delivery_method is not None:
+                    order["delivery_method"] = delivery_request.delivery_method
+                if delivery_request.delivery_address is not None:
+                    order["delivery_address"] = delivery_request.delivery_address
+                if delivery_request.pickup_location is not None:
+                    order["pickup_location"] = delivery_request.pickup_location
+                order["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z") # Convert to a string to prevent json save issues
+
+                # Set order entry with updated values
+                orders[idx] = order
+
+                # Save changes to order
+                save_all(orders)
+                return Order(**order)
+        raise HTTPException(status_code=404, detail="Order not found.")
+
+    # Omarion
+    # Update Order Information
+    def update_order_info(self, update_order_id: str, items: List[OrderItem]):
+        orders_store = load_all()
+        
+        # Search order list for order associated with update_order_id
+        for idx, o in enumerate(orders_store):
+            # Check if update_restaurant_id matches
+            if str(o.get("order_id")) == str(update_order_id):
+                if DeliveryStatus(o.get("status")) in (DeliveryStatus.delivered, DeliveryStatus.picked_up):
+                    raise HTTPException(status_code=400, detail="Cannot update a completed (Delivered or Picked up) order.")
+                if items is not None:
+                    o["items"] = [it.model_dump() for it in items]
+                o["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                
+                # Save changes to orders list
+                orders_store[idx] = o
+                save_all(orders_store)
+
+                # Return order
+                return Order(**o)
+        # Throw exception if order does not exist
+        raise HTTPException(status_code=404,detail=f"Order not found.")
+
+    # Siam
+    def get_order_history_by_user_id(self, user_id: str) -> List[Order]:
+        orders_store = load_all()
+        user_orders: List[Order] = []
+        
+        # Search order list for order associated with update_order_id
+        for idx, o in enumerate(orders_store):
+            # Check if update_restaurant_id matches
+            if str(o.get("user_id")) == str(user_id):
+                user_orders.append(Order(**o))
+        
+        # Return list of orders
+        return user_orders
+
+
+
