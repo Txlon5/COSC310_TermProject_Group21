@@ -11,10 +11,12 @@ class PaymentStatusType (StrEnum):
     refunded = "refunded"
 
 # Payment Details
-class Payment(BaseModel):
+class PaymentTransaction(BaseModel):
     payment_id: str = Field(default_factory=lambda: "payment_...")
     order_id: str
     card: CreditCard
     status: PaymentStatusType = PaymentStatusType.pending
     created_at: datetime
     updated_at: datetime
+    price_total: float
+

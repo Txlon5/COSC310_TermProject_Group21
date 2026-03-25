@@ -1,0 +1,19 @@
+[
+  {
+    "payment_id": "3cc70a46-e8e9-4421-b2ef-f68ca90be31b",
+    "order_id": "a5a41ed2-bf86-402b-bac7-ce18cc671f75",
+    "card": {
+      "id": "d45f3866-88d7-46c0-9536-6f77250a5d5f",
+      "user_id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7",
+      "card_num": "4868719196829038",
+      "card_cvc": "344",
+      "card_exp": "2029-02",
+      "holder_name": "John Smith",
+      "holder_address": "1 Orsi Crt"
+    },
+    "status": "pending",
+    "created_at": "2026-03-25T06:31:34.514543Z",
+    "updated_at": "2026-03-25T06:31:34.514549Z",
+    "price_total": 0.0
+  }
+]

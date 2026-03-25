@@ -1,12 +1,15 @@
 from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse,DeliveryInfoUpdateRequest,Order,DeliveryInfoResponse
 from fastapi import APIRouter, status, Depends, HTTPException
 from app.schemas.order import CreateOrderResponse, CreateOrderRequest, Order, OrderItem
+from app.schemas.payment_method import CreditCard
+from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusType
 from app.schemas.delivery import DeliveryType, DeliveryStatus
 from app.schemas.user import User
-from app.services.notification_service import Notification, NotificationService
+from app.services.notification_service import NotificationService
 from app.repositories.orders_repository import load_all, save_all
-from typing import List, Dict
+from typing import List
 from datetime import datetime, timezone
+from app.services.payments_service import create_transaction
 from uuid import uuid4
 from app.services.menu_service import fetch_menu_by_restaurant_id
 
@@ -81,7 +84,31 @@ class OrdersService:
         
         orders.append(new_order.model_dump(mode='json'))
         save_all(orders)
-    
+
+        # temp_card = CreditCard(
+        #         id = "d45f3866-88d7-46c0-9536-6f77250a5d5f",
+        #         user_id = order_request.user_id,
+        #         card_num = "4868719196829038",
+        #         card_cvc= "344",
+        #         card_exp= "2029-02",
+        #         holder_name= "John Smith",
+        #         holder_address= "1 Orsi Crt"
+        #     )
+        
+        # # Generate payment transaction
+        # transaction = PaymentTransaction(
+        #     payment_id = str(uuid4()),
+        #     order_id = order_id,
+        #     status = PaymentStatusType.pending,
+        #     card = temp_card,
+        #     created_at = datetime.now(timezone.utc),
+        #     updated_at = datetime.now(timezone.utc),
+        #     price_total = 0.00
+        # )
+
+        # # Create payment transaction
+        # create_transaction(transaction)
+        
         # Generate a notification for the order creation event.
         self.notification.create_order_created_notification(user_id = new_order.user_id, order_id = new_order.order_id)
 

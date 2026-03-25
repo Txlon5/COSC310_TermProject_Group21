@@ -2,8 +2,10 @@ import uuid
 from typing import List
 from fastapi import HTTPException
 from app.schemas.payment_method import CreditCard, CreditCardCreate, CreditCardUpdate
+from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusType
 from app.schemas.user import User
-from app.repositories.payment_methods_repository import load_all, save_all
+from app.repositories import payment_methods_repository as card_repo
+from app.repositories import transactions_repository as transaction_repo
 from app.schemas.card_validator import CardValidator
 
 def list_user_cards(user_id: str) -> List[CreditCard]:
@@ -11,7 +13,7 @@ def list_user_cards(user_id: str) -> List[CreditCard]:
     Returns all cards belonging to a specific user
     """
     # Load card list
-    cards = load_all()
+    cards = card_repo.load_all()
     user_cards = []
 
     # Fetch cards that are owned by the userid
@@ -38,7 +40,7 @@ def create_card(user_id: str, payload: CreditCardCreate) -> CreditCard:
     Raises 409 if random uuid(card_id) is already used in the system
     """
     # Load card list
-    cards = load_all()
+    cards = card_repo.load_all()
 
     # Fetch card values
     new_card_id = str(uuid.uuid4())
@@ -77,7 +79,7 @@ def create_card(user_id: str, payload: CreditCardCreate) -> CreditCard:
     
     # Save card and return result
     cards.append(new_card.model_dump(mode='json'))
-    save_all(cards)
+    card_repo.save_all(cards)
     return new_card
 
 def get_card_by_id(card_id: str) -> CreditCard:
@@ -86,7 +88,7 @@ def get_card_by_id(card_id: str) -> CreditCard:
     Raises 404 if no card exists
     """
     # Load card list
-    cards = load_all()
+    cards = card_repo.load_all()
     
     # Search card list
     for c in cards:
@@ -110,7 +112,7 @@ def update_card(card_id: str, current_user: User, payload: CreditCardUpdate) -> 
     Raises 422 if any input is invalid
     Raises 404 if no card exists
     """
-    cards = load_all()
+    cards = card_repo.load_all()
     
     # Search card list
     for idx, c in enumerate(cards):
@@ -153,7 +155,7 @@ def update_card(card_id: str, current_user: User, payload: CreditCardUpdate) -> 
 
             # Save changes to card list
             cards[idx] = c
-            save_all(cards)
+            card_repo.save_all(cards)
 
             # Retrieve card for masking
             card = CreditCard(**c)
@@ -174,7 +176,7 @@ def delete_card(card_id: str, current_user: User) -> None:
     Raises 404 if no card exists
     """
     # Load card list
-    cards = load_all()
+    cards = card_repo.load_all()
     new_cards = []
 
     # Search card list
@@ -193,5 +195,27 @@ def delete_card(card_id: str, current_user: User) -> None:
     
     # Save new card list
     new_cards = [c for c in cards if c.get("id") != card_id]
-    save_all(new_cards)
+    card_repo.save_all(new_cards)
+
+# Transaction Functions
+def create_transaction(payment: PaymentTransaction) -> PaymentTransaction:
+    # Load transaction list
+    payments = transaction_repo.load_all()
+    cards = card_repo.load_all()
+
+    # Collision check transaction list 
+    for idx, t in enumerate(payments):
+        # Check if transaction already exists
+        if str(t.get("order_id")) == str(payment.order_id):
+            raise HTTPException(status_code=409, detail="Transaction already exists.")
+    
+    # Card Validation
+    for idx, c in enumerate(cards):
+        # Check if transaction already exists
+        if str(c.get("id")) == str(payment.card.id):
+            payments.append(payment.model_dump(mode='json'))
+            transaction_repo.save_all(payments)
+            return payment
+    
+    raise HTTPException(status_code=404, detail="Credit card not found.")
 
