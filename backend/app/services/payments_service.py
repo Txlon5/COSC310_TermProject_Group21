@@ -1,7 +1,7 @@
 import uuid
 from typing import List
 from fastapi import HTTPException
-from app.schemas.payment_method import CreditCard, CreditCardCreate
+from app.schemas.payment_method import CreditCard, CreditCardCreate, CreditCardUpdate
 from app.schemas.user import User
 from app.repositories.payment_methods_repository import load_all, save_all
 from app.schemas.card_validator import CardValidator
@@ -88,8 +88,9 @@ def get_card_by_id(card_id: str) -> CreditCard:
     # Load card list
     cards = load_all()
     
-    # Fetch card associated with card_id
+    # Search card list
     for c in cards:
+        # Check if card_id matches
         if c.get("id") == card_id:
             # Retrieve Card
             card = CreditCard(**c)
@@ -101,6 +102,70 @@ def get_card_by_id(card_id: str) -> CreditCard:
             # Return Card
             return card
     raise HTTPException(status_code=404, detail="Credit Card {card_id} not found.")
+
+def update_card(card_id: str, current_user: User, payload: CreditCardUpdate) -> CreditCard:
+    """
+    Updates card details if it belongs to the user
+    Raises 403 if user not authorized to update this card
+    Raises 422 if any input is invalid
+    Raises 404 if no card exists
+    """
+    cards = load_all()
+    
+    # Search card list
+    for idx, c in enumerate(cards):
+        # Check if card_id matches
+        if str(c.get("id")) == str(card_id):
+            # Check if user owns the card
+            if c.get("user_id") != current_user.id:
+                raise HTTPException(status_code=403, detail="Not authorized to update this card.")
+
+            # Update fields if entered
+            if payload.card_num is not None and payload.card_num.strip() != "":
+                # Validate new card number
+                if not CardValidator.is_valid_card_num(payload.card_num.strip()):
+                    raise HTTPException(status_code=422, detail="Invalid card number. Must be 13-19 digits.")
+                c["card_num"] = payload.card_num.strip()
+
+            if payload.card_cvc is not None and payload.card_cvc.strip() != "":
+                # Validate new cvc
+                if not CardValidator.is_valid_cvc(payload.card_cvc.strip()):
+                    raise HTTPException(status_code=422, detail="Invalid CVC. Must be 3 or 4 digits.")
+                c["card_cvc"] = payload.card_cvc.strip()
+
+            if payload.card_exp is not None and payload.card_exp.strip() != "":
+                # Validate new expiry date
+                if not CardValidator.is_valid_expiry(payload.card_exp.strip()):
+                    raise HTTPException(status_code=422, detail="Invalid expiry format. Use YYYY-MM.")
+                c["card_exp"] = payload.card_exp.strip()
+
+            if payload.holder_name is not None and payload.holder_name.strip() != "":
+                # Validate new card holder name
+                if not CardValidator.is_valid_name(payload.holder_name.strip()):
+                    raise HTTPException(status_code=422, detail="Holder name cannot contain special characters.")
+                c["holder_name"] = payload.holder_name.strip()
+
+            if payload.holder_address is not None and payload.holder_address.strip() != "":
+                # Validate new card holder address
+                if not CardValidator.is_valid_address(payload.holder_address.strip()):
+                    raise HTTPException(status_code=422, detail="Address can only contain letters, numbers, spaces, '-', or ','.")
+                c["holder_address"] = payload.holder_address.strip()
+
+            # Save changes to card list
+            cards[idx] = c
+            save_all(cards)
+
+            # Retrieve card for masking
+            card = CreditCard(**c)
+
+            # Mask details before returning
+            card.card_num = "*"*(len(card.card_num)-4) + card.card_num[-4:] 
+            card.card_cvc = "***" 
+
+            # Return card
+            return card
+    # Throw exception if card does not exist
+    raise HTTPException(status_code=404, detail=f"Credit card '{card_id}' not found")
 
 def delete_card(card_id: str, current_user: User) -> None:
     """
@@ -129,3 +194,4 @@ def delete_card(card_id: str, current_user: User) -> None:
     # Save new card list
     new_cards = [c for c in cards if c.get("id") != card_id]
     save_all(new_cards)
+
