@@ -1,12 +1,30 @@
 import pytest
 from app.services.orders_service import OrdersService
 from app.repositories.orders_repository import save_all
-from app.schemas.order import CreateOrderRequest, OrderItem
+from app.repositories.restaurants_repository import RestaurantsRepository
+from app.schemas.order import CreateOrderRequest, OrderItem,DeliveryInfoUpdateRequest
 from app.schemas.user import User
 from fastapi import HTTPException
+from app.schemas.delivery import DeliveryType
 
 # Use a restaurant id that exists in the packaged restaurant data.
 RESTAURANT_ID = "85590c53-fc55-4837-a3ef-283345df572a"
+
+def seed_restaurant():
+    repo = RestaurantsRepository()
+    repo.save_all([
+        {
+            "restaurant_id": RESTAURANT_ID,
+            "restaurant_name": "Test Pizza",
+            "tags": ["pizza"],
+            "isOpen": True,
+            "menuItems": [
+                {"menuItemId": 1, "name": "Pizza", "price": 10.0, "category": "Food"},
+                {"menuItemId": 2, "name": "Veggie Pizza", "price": 18.0, "category": "Food"},
+                {"menuItemId": 3, "name": "Canadian Pizza", "price": 23.0, "category": "Food"}
+            ]
+        }
+    ])
 
 # Making sure we don't override the orders JSON file
 # Automatic fixture to isolate tests, it runs per test 
@@ -56,6 +74,8 @@ def test_create_order_rejects_no_items():
 
 
 def test_service_retrieves_created_order_for_matching_user():
+    seed_restaurant()
+    
     service = OrdersService()
     created = service.create_order(
         CreateOrderRequest(
@@ -78,6 +98,8 @@ def test_service_retrieves_created_order_for_matching_user():
 
 
 def test_service_rejects_access_for_wrong_user():
+    seed_restaurant()
+
     service = OrdersService()
     created = service.create_order(
         CreateOrderRequest(
@@ -140,30 +162,91 @@ def test_get_order_by_id_not_found():
         service.get_order_by_id("nonexistent-id", user)
     assert exc_info.value.status_code == 404
     
-    
-# LEGACY CODE BELOW - FOR REFERENCE
-# def test_service_creates_valid_order():
-#     service = OrdersService(OrdersRepository(), RestaurantsRepository())
-#     order = service.create_order(
-#         restaurant_id=19,
-#         items=[{"menuItemId": 5, "quantity": 2, "item_name": "Pasta"}]
-#     ) # Updated values to match the CSV file, also done for other tests in this file
-#     assert order["orderId"] == 1
-#     assert len(order["items"]) == 1
+#////////////////
 
-# def test_service_rejects_empty_order():
-#     service = OrdersService(OrdersRepository(), RestaurantsRepository())
-#     with pytest.raises(ValueError): # We expect a ValueError to be raised when trying to create an order with no items
-#         service.create_order(
-#             restaurant_id=19,
-#             items=[]
-#         )
+def test_list_orders_simple():
+    save_all([
+        {
+            "order_id": "order-1",
+            "user_id": "user-1",
+            "restaurant_id": RESTAURANT_ID,
+            "items": [
+                {
+                    "menuItemId": 1,
+                    "name": "Pizza",
+                    "price": 10.0,
+                    "quantity": 1
+                }
+            ],
+            "status": "created",
+            "delivery_method": "delivery",
+            "delivery_address": None,
+            "pickup_location": None,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z",
+            "delivered_at": None
+        }
+    ])
 
-# def test_service_retrieves_created_order():
-#     service = OrdersService(OrdersRepository(), RestaurantsRepository())
-#     created = service.create_order(
-#         restaurant_id=22,
-#         items=[{"menuItemId": 2, "quantity": 1, "item_name": "Burger"}]
-#     )
-#     fetched = service.get_order_by_id(created["orderId"]) # We should be able to retrieve the same order we just created
-#     assert fetched["orderId"] == created["orderId"] # The IDs should match, confirming we retrieved the correct order
+    service = OrdersService()
+    orders = service.list_orders()
+
+    assert len(orders) == 1
+    assert orders[0].order_id == "order-1"
+
+
+def test_create_order_bad_menu_item():
+    service = OrdersService()
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.create_order(
+            CreateOrderRequest(
+                user_id="user-1",
+                restaurant_id=RESTAURANT_ID,
+                items=[OrderItem(menuItemId=999, name="Fake", price=1.0, quantity=1)]
+            )
+        )
+
+    assert exc_info.value.status_code == 400
+
+
+def test_create_order_zero_quantity():
+    service = OrdersService()
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.create_order(
+            CreateOrderRequest(
+                user_id="user-1",
+                restaurant_id=RESTAURANT_ID,
+                items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=0)]
+            )
+        )
+
+    assert exc_info.value.status_code == 400
+
+
+def test_assign_delivery_info_not_found():
+    service = OrdersService()
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.assign_delivery_info(
+            "missing-id",
+            DeliveryInfoUpdateRequest(
+                delivery_method=DeliveryType.pickup,
+                pickup_location="Front Desk"
+            )
+        )
+
+    assert exc_info.value.status_code == 404
+
+
+def test_update_order_info_not_found():
+    service = OrdersService()
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.update_order_info(
+            "missing-id",
+            [OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
+        )
+
+    assert exc_info.value.status_code == 404
