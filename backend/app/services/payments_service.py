@@ -9,6 +9,7 @@ from app.repositories import payment_methods_repository as card_repo
 from app.repositories import transactions_repository as transaction_repo
 from app.schemas.card_validator import CardValidator
 
+# [Payment Method Functions]
 def list_user_cards(user_id: str) -> List[CreditCard]:
     """
     Returns all cards belonging to a specific user
@@ -216,7 +217,35 @@ def delete_card(card_id: str, current_user: User) -> None:
     new_cards = [c for c in cards if c.get("id") != card_id]
     card_repo.save_all(new_cards)
 
-# Transaction Functions
+# [Payment Transaction Functions]
+
+def get_transaction_by_id(order_id: str, user_id: str) -> PaymentTransaction:
+    """
+    Returns the card details matching card_id if it belongs to the user 
+    Raises 403 if user not authorized to use this card
+    Raises 404 if no card exists
+    """
+    # Load transaction list
+    payments = transaction_repo.load_all()
+    
+    # Search transaction list
+    for t in payments:
+        # Check if order_id matches
+        if str(t.get("order_id")) == str(order_id):
+            if str(t.get("user_id")) != str(user_id):
+                raise HTTPException(status_code=403, detail="Not authorized to view this transaction.")
+            # Mask Details
+            transaction = PaymentTransaction(**t)
+            # Get card number and mask details before returning to user
+            mask_card_num = transaction.card.card_num 
+            transaction.card.card_num = "*"*(len(mask_card_num)-4) + mask_card_num[len(mask_card_num)-4:] # Mask card number and show only last 4 digits
+            transaction.card.card_cvc = "***" # Mask cvc
+            # Return transaction to user
+            return transaction
+
+    raise HTTPException(status_code=404, detail=f"Payment Transaction for '{order_id}' not found.")
+
+
 def create_transaction(payment: PaymentTransaction) -> PaymentTransaction:
     # Load transaction list
     payments = transaction_repo.load_all()

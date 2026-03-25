@@ -92,7 +92,8 @@ class OrdersService:
         # Generate payment transaction
         transaction = PaymentTransaction(
             payment_id = str(uuid4()),
-            order_id = order_id,
+            order_id = new_order.order_id,
+            user_id = new_order.user_id, 
             status = PaymentStatusType.pending,
             card = card,
             created_at = timestamp,
