@@ -17,18 +17,10 @@ class RestaurantsService:
     # Omarion
     # Get all restaurants - return with minimal values (id, name, tags)
     def list_restaurants(self):
-<<<<<<< HEAD
-        # Retrieve all raw restaurant data from the repository (data layer)
-        restaurants = self.repo.get_all()
-        # Convert each raw restaurant dictionary into a schema-friendly object
-    # using a helper method (_to_schema_restaurant)
-        return [self._to_schema_restaurant(r) for r in restaurants]
-=======
         return [RestaurantMinimal(**it) for it in self.repo.load_all()]
     
     # Tariq
     # Get all restaurants - full data
->>>>>>> feat-6-sr1-subtotal
     def get_restaurants(self):
         return [Restaurant(**it) for it in self.repo.load_all()]
     
@@ -52,18 +44,6 @@ class RestaurantsService:
         # Load in existing restaurant list
         restaurants = self.repo.load_all()
 
-<<<<<<< HEAD
-        new_restaurant = {
-            "restaurantId": str(uuid.uuid4()),
-            "name": payload.name.strip(),
-            "category": payload.category.strip(),
-            "tags": payload.tags if payload.tags is not None else [],
-            "isOpen": True,
-            "menuItems": []
-        }
- # Add the new restaurant to the list
-        restaurants.append(new_restaurant)
-=======
         # Create restaurant
         new_restaurant = Restaurant(
             restaurant_id = str(uuid.uuid4()),
@@ -76,7 +56,6 @@ class RestaurantsService:
         # Add new_restaurant to restaurant list and save changes
         restaurants.append(new_restaurant.model_dump(mode='json'))
         self.repo.save_all(restaurants)
->>>>>>> feat-6-sr1-subtotal
 
         # Return new_restaurant to user
         return new_restaurant
@@ -147,7 +126,7 @@ class RestaurantsService:
         return items[start:end]
 
     # Tariq
-    # SR2 - Search and Filter Functionality
+    # Feat3SR2 - Search and Filter Functionality
     def search_restaurants(self,q=None,restaurant_id=None,is_open=None,tag=None,page=None,page_size=None):
         # Get all restaurants from the repository
         restaurants = self.repo.load_all()
@@ -160,7 +139,7 @@ class RestaurantsService:
             ]
 
         # Filter by open/closed status if provided
-        # From SR1, the repository sets isOpen = True for now
+        # From Feat3SR1, the repository sets isOpen = True
         if is_open is not None:
             restaurants = [
                 r for r in restaurants
@@ -178,11 +157,6 @@ class RestaurantsService:
 
             def has_tag(r):
                 tags = r.get("tags", [])
-
-                 # If tags is a string, convert it into a list
-                if isinstance(tags, str):
-                    tags = [t.strip() for t in tags.split(",") if t.strip()]
-                    
                 return any(tag_norm == str(t).strip().lower() for t in tags)
             restaurants = [r for r in restaurants if has_tag(r)]
 
