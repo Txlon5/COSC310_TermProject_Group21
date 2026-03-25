@@ -12,12 +12,5 @@ def calculate_subtotal_endpoint(payload: SubtotalRequest):
         if payload.delivery_method not in ["delivery", "pickup"]:
             raise HTTPException(status_code=400,detail="delivery_method must be either 'delivery' or 'pickup'.")
      #SR1 endpoint:Calculates the subtotal of the selected order items.
-<<<<<<< HEAD
-    
-
-
-    menu_items = get_menu_items_by_restaurant(payload.restaurant_id)
-=======
     menu_items = fetch_menu_by_restaurant_id(payload.restaurant_id)
->>>>>>> feat-6-sr1-subtotal
     return calculate_order_subtotal(payload, menu_items)
