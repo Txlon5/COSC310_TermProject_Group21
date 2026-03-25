@@ -124,9 +124,18 @@ def delete_user(user_id: str) -> None:
     Raises 404 if no user exists
     """
     users = load_all()
-    new_users = [it for it in users if it.get("id") != user_id]
+    new_users = []
+
+    # Search user list
+    for it in users:
+        # Check user is associated with user_id
+        if it.get("id") != user_id:
+            new_users.append(it)
+
+    # Check if new user list does not contain user
     if len(new_users) == len(users):
         raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+    # Save new user list
     save_all(new_users)
 
 def login_user (email:str, password: str) -> User:

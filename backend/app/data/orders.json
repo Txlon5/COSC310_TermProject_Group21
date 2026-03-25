@@ -1,23 +1,65 @@
 [
   {
-    "order_id": "df29a91a-901d-4826-a668-813c1c1b5c81",
-    "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
+    "order_id": "7239da75-4135-42a5-9928-07ae28fe6ee4",
+    "user_id": "u1",
+    "restaurant_id": "85590c53-fc55-4837-a3ef-283345df572a",
     "items": [
       {
-        "menuItemId": 2,
-        "name": "Heya",
-        "price": 20.0,
-        "quantity": 2
+        "menuItemId": 1,
+        "name": "Onion Pizza",
+        "price": 26.0,
+        "quantity": 1
       }
     ],
-    "status": "ready",
+    "status": "created",
     "total_price": 0.0,
-    "delivery_method": "pickup",
-    "delivery_address": "string",
-    "pickup_location": "string",
-    "created_at": "2026-03-22T23:55:28.013937Z",
-    "updated_at": "2026-03-23T00:03:40.165443Z",
+    "delivery_method": "delivery",
+    "delivery_address": "123 Test St",
+    "pickup_location": null,
+    "created_at": "2026-03-24T22:37:51.219859Z",
+    "updated_at": "2026-03-24T22:37:51.234873Z",
     "delivered_at": null
+  },
+  {
+    "order_id": "e883ff1b-7193-4a5a-bbaa-383bb34db1d3",
+    "user_id": "u1",
+    "restaurant_id": "85590c53-fc55-4837-a3ef-283345df572a",
+    "items": [
+      {
+        "menuItemId": 1,
+        "name": "Onion Pizza",
+        "price": 26.0,
+        "quantity": 1
+      }
+    ],
+    "status": "created",
+    "total_price": 0.0,
+    "delivery_method": "delivery",
+    "delivery_address": null,
+    "pickup_location": null,
+    "created_at": "2026-03-24T22:37:51.255891Z",
+    "updated_at": "2026-03-24T22:37:51.255891Z",
+    "delivered_at": null
+  },
+  {
+    "order_id": "b07241a8-6329-4d71-a85c-7b2a3bf31eb3",
+    "user_id": "u1",
+    "restaurant_id": "85590c53-fc55-4837-a3ef-283345df572a",
+    "items": [
+      {
+        "menuItemId": 1,
+        "name": "Onion Pizza",
+        "price": 26.0,
+        "quantity": 1
+      }
+    ],
+    "status": "delivered",
+    "total_price": 0.0,
+    "delivery_method": "delivery",
+    "delivery_address": null,
+    "pickup_location": null,
+    "created_at": "2026-03-24T22:37:51.277911Z",
+    "updated_at": "2026-03-24T22:37:51.322953Z",
+    "delivered_at": "2026-03-24T22:37:51.322953Z"
   }
 ]

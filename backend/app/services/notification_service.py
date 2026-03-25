@@ -42,23 +42,3 @@ class NotificationService:
     def clear_notifications(self) -> None:
         self.notifications.clear()     #This clears all notifs from memory. 
 
-    #For SR3, we will be storing unauthorized access attempts
-    # unauthorized_access_log: List[dict] = []
-    # logger = logging.getLogger(__name__)        #creates a python logger for server logs
-
-    # def validate_access_to_order_history(requested_user_id: str, authenticated_user_id: Optional[str], path: str) -> None:
-        
-    #     #Unauthenticated user requests rejected
-    #     if authenticated_user_id is None:
-    #         attempt = {"requested_user_id": requested_user_id, "authenticated_user_id": None, "path": path, "timestamp": datetime.now(timezone.utc)}
-    #         unauthorized_access_log.append(attempt)
-    #         logger.warning("Unauthorized attempt: order history access rejected: %s", attempt)
-    #         raise HTTPException(status_code = 401, detail = "Authentication required.")
-        
-    #     #Accessing other user data requests rejected
-    #     if authenticated_user_id != requested_user_id:
-    #         attempt = {"requested_user_id": requested_user_id, "authenticated_user_id": authenticated_user_id, "path": path, "timestamp": datetime.now(timezone.utc)}
-    #         unauthorized_access_log.append(attempt)
-    #         logger.warning("Unauthorized attempt: forbidden order history access: %s", attempt)
-    #         raise HTTPException(status_code = 403, detail = "Not authorized to access this order history.")
-        

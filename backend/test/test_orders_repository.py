@@ -54,6 +54,7 @@ def test_create_order_stores_order(monkeypatch, tmp_path):
     )
     order_request = {
         "user_id": "testuser1",
+        "card_id": "test-card-id",
         "restaurant_id": restaurant_id,
         "items": [{"menuItemId": menuItemId, "name": name, "price": price, "quantity": 2}],
         "delivery_method": "delivery",
@@ -77,12 +78,13 @@ def test_get_order_by_id_returns_correct_order(monkeypatch, tmp_path):
     )
     order_request = {
         "user_id": "testuser2",
+        "card_id": "test-card-id",
         "restaurant_id": restaurant_id,
         "items": [{"menuItemId": menuItemId, "name": name, "price": price, "quantity": 1}],
         "delivery_method": "pickup",
         "pickup_location": "Front Desk"
     }
-    create_response = client.post("/orders", json=order_request)
+    create_response = client.post("/orders", params={"delivery_method": "pickup"}, json=order_request)
     assert create_response.status_code == 201
     
     order_id = create_response.json()["order_id"]
@@ -105,6 +107,7 @@ def test_update_completed_order_raises_error(monkeypatch, tmp_path):
     )
     order_request = {
         "user_id": "testuser3",
+        "card_id": "test-card-id",
         "restaurant_id": restaurant_id,
         "items": [{"menuItemId": menuItemId, "name": name, "price": price, "quantity": 1}],
         "delivery_method": "delivery",
