@@ -3,7 +3,7 @@ from app.schemas.menu import MenuItem, CreateMenuItem, UpdateMenuItem
 from app.services.menu_service import fetch_menu_by_restaurant_id, fetch_all_menus, create_menu_item, update_menu_item, delete_menu_item
 
 
-router = APIRouter(tags=["Menu"])
+router = APIRouter(tags=["Menus"])
 
 @router.get("/menus")
 def get_menus():

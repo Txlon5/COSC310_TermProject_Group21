@@ -53,6 +53,7 @@ def test_get_order_by_id():
     # Create an order using valid CSV data
     create_response = client.post("/orders", json={
         "user_id": "8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7",  # customer_id from mock user
+        "card_id": "test-card-id",
         "restaurant_id": RESTAURANT_ID,                     # restaurant_id from mock data
         "items": [
             {"menuItemId": 1, "quantity": 2, "name": "Taccos", "price": 12.99} # food_item from list

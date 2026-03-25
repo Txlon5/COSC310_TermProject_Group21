@@ -51,6 +51,7 @@ def test_get_notifications_for_user_returns_all_notifications():
     #Checks that notificaions created during order creation and status change are correctly retrieved for a user.
     order_request = {
         "user_id": "user456",
+        "card_id": "test-card-id",
         "restaurant_id": RESTAURANT_ID,
         "delivery_method": "delivery",
         "items": [
@@ -97,12 +98,14 @@ def test_get_notifications_for_user_returns_all_notifications():
 def test_get_notifications_returns_requested_users_notifications_only():
     #Checks that when retrieving notifications for a specific user, only that user's notifications are returned and not notifications for other users.
     order_request1 = {"user_id" : "user1",
+        "card_id": "test-card-id",
         "restaurant_id" : RESTAURANT_ID,
         "delivery_method": "delivery",
         "items": [{"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "quantity": 1}]
     }
     order_request2 = {
         "user_id" : "user2",
+        "card_id": "test-card-id",
         "restaurant_id" : RESTAURANT_ID,
         "delivery_method": "delivery",
         "items": [{"menuItemId": 1, "name": "Cheesey Bread", "price": 15.0, "quantity": 1}]

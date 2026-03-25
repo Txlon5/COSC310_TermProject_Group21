@@ -41,6 +41,7 @@ def test_service_creates_valid_order():
     order = service.create_order(
         CreateOrderRequest(
             user_id="user-1",
+            card_id="test-card-id",
             restaurant_id=RESTAURANT_ID,
             items=[OrderItem(menuItemId=1, name="Onion Pizza", price=26.0, quantity=2)],
         )
@@ -57,7 +58,7 @@ def test_service_rejects_empty_order():
 
     # Empty item lists are not allowed.
     with pytest.raises(ValueError):
-        service.create_order(CreateOrderRequest(user_id="user-1", restaurant_id=RESTAURANT_ID, items=[]))
+        service.create_order(CreateOrderRequest(user_id="user-1", card_id="test-card-id", restaurant_id=RESTAURANT_ID, items=[]))
 
 
 def test_create_order_rejects_no_items():
@@ -66,6 +67,7 @@ def test_create_order_rejects_no_items():
         service.create_order(
             CreateOrderRequest(
                 user_id="user-1",
+                card_id="test-card-id",
                 restaurant_id=RESTAURANT_ID,
                 items=[]
             )
@@ -80,6 +82,7 @@ def test_service_retrieves_created_order_for_matching_user():
     created = service.create_order(
         CreateOrderRequest(
             user_id="9c6dbfcb-72c5-4cc4-9f76-29200f0efda7",
+            card_id="test-card-id",
             restaurant_id=RESTAURANT_ID,
             items=[OrderItem(menuItemId=2, name="Cheesey Bread", price=15.0, quantity=1)],
         )
@@ -104,6 +107,7 @@ def test_service_rejects_access_for_wrong_user():
     created = service.create_order(
         CreateOrderRequest(
             user_id="owner-id",
+            card_id="test-card-id",
             restaurant_id=RESTAURANT_ID,
             items=[OrderItem(menuItemId=3, name="Canadian Pizza", price=23.0, quantity=1)],
         )
@@ -122,6 +126,7 @@ def test_get_order_by_id_owner():
     # Create and save an order
     order = service.create_order(CreateOrderRequest(
         user_id="user-1",
+        card_id="test-card-id",
         restaurant_id=RESTAURANT_ID,
         items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
     ))
@@ -134,6 +139,7 @@ def test_get_order_by_id_admin():
     service = OrdersService()
     order = service.create_order(CreateOrderRequest(
         user_id="user-1",
+        card_id="test-card-id",
         restaurant_id=RESTAURANT_ID,
         items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
     ))
@@ -146,6 +152,7 @@ def test_get_order_by_id_forbidden():
     service = OrdersService()
     order = service.create_order(CreateOrderRequest(
         user_id="user-1",
+        card_id="test-card-id",
         restaurant_id=RESTAURANT_ID,
         items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
     ))

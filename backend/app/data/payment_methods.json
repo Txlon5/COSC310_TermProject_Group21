@@ -1,0 +1,11 @@
+[
+  {
+    "id": "83abbe8d-00fa-4a30-94e9-61ca5016022f",
+    "user_id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7",
+    "card_num": "string",
+    "card_cvc": "string",
+    "card_exp": "string",
+    "holder_name": "string",
+    "holder_address": "string"
+  }
+]

@@ -61,7 +61,7 @@ def setup_test_environment():
     app.dependency_overrides = {}
 
 def test_get_order_history_requires_authentication():
-    order_request = {"user_id": "user123", "restaurant_id": "restaurantA", "items": [{"menuItemId": 1, "quantity": 1, "name": "Shawarma", "price": 10.0}], "delivery_method": "delivery", }
+    order_request = {"user_id": "user123", "card_id": "test-card-id", "restaurant_id": "restaurantA", "items": [{"menuItemId": 1, "quantity": 1, "name": "Shawarma", "price": 10.0}], "delivery_method": "delivery", }
     create_response = client.post("/orders", json=order_request)
     assert create_response.status_code == 201
 
@@ -73,6 +73,7 @@ def test_get_order_history_requires_authentication():
 def test_get_selected_order_rejects_wrong_authenticated_user():
     create_response = client.post("/orders", json={
         "user_id": "user456", 
+        "card_id": "test-card-id",
         "restaurant_id": "restaurantB", 
         "delivery_method": "delivery",
         "items": [{"menuItemId": 1, "quantity": 1, "name": "Shawarma", "price": 10.0}]
@@ -91,18 +92,21 @@ def test_get_order_history_allows_authenticated_user_to_view_own_orders():
     # Create two orders for user123 and one for a different user to verify mismatch
     response_1 = client.post("/orders", json={
         "user_id": "userabc", 
+        "card_id": "test-card-id",
         "restaurant_id": "restaurant1", 
         "delivery_method": "delivery",
         "items": [{"menuItemId": 1, "quantity": 1, "name": "Shawarma", "price": 10.0}]
     })
     response_2 = client.post("/orders", json={
         "user_id": "userabc", 
+        "card_id": "test-card-id",
         "restaurant_id": "restaurant2", 
         "delivery_method": "delivery",
         "items": [{"menuItemId": 1, "quantity": 2, "name": "Fries", "price": 5.0}]
     })
     response_3 = client.post("/orders", json={
         "user_id": "user999", 
+        "card_id": "test-card-id",
         "restaurant_id": "restaurantC", 
         "delivery_method": "delivery",
         "items": [{"menuItemId": 1, "quantity": 1, "name": "Pasta", "price": 15.0}]
@@ -126,6 +130,7 @@ def test_get_order_history_allows_authenticated_user_to_view_own_orders():
 def test_get_order_history_rejects_access_to_another_users_orders():
     create_response = client.post("/orders", json={
         "user_id": "user123", 
+        "card_id": "test-card-id",
         "restaurant_id": "restaurantA", 
         "delivery_method": "delivery",
         "items": [{"menuItemId": 1, "quantity": 1, "name": "Sushi", "price": 20.0}]
