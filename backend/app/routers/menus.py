@@ -4,7 +4,7 @@ from app.services.menu_service import fetch_menu_by_restaurant_id, fetch_all_men
 
 from app.repositories.restaurants_repository import RestaurantsRepository
 
-router = APIRouter(tags=["Menu"])
+router = APIRouter(tags=["Menus"])
 
 @router.get("/menus")
 def get_menus():
