@@ -72,6 +72,7 @@ def test_get_certain_past_orders_show_unauthorized_when_order_belongs_to_another
     #sample order
     order_request = {
         "user_id": "user123",
+        "card_id": "test-card-id",
         "restaurant_id": "24",
         "delivery_method": "delivery",
         "delivery_address": "123 Main St",
@@ -98,6 +99,7 @@ def test_get_certain_past_order_displays_full_order_details():
     #sample order
     order_request = {
         "user_id": "4c6dbfcb-72c5-4cc4-9f76-29300f0ecda7",
+        "card_id": "test-card-id",
         "restaurant_id": "28",
         "delivery_method": "delivery",
         "delivery_address": "123 Main St",
@@ -135,6 +137,7 @@ def test_get_certain_past_order_displays_full_order_details():
 def test_get_certain_past_order_reflects_updated_status():
     order_request = {
         "user_id": "4c6dbfcb-72c5-4cc4-9f76-29300f0ecda7",
+        "card_id": "test-card-id",
         "restaurant_id": "12",
         "delivery_method": "delivery",
         "delivery_address": "123 Main St",

@@ -6,7 +6,7 @@ from app.schemas.payment_method import CreditCard
 # Payment Status 
 class PaymentStatusType (StrEnum):
     pending = "pending"
-    completed = "completed"
+    approved = "approved"
     declined = "declined"
     refunded = "refunded"
 

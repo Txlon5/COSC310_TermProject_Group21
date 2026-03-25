@@ -15,6 +15,7 @@ def test_assign_delivery_info_to_existing_order():
      # First create an order that we can later update with delivery information
     create_response = client.post("/orders", json={
         "user_id": "u1",
+        "card_id": "test-card-id",
         "restaurant_id": RESTAURANT_ID,
         "items": [{"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "quantity": 1}]
     })

@@ -44,6 +44,7 @@ def setup_test_environment():
 def test_create_order_notification():
     order_request = {
         "user_id": "user123",
+        "card_id": "test-card-id",
         "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
         "items": [
             {"menuItemId": 1, "quantity": 1, "name": "Pizza", "price": 12.99},
@@ -75,6 +76,7 @@ def test_create_order_notification():
 def test_notification_associated_with_correct_user():
     order_request = {
         "user_id": "Adam22",
+        "card_id": "test-card-id",
         "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
         "items": [
             {"menuItemId": 1, "quantity": 1, "name": "Pizza", "price": 12.99}
@@ -96,6 +98,7 @@ def test_each_created_order_generates_its_own_notification():
     # two notifs should be generated for two different orders
     order_request1 = {
         "user_id": "Charlie33",
+        "card_id": "test-card-id",
         "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
         "items": [
             {"menuItemId": 1, "quantity": 1, "name": "Pizza", "price": 12.99}
@@ -106,6 +109,7 @@ def test_each_created_order_generates_its_own_notification():
     
     order_request2 = {
         "user_id": "Charlie33",
+        "card_id": "test-card-id",
         "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
         "items": [
             {"menuItemId": 2, "quantity": 1, "name": "Soda", "price": 2.99}
@@ -133,6 +137,7 @@ def test_invalid_order_request_does_not_generate_notification():
     # If order creation fails, no notification should be generated. This tests the validation of the order creation endpoint and ensures that notifications are only created for valid orders.
     invalid_order_request = {
         "user_id": "Dave44",
+        "card_id": "test-card-id",
         "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
         "items": [{}] # Invalid item
     }
@@ -147,6 +152,7 @@ def test_failed_order_creation_does_not_generate_notification():
     """
     invalid_order_request = {
         "user_id": "Eve44",
+        "card_id": "test-card-id",
         "restaurant_id": "6fc1000b-6494-4f0e-b8a1-4888f669f975",
         "items": [{}] # Invalid item
     }
