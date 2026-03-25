@@ -4,10 +4,13 @@ from fastapi import HTTPException
 from app.schemas.payment_method import CreditCard, CreditCardCreate
 from app.schemas.user import User
 from app.repositories.payment_methods_repository import load_all, save_all
+from app.schemas.card_validator import CardValidator
 
 def list_user_cards(user_id: str) -> List[CreditCard]:
-    """Returns all cards belonging to a specific user"""
-    #
+    """
+    Returns all cards belonging to a specific user
+    """
+    # Load card list
     cards = load_all()
     user_cards = []
 
@@ -29,7 +32,11 @@ def list_user_cards(user_id: str) -> List[CreditCard]:
 
 
 def create_card(user_id: str, payload: CreditCardCreate) -> CreditCard:
-    """Creates a new card for a user"""
+    """
+    Creates a new card for a user
+    Raises 422 if any input is invalid
+    Raises 409 if random uuid(card_id) is already used in the system
+    """
     # Load card list
     cards = load_all()
 
@@ -41,7 +48,23 @@ def create_card(user_id: str, payload: CreditCardCreate) -> CreditCard:
     new_holder_name=payload.holder_name.strip()
     new_holder_adr=payload.holder_address.strip()
 
-    # Create Card
+    # Card input validation
+    if not CardValidator.is_valid_card_num(new_card_num):
+        raise HTTPException(status_code=422, detail="Invalid Card Number. Must be numbers 0-9 and 13-19 digits long.")
+    if not CardValidator.is_valid_cvc(new_card_cvc):
+        raise HTTPException(status_code=422, detail="Invalid CVC. Must be numbers 0-9 and 3-4 digits long.")
+    if not CardValidator.is_valid_expiry(new_card_exp):
+        raise HTTPException(status_code=422, detail="Invalid Expiry Date. Must be numbers 0-9 and formatted YYYY-MM.")
+    if not CardValidator.is_valid_name(new_holder_name):
+        raise HTTPException(status_code=422, detail="Invalid Name. Card holder name cannot contain special characters.")
+    if not CardValidator.is_valid_address(new_holder_adr):
+        raise HTTPException(status_code=422, detail="Invalid Address. Billing address can only contain letters, numbers, spaces, '-', or ','.")
+
+    # Card_id conflict validation
+    if any(it.get("id") == new_card_id for it in cards): 
+        raise HTTPException(status_code=409, detail="ID collision; retry.")
+    
+    # Create card
     new_card = CreditCard(
         id=new_card_id,
         user_id=user_id,
@@ -58,7 +81,10 @@ def create_card(user_id: str, payload: CreditCardCreate) -> CreditCard:
     return new_card
 
 def get_card_by_id(card_id: str) -> CreditCard:
-    """Returns the card matching the card_id"""
+    """
+    Returns the card matching the card_id
+    Raises 404 if no card exists
+    """
     # Load card list
     cards = load_all()
     
