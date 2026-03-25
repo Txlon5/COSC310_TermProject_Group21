@@ -38,6 +38,7 @@ def test_update_delivered_order_api():
     # Create a delivery order
     response = client.post("/orders", json={
         "user_id": "testuser",
+        "card_id": "test-card-id",
         "restaurant_id": RESTAURANT_ID,
         "items": [{"menuItemId": 1,"name": "Onion Pizza", "price": 26.0, "quantity": 1}],
         "delivery_method": "delivery",
@@ -61,10 +62,11 @@ def test_update_picked_up_order_api():
     # Create a pickup order
     response = client.post("/orders", json={
         "user_id": "testuser",
+        "card_id": "test-card-id",
         "restaurant_id": RESTAURANT_ID,
         "items": [{"menuItemId": 2,"name": "Soda", "price": 6.0, "quantity": 1}],
-        "delivery_method": "pickup",
-        "pickup_location": "Front Desk"
+        "pickup_location": "Front Desk",
+        "delivery_method": "pickup"
     })
     assert response.status_code == 201
     order_id = response.json()["order_id"]

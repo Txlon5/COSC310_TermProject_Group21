@@ -46,7 +46,7 @@ def test_status_change_for_missing_orders_generates_404():
     assert response.json() == {"detail": "Order not found."}
     
 def test_same_status_generates_400():
-    order_request = {"user_id" : "user123", "restaurant_id" : "6fc1000b-6494-4f0e-b8a1-4888f669f975", "delivery_method": "delivery", "items": [{"menuItemId": 1, "quantity": 1, "name": "Pizza", "price": 12.99}]}
+    order_request = {"user_id" : "user123", "card_id": "test-card-id", "restaurant_id" : "6fc1000b-6494-4f0e-b8a1-4888f669f975", "delivery_method": "delivery", "items": [{"menuItemId": 1, "quantity": 1, "name": "Pizza", "price": 12.99}]}
     
     create_response = client.post("/orders", json=order_request)
     assert create_response.status_code == 201
@@ -61,7 +61,7 @@ def test_same_status_generates_400():
     assert user_notifications[0].type == "Order_Created"
     
 def test_order_status_change_generates_notification():
-    order_request = {"user_id" : "user333", "restaurant_id" : "6fc1000b-6494-4f0e-b8a1-4888f669f975", "delivery_method": "delivery", "items": [{"menuItemId": 1, "quantity": 1, "name": "Biriyani", "price": 15.00}, {"menuItemId": 1, "quantity": 1, "name": "Lassi", "price": 5.00}]}
+    order_request = {"user_id" : "user333", "card_id": "test-card-id", "restaurant_id" : "6fc1000b-6494-4f0e-b8a1-4888f669f975", "delivery_method": "delivery", "items": [{"menuItemId": 1, "quantity": 1, "name": "Biriyani", "price": 15.00}, {"menuItemId": 1, "quantity": 1, "name": "Lassi", "price": 5.00}]}
     
     create_response = client.post("/orders", json=order_request)
     assert create_response.status_code == 201
@@ -85,7 +85,7 @@ def test_order_status_change_generates_notification():
     assert status_notification.timestamp is not None
     
 def test_status_change_creates_only_one_notification():
-    order_request = {"user_id" : "user999", "restaurant_id" : "6fc1000b-6494-4f0e-b8a1-4888f669f975", "delivery_method": "delivery", "items": [{"menuItemId": 1, "quantity": 1, "name": "Sushi", "price": 22.00}]}
+    order_request = {"user_id" : "user999", "card_id": "test-card-id", "restaurant_id" : "6fc1000b-6494-4f0e-b8a1-4888f669f975", "delivery_method": "delivery", "items": [{"menuItemId": 1, "quantity": 1, "name": "Sushi", "price": 22.00}]}
     
     create_response = client.post("/orders", json=order_request)
     assert create_response.status_code == 201

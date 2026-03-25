@@ -1,12 +1,14 @@
 from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse,DeliveryInfoUpdateRequest,Order,DeliveryInfoResponse
 from fastapi import APIRouter, status, Depends, HTTPException
 from app.schemas.order import CreateOrderResponse, CreateOrderRequest, Order, OrderItem
+from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusType
 from app.schemas.delivery import DeliveryType, DeliveryStatus
 from app.schemas.user import User
-from app.services.notification_service import Notification, NotificationService
+from app.services.notification_service import NotificationService
 from app.repositories.orders_repository import load_all, save_all
-from typing import List, Dict
+from typing import List
 from datetime import datetime, timezone
+from app.services.payments_service import create_transaction, get_card_for_user
 from uuid import uuid4
 from app.services.menu_service import fetch_menu_by_restaurant_id
 
@@ -44,6 +46,7 @@ class OrdersService:
 
         # Check for at least one valid menu item with quantity >= 1
         has_valid_quantity = False
+        total_price = 0.0
         for order_item in order_request.items:
             if order_item.menuItemId not in valid_menu_ids:
                 raise HTTPException(
@@ -52,6 +55,7 @@ class OrdersService:
                 )
             if order_item.quantity and order_item.quantity >= 1:
                 has_valid_quantity = True
+                total_price += order_item.price * order_item.quantity
 
         if not has_valid_quantity:
             raise HTTPException(
@@ -59,8 +63,10 @@ class OrdersService:
                 detail="Order must include at least one valid menu item with quantity of 1 or more."
             )
 
-        orders = load_all()
+        # Validate user owns card and fetch card details
+        card = get_card_for_user(order_request.card_id, order_request.user_id)
 
+        orders = load_all()
 
         order_id = str(uuid4())     #Generates a unique order ID using uuid4.
         timestamp = datetime.now(timezone.utc)     #records time for when order is created/updated/delivered
@@ -71,6 +77,7 @@ class OrdersService:
             restaurant_id = order_request.restaurant_id,
             items = order_request.items,
             status = DeliveryStatus.created,
+            total_price = total_price,
             delivery_method= DeliveryType(order_request.delivery_method),
             delivery_address=order_request.delivery_address,
             pickup_location=order_request.pickup_location,
@@ -81,14 +88,27 @@ class OrdersService:
         
         orders.append(new_order.model_dump(mode='json'))
         save_all(orders)
-    
+        
+        # Generate payment transaction
+        transaction = PaymentTransaction(
+            payment_id = str(uuid4()),
+            order_id = order_id,
+            status = PaymentStatusType.pending,
+            card = card,
+            created_at = timestamp,
+            updated_at = timestamp,
+            price_total = total_price
+        )
+
+        # Create payment transaction
+        create_transaction(transaction)
+        
         # Generate a notification for the order creation event.
         self.notification.create_order_created_notification(user_id = new_order.user_id, order_id = new_order.order_id)
 
         return new_order
         #return None #repo.create_order(restaurant_id, items)
-
-     
+    
     # Tariq
     def get_order_by_id(self, order_id: str, current_user: User) -> Order:
         # Retrieve the order from the repository
@@ -210,6 +230,4 @@ class OrdersService:
         
         # Return list of orders
         return user_orders
-
-
 

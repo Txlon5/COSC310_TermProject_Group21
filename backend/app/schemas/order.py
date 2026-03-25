@@ -13,6 +13,7 @@ class OrderItem(ItemBase):
 # Unified CreateOrderRequest
 class CreateOrderRequest(BaseModel):
     user_id: str
+    card_id: str
     restaurant_id: str
     items: List[OrderItem]
     status: DeliveryStatus = DeliveryStatus.created
