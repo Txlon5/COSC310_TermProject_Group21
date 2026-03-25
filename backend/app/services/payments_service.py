@@ -1,4 +1,5 @@
 import uuid
+import random
 from typing import List
 from fastapi import HTTPException
 from app.schemas.payment_method import CreditCard, CreditCardCreate, CreditCardUpdate
@@ -84,7 +85,7 @@ def create_card(user_id: str, payload: CreditCardCreate) -> CreditCard:
 
 def get_card_by_id(card_id: str) -> CreditCard:
     """
-    Returns the card matching the card_id
+    Returns the card matching the card_id with masked details
     Raises 404 if no card exists
     """
     # Load card list
@@ -93,7 +94,7 @@ def get_card_by_id(card_id: str) -> CreditCard:
     # Search card list
     for c in cards:
         # Check if card_id matches
-        if c.get("id") == card_id:
+        if str(c.get("id")) == card_id:
             # Retrieve Card
             card = CreditCard(**c)
 
@@ -103,7 +104,25 @@ def get_card_by_id(card_id: str) -> CreditCard:
 
             # Return Card
             return card
-    raise HTTPException(status_code=404, detail="Credit Card {card_id} not found.")
+    raise HTTPException(status_code=404, detail=f"Credit Card '{card_id}' not found.")
+
+def get_card_for_user(card_id: str, user_id: str) -> CreditCard:
+    """
+    Returns the card details matching card_id if it belongs to the user 
+    Raises 403 if user not authorized to use this card
+    Raises 404 if no card exists
+    """
+    # Load card list
+    cards = card_repo.load_all()
+    # Search card list
+    for c in cards:
+        # Check if card_id matches
+        if str(c.get("id")) == str(card_id):
+            if str(c.get("user_id")) != str(user_id):
+                raise HTTPException(status_code=403, detail="Not authorized to use this card.")
+            return CreditCard(**c)
+
+    raise HTTPException(status_code=404, detail=f"Credit card '{card_id}' not found.")
 
 def update_card(card_id: str, current_user: User, payload: CreditCardUpdate) -> CreditCard:
     """
@@ -182,11 +201,11 @@ def delete_card(card_id: str, current_user: User) -> None:
     # Search card list
     for c in cards:
         # Check card is associated with card_id
-        if c.get("id") != card_id:
+        if str(c.get("id")) != card_id:
             new_cards.append(c)
         # Check user is authorized to remove card
-        elif c.get("id") == card_id:
-            if c.get("user_id") != current_user.id or current_user.role != "admin":
+        elif str(c.get("id")) == card_id:
+            if str(c.get("user_id")) != str(current_user.id) or str(current_user.role) != "admin":
                 raise HTTPException(status_code=403, detail="Not authorized to delete this card.")
 
     # Check if new card list does not contain card        
@@ -213,9 +232,11 @@ def create_transaction(payment: PaymentTransaction) -> PaymentTransaction:
     for idx, c in enumerate(cards):
         # Check if transaction already exists
         if str(c.get("id")) == str(payment.card.id):
+            # Simulate payment by random selection 
+            payment.status = random.choice([PaymentStatusType.declined, PaymentStatusType.approved])
+            # Save transaction and return result
             payments.append(payment.model_dump(mode='json'))
             transaction_repo.save_all(payments)
             return payment
-    
+        
     raise HTTPException(status_code=404, detail="Credit card not found.")
-
