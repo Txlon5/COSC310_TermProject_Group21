@@ -4,6 +4,10 @@ from app.repositories.orders_repository import save_all
 from app.schemas.order import CreateOrderRequest, OrderItem
 from app.schemas.user import User
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
+from app.main import app
+
+client = TestClient(app)
 
 # Use a restaurant id that exists in the packaged restaurant data.
 RESTAURANT_ID = "85590c53-fc55-4837-a3ef-283345df572a"
@@ -146,6 +150,51 @@ def test_get_order_by_id_not_found():
     with pytest.raises(HTTPException) as exc_info:
         service.get_order_by_id("nonexistent-id", user)
     assert exc_info.value.status_code == 404
+
+
+
+
+def test_subtotal_endpoint_works():
+    payload = {
+        "restaurant_id": RESTAURANT_ID,
+        "items": [
+            {
+                "item_id": "1",
+                "quantity": 1
+            }
+        ]
+    }
+
+    response = client.post("/order-cost/subtotal", json=payload)
+
+    assert response.status_code == 200
+    assert "subtotal" in response.json()
+
+
+def test_calculate_endpoint_works():
+    payload = {
+        "restaurant_id": RESTAURANT_ID,
+        "delivery_method": "delivery",
+        "delivery_address": "123 Test St",
+        "province": "BC",
+        "distance_km": 4,
+        "items": [
+            {
+                "item_id": "1",
+                "quantity": 1
+            }
+        ]
+    }
+
+    response = client.post("/order-cost/calculate", json=payload)
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert "subtotal" in data
+    assert "delivery_fee" in data
+    assert "tax" in data
+    assert "total" in data
     
     
 # LEGACY CODE BELOW - FOR REFERENCE
