@@ -72,7 +72,7 @@ def test_filter_by_tag():
     repo = FakeRestaurantsRepository() # Create repository instance
     service = RestaurantsService(repo)
     all_data = service.get_restaurants()
-    # Pick a valid tag from JSON
+    # Pick a valid tag
     valid_tag = all_data[0].tags[0] if all_data[0].tags else None
     data = service.search_restaurants(tag=valid_tag)
     assert len(data) >= 1
@@ -115,7 +115,7 @@ def test_empty_q_returns_empty_list():
     result = service.search_restaurants(q="")
     assert result == []
         
-"""SR3 PAGINATION TESTS"""
+"""FEAT3-SR3 PAGINATION TESTS"""
 
 def test_paginate_limits_by_page_size():
     service = RestaurantsService(FakeRestaurantsRepository())
@@ -146,7 +146,8 @@ def test_paginate_invalid_page_size_rejected():
     service = RestaurantsService(FakeRestaurantsRepository())
     with pytest.raises(ValueError):
         service.paginate([1, 2, 3], page=1, page_size=0) # Page size less than 1 should raise an error
-        
+    
+# Search w/ pagination tests
 def test_search_with_pagination_limits_results():
     repo = FakeRestaurantsRepository() # Create repository instance
     service = RestaurantsService(repo)
@@ -193,3 +194,21 @@ def test_delete_restaurant_not_found():
         service.delete_restaurant("999")
 
     assert exc.value.status_code == 404
+
+def test_get_restaurant_filtered_empty_q_raises():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    with pytest.raises(HTTPException) as exc:
+        service.get_restaurant_filtered(q="   ")
+    assert exc.value.status_code == 400
+    assert exc.value.detail == "q cannot be empty"
+
+def test_get_restaurant_filtered_no_args_returns_all():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    result = service.get_restaurant_filtered()
+    assert isinstance(result, list)
+    assert len(result) == 2  # both fake restaurants returned
+
+def test_get_restaurant_filtered_with_filter_parameters():
+    service = RestaurantsService(FakeRestaurantsRepository())
+    result = service.get_restaurant_filtered(is_open=True)
+    assert all(r.isOpen is True for r in result)

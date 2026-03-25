@@ -22,7 +22,6 @@ class RestaurantsRepository:
             json.dump(restaurants, f, ensure_ascii=False, indent=2)
         os.replace(tmp, self.json_path)
 
-
 # class RestaurantsRepository:
 #     def __init__(self, csv_path=None):
 #         # If no path is provided, load backend/app/data/dataset.csv, that should be where we keep the CSV file anwyay
