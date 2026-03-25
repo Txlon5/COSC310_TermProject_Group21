@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from app.schemas.payment_method import CreditCard, CreditCardCreate
+from app.schemas.payment_method import CreditCard, CreditCardCreate, CreditCardUpdate
 from app.schemas.user import User
-from app.services.payments_service import get_card_by_id, create_card, delete_card, list_user_cards
+from app.services.payments_service import get_card_by_id, create_card, update_card, delete_card, list_user_cards
 from app.auth.token_utils import get_current_user
 
 router = APIRouter(prefix="/payments/cards", tags=["Payment Methods"])
@@ -24,6 +24,12 @@ def get_card(card_id: str, current_user: User = Depends(get_current_user)):
 @router.post("", response_model=CreditCard, status_code=201)
 def add_card(payload: CreditCardCreate, current_user: User = Depends(get_current_user)):
     return create_card(current_user.id, payload)
+
+# Update credit card
+@router.put("/{card_id}", response_model=CreditCard)
+def put_card(card_id: str, payload: CreditCardUpdate, current_user: User = Depends(get_current_user)):
+    return update_card(card_id, current_user, payload)
+
 
 # Delete credit card 
 @router.delete("/{card_id}", status_code=status.HTTP_204_NO_CONTENT)
