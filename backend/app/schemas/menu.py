@@ -22,7 +22,6 @@ class MenuItem(ItemBase):
 class CreateMenuItem(BaseModel):
     name: str
     price: float
-<<<<<<< HEAD
     category: str
 
 
@@ -30,6 +29,3 @@ class UpdateMenuItem(BaseModel):
     name: str
     price: float
     category: str
-=======
-    category: str
->>>>>>> origin/main
