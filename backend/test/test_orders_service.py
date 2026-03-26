@@ -9,8 +9,8 @@ from fastapi import HTTPException
 from app.schemas.delivery import DeliveryStatus, DeliveryType
 from fastapi.testclient import TestClient
 from app.main import app
-from backend.app.schemas.payment_method import CreditCard
-from backend.app.schemas.payment_transaction import PaymentStatusType, PaymentTransaction
+from app.schemas.payment_method import CreditCard
+from app.schemas.payment_transaction import PaymentStatusType, PaymentTransaction
 
 client = TestClient(app)
 
