@@ -209,7 +209,7 @@ def delete_card(card_id: str, current_user: User) -> None:
             new_cards.append(c)
         # Check user is authorized to remove card
         elif str(c.get("id")) == card_id:
-            if str(c.get("user_id")) != str(current_user.id) or str(current_user.role) != "admin":
+            if str(c.get("user_id")) != str(current_user.id) and str(current_user.role) != "admin":
                 raise HTTPException(status_code=403, detail="Not authorized to delete this card.")
 
     # Check if new card list does not contain card        
@@ -217,7 +217,6 @@ def delete_card(card_id: str, current_user: User) -> None:
         raise HTTPException(status_code=404, detail="Credit card not found.")
     
     # Save new card list
-    new_cards = [c for c in cards if c.get("id") != card_id]
     card_repo.save_all(new_cards)
 
 # [Payment Transaction Functions]
@@ -264,8 +263,6 @@ def create_transaction(payment: PaymentTransaction) -> PaymentStatusType:
     for c in cards:
         # Check if transaction already exists
         if str(c.get("id")) == str(payment.card.id):
-            # Simulate payment by random selection 
-            payment.status = random.choice([PaymentStatusType.declined, PaymentStatusType.approved])
             # Save transaction and return result
             payments.append(payment.model_dump(mode='json'))
             transaction_repo.save_all(payments)
@@ -308,20 +305,21 @@ def update_transaction(order_id: str, current_user: User, payload: PaymentUpdate
             if (payload.status == PaymentStatusType.declined):
                 # Order cancelled
                 try:
-                    
+                    # Import OrderService to update order status
                     order = OrdersService()
                     order.update_order_status(order_id, OrderStatusUpdateRequest(status=DeliveryStatus.cancelled))
                     print("CANCELLED")
-                except HTTPException as e:
-                    print(f"Order Update Failed: {e.detail}")
+                except HTTPException:
+                    raise HTTPException(status_code=403, detail="Unable to update order status to cancelled.")  
             elif (payload.status == PaymentStatusType.approved):
                 # Order ready
                 try:
+                    # Import OrderService to update order status
                     order = OrdersService()
                     order.update_order_status(order_id, OrderStatusUpdateRequest(status=DeliveryStatus.ready))
                     print("Approved")
-                except HTTPException as e:
-                    print(f"Order Update Failed: {e.detail}")
+                except HTTPException:
+                    raise HTTPException(status_code=403, detail="Unable to update order status to approved.")  
 
             # Save changes
             payments[idx] = t
