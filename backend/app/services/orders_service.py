@@ -14,16 +14,16 @@ from app.services.menu_service import fetch_menu_by_restaurant_id
 
 # Order Status Dictionary
 PICKUP_STATUS_TRANSITIONS = {
-    DeliveryStatus.created.value: [DeliveryStatus.preparing.value],
-    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value],
-    DeliveryStatus.ready.value: [DeliveryStatus.picked_up.value],
-    DeliveryStatus.picked_up.value: [DeliveryStatus.complete.value],
+    DeliveryStatus.created.value: [DeliveryStatus.preparing.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.ready.value: [DeliveryStatus.picked_up.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.picked_up.value: [DeliveryStatus.complete.value]
 }
 DELIVERY_STATUS_TRANSITIONS = {
-    DeliveryStatus.created.value: [DeliveryStatus.preparing.value],
-    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value],
-    DeliveryStatus.ready.value: [DeliveryStatus.delivered.value],
-    DeliveryStatus.delivered.value: [DeliveryStatus.complete.value],
+    DeliveryStatus.created.value: [DeliveryStatus.preparing.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.ready.value: [DeliveryStatus.delivered.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.delivered.value: [DeliveryStatus.complete.value]
 }
 
 class OrdersService:
@@ -135,7 +135,6 @@ class OrdersService:
             if str(o.get("order_id")) == update_order_id:        
                 old_status = DeliveryStatus(o.get("status"))
                 new_status = status_request.status
-                
                 if old_status == new_status:
                     raise HTTPException(status_code = 400, detail = "Order status remains unchanged.")  
 
@@ -175,23 +174,26 @@ class OrdersService:
     def assign_delivery_info(self, update_order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> Order:
         orders = load_all()
         # Search order list for order associated with update_order_id
-        for idx, order in enumerate(orders):
-            if str(order.get("order_id")) == update_order_id:
+        for idx, o in enumerate(orders):
+            if str(o.get("order_id")) == update_order_id:
+                # Check if order cancelled or complete
+                if DeliveryStatus(o.get("status")) in (DeliveryStatus.delivered, DeliveryStatus.picked_up, DeliveryStatus.complete, DeliveryStatus.cancelled):
+                    raise HTTPException(status_code=400, detail="Cannot update an order that is completed or cancelled.")
                 # Set new values
                 if delivery_request.delivery_method is not None:
-                    order["delivery_method"] = delivery_request.delivery_method
+                    o["delivery_method"] = delivery_request.delivery_method
                 if delivery_request.delivery_address is not None:
-                    order["delivery_address"] = delivery_request.delivery_address
+                    o["delivery_address"] = delivery_request.delivery_address
                 if delivery_request.pickup_location is not None:
-                    order["pickup_location"] = delivery_request.pickup_location
-                order["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z") # Convert to a string to prevent json save issues
+                    o["pickup_location"] = delivery_request.pickup_location
+                o["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z") # Convert to a string to prevent json save issues
 
                 # Set order entry with updated values
-                orders[idx] = order
+                orders[idx] = o
 
                 # Save changes to order
                 save_all(orders)
-                return Order(**order)
+                return Order(**o)
         raise HTTPException(status_code=404, detail="Order not found.")
 
     # Omarion
@@ -203,8 +205,8 @@ class OrdersService:
         for idx, o in enumerate(orders_store):
             # Check if update_restaurant_id matches
             if str(o.get("order_id")) == str(update_order_id):
-                if DeliveryStatus(o.get("status")) in (DeliveryStatus.delivered, DeliveryStatus.picked_up):
-                    raise HTTPException(status_code=400, detail="Cannot update a completed (Delivered or Picked up) order.")
+                if DeliveryStatus(o.get("status")) in (DeliveryStatus.delivered, DeliveryStatus.picked_up, DeliveryStatus.complete, DeliveryStatus.cancelled):
+                    raise HTTPException(status_code=400, detail="Cannot update an order that is completed or cancelled.")
                 if items is not None:
                     o["items"] = [it.model_dump() for it in items]
                 o["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
