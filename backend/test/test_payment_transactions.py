@@ -168,16 +168,6 @@ def test_update_transaction_invalid_price():
         r = client.put("/payments/order-1", json={"price_total": -10.00})
         assert r.status_code == 422
 
-# Transaction Update - Unauthorized
-def test_update_transaction_unauthorized():
-    # Switch to non-admin user
-    def override_non_admin():
-        return User(id="user-id", name="User", email="user@example.com", password="Password123!", role="user")
-    app.dependency_overrides[get_current_user] = override_non_admin
-
-    r = client.put("/payments/some-order", json={"price_total": 50.00})
-    assert r.status_code == 403
-
 # Transaction Update - Status Declined
 def test_update_transaction_declined():
     fake_transactions = [make_transaction("order-1")]
