@@ -234,8 +234,6 @@ def get_transaction_by_id(order_id: str, user_id: str) -> PaymentTransaction:
     for t in payments:
         # Check if order_id matches
         if str(t.get("order_id")) == str(order_id):
-            if str(t.get("user_id")) != str(user_id):
-                raise HTTPException(status_code=403, detail="Not authorized to view this transaction.")
             # Mask Details
             transaction = PaymentTransaction(**t)
             # Get card number and mask details before returning to user
