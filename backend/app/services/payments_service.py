@@ -293,8 +293,10 @@ def update_transaction(order_id: str, current_user: User, payload: PaymentUpdate
                 raise HTTPException(status_code=422, detail="Invalid price_total. Must be 0 or greater.")
 
             # Update fields
-            t["status"] = payload.status
-            t["price_total"] = payload.price_total
+            if payload.status is not None:
+                t["status"] = payload.status
+            if payload.price_total is not None:
+                t["price_total"] = payload.price_total
             t["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
             # Import OrderService to update order status

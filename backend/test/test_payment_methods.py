@@ -30,6 +30,45 @@ def apply_admin_override():
     # Clear the override after test is done
     app.dependency_overrides = {}
 
+# Test card for API requests
+TEST_CARD = {
+    "card_num": "4868719196829038",
+    "card_cvc": "344",
+    "card_exp": "2029-11",
+    "holder_name": "John Smith",
+    "holder_address": "556 Sarsons Rd, V1W5H5, Kelowna, BC"
+}
+
+# Test card data for mock transactions
+TEST_CARD_DATA = {
+    "id": "test-card-txn-id",
+    "user_id": "8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7",
+    "card_num": "4868719196829038",
+    "card_cvc": "344",
+    "card_exp": "2029-11",
+    "holder_name": "Admin User",
+    "holder_address": "123 Admin St"
+}
+
+# Create test card and return id
+def create_test_card():
+    r = client.post("/payments/cards/", json=TEST_CARD)
+    assert r.status_code == 201
+    return r.json()["id"]
+
+# Build mock transaction for tests
+def make_transaction(order_id, user_id="8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7", status="pending"):
+    return {
+        "payment_id": f"pay-{order_id}",
+        "order_id": order_id,
+        "user_id": user_id,
+        "card": TEST_CARD_DATA,
+        "status": status,
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z",
+        "price_total": 25.00
+    }
+
 
 # Unit Tests
 
