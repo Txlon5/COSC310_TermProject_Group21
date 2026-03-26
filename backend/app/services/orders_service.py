@@ -108,7 +108,6 @@ class OrdersService:
         self.notification.create_order_created_notification(user_id = new_order.user_id, order_id = new_order.order_id)
 
         return new_order
-        #return None #repo.create_order(restaurant_id, items)
     
     # Tariq
     def get_order_by_id(self, order_id: str, current_user: User) -> Order:

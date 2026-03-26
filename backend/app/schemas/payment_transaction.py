@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 from datetime import datetime
 from enum import StrEnum
@@ -12,7 +14,7 @@ class PaymentStatusType (StrEnum):
 
 # Payment Details
 class PaymentTransaction(BaseModel):
-    payment_id: str = Field(default_factory=lambda: "payment_...")
+    payment_id: str
     order_id: str
     user_id: str
     card: CreditCard
@@ -30,5 +32,5 @@ class PaymentStatusResponse(BaseModel):
 
 # Payment Update Details
 class PaymentUpdate(BaseModel):
-    status: PaymentStatusType
-    price_total: float
+    status: Optional[PaymentStatusType] = None
+    price_total: Optional[float] = None
