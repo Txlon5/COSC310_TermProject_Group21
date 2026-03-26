@@ -212,3 +212,43 @@ def test_get_restaurant_filtered_with_filter_parameters():
     service = RestaurantsService(FakeRestaurantsRepository())
     result = service.get_restaurant_filtered(is_open=True)
     assert all(r.isOpen is True for r in result)
+
+class FakeSaveRestaurantsRepository(FakeRestaurantsRepository):
+    def __init__(self):
+        super().__init__()
+        self.saved_restaurants = None
+
+    def save_all(self, restaurants):
+        self.saved_restaurants = restaurants
+        self.restaurants = restaurants
+
+
+def test_list_restaurants_returns_minimal_data():
+    repo = FakeRestaurantsRepository()
+    service = RestaurantsService(repo)
+
+    data = service.list_restaurants()
+
+    assert len(data) == 2
+    assert data[0].restaurant_id == "1"
+    assert data[0].restaurant_name == "Pizza Place"
+    assert data[0].tags == ["Italian", "Pizza"]
+
+
+def test_update_restaurant_saves_changes():
+    repo = FakeSaveRestaurantsRepository()
+    service = RestaurantsService(repo)
+
+    payload = RestaurantUpdate(
+        restaurant_name="  New Pizza Place  ",
+        tags=["Italian", "Late Night"],
+        isOpen=False,
+    )
+
+    updated = service.update_restaurant("1", payload)
+
+    assert updated.restaurant_name == "New Pizza Place"
+    assert updated.tags == ["Italian", "Late Night"]
+    assert updated.isOpen is False
+    assert repo.saved_restaurants is not None
+    assert repo.saved_restaurants[0]["restaurant_name"] == "New Pizza Place"

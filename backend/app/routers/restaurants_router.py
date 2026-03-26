@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Query, status
 from typing import List, Optional
 from app.schemas.restaurant import Restaurant, RestaurantCreate, RestaurantUpdate, RestaurantMinimal
 from app.repositories.restaurants_repository import RestaurantsRepository

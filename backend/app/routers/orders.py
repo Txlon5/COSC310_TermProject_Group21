@@ -1,11 +1,8 @@
-from typing import Dict, List, Optional
-from datetime import datetime, timezone
-from app.schemas.menu import MenuItem
+from typing import List 
 from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest, DeliveryInfoUpdateRequest, Order, OrderItem
 from app.services.orders_service import OrdersService
 from fastapi import APIRouter, status, HTTPException, Depends
 from app.schemas.user import User
-from uuid import uuid4
 from app.auth.token_utils import get_current_user
  
 router = APIRouter(prefix = "/orders", tags = ["Orders"])

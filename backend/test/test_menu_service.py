@@ -1,107 +1,143 @@
-# import pytest
-# from fastapi import HTTPException
-# from app.services import menu_service
-# from app.schemas.menu import MenuCreate, Menu
+import pytest
+from fastapi import HTTPException
+
+from app.repositories.restaurants_repository import RestaurantsRepository
+from app.schemas.menu import CreateMenuItem
+from app.services.menu_service import create_menu_item, fetch_all_menus, fetch_menu_by_restaurant_id,update_menu_item, delete_menu_item
+from app.schemas.menu import UpdateMenuItem
 
 
-# def test_fetch_all_menus_returns_all_menus(monkeypatch):
-#     # fake_menus = [
-#     #     Menu(id=1, restaurant_id=1, name="Burger", price=8.99),
-#     #     Menu(id=2, restaurant_id=1, name="Fries", price=3.99),
-#     # ]
-
-#     monkeypatch.setattr(menu_service, "get_all_menus", lambda: fake_menus)
-
-#     result = menu_service.fetch_all_menus()
-
-#     assert result == fake_menus
-#     assert len(result) == 2
 
 
-# def test_fetch_menu_by_restaurant_id_returns_matching_items(monkeypatch):
-#     fake_restaurants = [
-#         {"id": 1, "name": "Burger Place"},
-#         {"id": 2, "name": "Pizza Spot"},
-#     ]
-
-#     fake_menus = [
-#         Menu(id=1, restaurant_id=1, name="Burger", price=8.99),
-#         Menu(id=2, restaurant_id=1, name="Fries", price=3.99),
-#         Menu(id=3, restaurant_id=2, name="Pizza", price=12.99),
-#     ]
-
-#     monkeypatch.setattr(menu_service, "get_all_restaurants", lambda: fake_restaurants)
-#     monkeypatch.setattr(menu_service, "get_all_menus", lambda: fake_menus)
-
-#     result = menu_service.fetch_menu_by_restaurant_id(1)
-
-#     assert len(result) == 2
-#     assert all(item.restaurant_id == 1 for item in result)
+RESTAURANT_ID = "85590c53-fc55-4837-a3ef-283345df572a"
 
 
-# def test_fetch_menu_by_restaurant_id_raises_404_for_missing_restaurant(monkeypatch):
-#     fake_restaurants = [
-#         {"id": 1, "name": "Burger Place"},
-#         {"id": 2, "name": "Pizza Spot"},
-#     ]
-
-#     fake_menus = []
-
-#     monkeypatch.setattr(menu_service, "get_all_restaurants", lambda: fake_restaurants)
-#     monkeypatch.setattr(menu_service, "get_all_menus", lambda: fake_menus)
-
-#     with pytest.raises(HTTPException) as exc:
-#         menu_service.fetch_menu_by_restaurant_id(999)
-
-#     assert exc.value.status_code == 404
-#     assert exc.value.detail == "Restaurant not found"
-
-
-# def test_create_menu_returns_added_menu_for_valid_restaurant(monkeypatch):
-#     fake_restaurants = [
-#         {"id": 1, "name": "Burger Place"},
-#         {"id": 2, "name": "Pizza Spot"},
-#     ]
-
-#     new_menu_data = MenuCreate(
-#         restaurant_id=1,
-#         name="Onion Rings",
-#         price=5.99
-#     )
-
-#     expected_menu = Menu(
-#         id=6,
-#         restaurant_id=1,
-#         name="Onion Rings",
-#         price=5.99
-#     )
-
-#     monkeypatch.setattr(menu_service, "get_all_restaurants", lambda: fake_restaurants)
-#     monkeypatch.setattr(menu_service, "add_menu", lambda menu_data: expected_menu)
-
-#     result = menu_service.create_menu(new_menu_data)
-
-#     assert result == expected_menu
-#     assert result.restaurant_id == 1
-#     assert result.name == "Onion Rings"
+def seed_restaurant():
+    repo = RestaurantsRepository()
+    repo.save_all([
+        {
+            "restaurant_id": RESTAURANT_ID,
+            "restaurant_name": "Test Pizza",
+            "tags": ["pizza"],
+            "isOpen": True,
+            "menuItems": [
+                {"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "category": "Food"},
+                {"menuItemId": 2, "name": "Cheesey Bread", "price": 15.0, "category": "Food"},
+                {"menuItemId": 3, "name": "Canadian Pizza", "price": 23.0, "category": "Food"},
+            ]
+        }
+    ])
 
 
-# def test_create_menu_raises_400_for_invalid_restaurant(monkeypatch):
-#     fake_restaurants = [
-#         {"id": 1, "name": "Burger Place"},
-#         {"id": 2, "name": "Pizza Spot"},
-#     ]
+def test_fetch_all_menus():
+    seed_restaurant()
 
-#     new_menu_data = MenuCreate(
-#         restaurant_id=999,
-#         name="Fake Burger",
-#         price=10.99
-#     )
+    result = fetch_all_menus()
 
-#     monkeypatch.setattr(menu_service, "get_all_restaurants", lambda: fake_restaurants)
+    assert len(result) == 1
+    assert result[0]["restaurant_id"] == RESTAURANT_ID
+    assert len(result[0]["menuItems"]) == 3
 
-#     with pytest.raises(HTTPException) as exc:
-#         menu_service.create_menu(new_menu_data)
 
-#     assert exc.value.status_code == 400
-#     assert exc.value.detail == "Restaurant does not exist"
+def test_fetch_menu_by_restaurant_id():
+    seed_restaurant()
+
+    result = fetch_menu_by_restaurant_id(RESTAURANT_ID)
+
+    assert len(result) == 3
+    assert result[0].menuItemId == 1
+
+
+def test_fetch_menu_not_found():
+    seed_restaurant()
+
+    with pytest.raises(HTTPException) as exc_info:
+        fetch_menu_by_restaurant_id("bad-id")
+
+    assert exc_info.value.status_code == 404
+
+
+def test_create_menu_item():
+    seed_restaurant()
+
+    item = create_menu_item(RESTAURANT_ID,CreateMenuItem(name="Fries", price=5.0, category="Food"))
+
+    assert item.menuItemId == 4
+    assert item.name == "Fries"
+
+
+def test_create_menu_item_invalid_restaurant():
+    seed_restaurant()
+
+    with pytest.raises(HTTPException) as exc_info:
+        create_menu_item("bad-id",CreateMenuItem(name="Burger", price=12.0, category="Food"))
+
+    assert exc_info.value.status_code == 400
+def test_create_menu_item_empty_name():
+    seed_restaurant()
+
+    with pytest.raises(HTTPException):
+        create_menu_item(RESTAURANT_ID,CreateMenuItem(name="", price=5.0, category="Food"))
+
+
+def test_create_menu_item_bad_price():
+    seed_restaurant()
+
+    with pytest.raises(HTTPException):
+        create_menu_item(RESTAURANT_ID,CreateMenuItem(name="Fries", price=0, category="Food"))
+
+
+def test_update_menu_item_success():
+    seed_restaurant()
+
+    updated = update_menu_item(
+        RESTAURANT_ID,
+        1,
+        UpdateMenuItem(name="Updated Pizza", price=12.0, category="Food")
+    )
+
+    assert updated["name"] == "Updated Pizza"
+    assert updated["price"] == 12.0
+
+
+def test_update_menu_item_not_found():
+    seed_restaurant()
+
+    with pytest.raises(HTTPException):
+        update_menu_item(
+            RESTAURANT_ID,
+            999,
+            UpdateMenuItem(name="Fake", price=10.0, category="Food")
+        )
+
+
+def test_update_menu_item_invalid_data():
+    seed_restaurant()
+
+    with pytest.raises(HTTPException):
+        update_menu_item(RESTAURANT_ID,1,UpdateMenuItem(name="", price=-5, category=""))
+
+
+def test_delete_menu_item_success():
+    seed_restaurant()
+
+    delete_menu_item(RESTAURANT_ID, 1)
+
+    menu = fetch_menu_by_restaurant_id(RESTAURANT_ID)
+    ids = [item.menuItemId for item in menu]
+
+    assert 1 not in ids
+
+
+def test_delete_menu_item_not_found():
+    seed_restaurant()
+
+    with pytest.raises(HTTPException):
+        delete_menu_item(RESTAURANT_ID, 999)
+
+
+def test_delete_menu_item_bad_restaurant():
+    seed_restaurant()
+
+    with pytest.raises(HTTPException):
+        delete_menu_item("bad-id", 1)
