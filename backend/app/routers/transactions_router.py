@@ -35,7 +35,7 @@ def get_payment_status_by_order_id(order_id: str, current_user: User = Depends(g
     return status
 
 # Update transaction
-@router.put("/{order_id}", response_model=PaymentUpdate)
+@router.put("/{order_id}", response_model=PaymentTransaction)
 def put_transaction(order_id: str, payload: PaymentUpdate, current_user: User = Depends(get_current_user)):
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized to update this transaction.")

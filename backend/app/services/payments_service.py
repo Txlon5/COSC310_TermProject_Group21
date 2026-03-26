@@ -318,7 +318,7 @@ def update_transaction(order_id: str, current_user: User, payload: PaymentUpdate
                 try:
                     # Import OrderService to update order status
                     order = OrdersService()
-                    order.update_order_status(order_id, OrderStatusUpdateRequest(status=DeliveryStatus.ready))
+                    order.update_order_status(order_id, OrderStatusUpdateRequest(status=DeliveryStatus.preparing))
                     print("Approved")
                 except HTTPException:
                     raise HTTPException(status_code=403, detail="Unable to update order status to approved.")  
