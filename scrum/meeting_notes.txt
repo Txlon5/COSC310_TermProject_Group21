@@ -146,3 +146,859 @@ Action Items:
 - Talon:
   Todo: Continue implementation of Feat 1 System Requirements
   Blockers: None
+
+SCRUM MEETING #8
+Date: March 5, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+Discussion:
+- Adapt schedule to increase meeting frequency, will fill out another When2Meet
+- Code 
+-Delegate at least 2 features per person, see table below
+
+Action Items:
+- All:
+  Done: Worked on at least one requirement
+  Todo: Fill out when2meet
+
+- Tariq:
+  Todo: Ask TA about generating tag data, is open related to restaurants in dataset, Continue implementation of Feat 3 System Requirements
+  Blockers: - Feature implementation potentially relies on a Database
+
+- Omarion:
+  Todo: Ask TA about generating tag data, is open related to restaurants in dataset, Continue implementation of Feat 2 System Requirements 
+  Blockers: None
+ 
+- Talon:
+  Todo: Continue implementation of Feat 1 System Requirements
+  Blockers: None
+
+- Siam:
+  Todo: Continue implementation 
+  Blockers: None
+
+
+Feature #
+Person
+Feat1
+Talon
+Feat2
+Omarion
+Feat3
+Tariq
+Feat4
+Tariq
+Feat5
+Omarion
+Feat6
+Not assigned yet
+Feat7
+Talon
+Feat8
+Siam
+Feat9
+Siam
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SCRUM MEETING #9
+Date: March 9, 2026
+Attendance: Tariq, Omarion, Siam
+Absence: Talon (Reason: Personal Issues)
+
+Discussion: 
+	-Questions and concerns with individual current work
+	-Discussed PRs among ourselves
+-Finalizing task delegation, namely as there is an uneven number of tasks per person, see table below
+
+
+Action Items:
+- All:
+  Done: Worked on at least one requirement
+
+- Tariq:
+  Done: Majority of Feat 3
+  Todo: Begin work on Feat 4
+  Blockers: Issues with PRs and the CI file
+
+- Omarion:
+  Todo: Continue work on Feat 2
+  Blockers: Issues with PRs and the CI file
+
+- Siam:
+  Todo: Create appropriate mock data for Feat 8
+  Blockers: Issues with PRs and the CI file
+
+
+Feature #
+Person
+Feat1
+Talon
+Feat2
+Omarion
+Feat3
+Tariq
+Feat4
+Tariq
+Feat5
+Omarion
+Feat6
+Omarion
+Feat7
+Talon
+Feat8
+Siam
+Feat9
+Siam
+
+
+
+SCRUM MEETING #10
+Date: March 11, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+Discussion: PR and CI file concerns, finalized uneven feature delegation (see table below), completing features
+
+
+Action Items:
+- All:
+  Done: Worked on at least one requirement
+  Todo: Fix up CI file and submit pull requests
+
+- Tariq:
+  Done: Message TAs about PR concerns via Canvas inbox.
+  Todo: Continue work on Feat 4 implementation, submit PRs for Feat 3
+  Blockers: CI file implementation
+
+- Omarion:
+  Done: Majority of Feat 2 completed
+  Todo: Work on Feat 5
+  Blockers: None
+
+- Talon:
+  DoneL Majority of Feat 1 completed
+  Todo: Work on Feat 7
+  Blockers: None
+
+- Siam:
+  Todo: Continue work on Feat 8
+  Blockers: None
+
+Feature #
+Person
+Feat1 (Done)
+Talon
+Feat2 (Done)
+Omarion
+Feat3 (Done)
+Tariq
+Feat4
+Tariq
+Feat5
+Omarion
+Feat6
+Omarion
+Feat7
+Talon
+Feat8 (Done)
+Siam
+Feat9
+Siam
+
+
+
+SCRUM MEETING #11
+Date: March 12, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+Discussion: PR and CI file concerns, finalized uneven feature delegation (see table below), completing features
+
+
+Action Items:
+- All:
+  Done: Worked on at least one requirement
+  Todo: Fix up CI file and submit pull requests
+
+- Tariq:
+  Done: Message TAs about PR concerns via Canvas inbox.
+  Todo: Continue work on Feat 4 implementation, submit PRs for Feat 3
+  Blockers: CI file implementation
+
+- Omarion:
+  Done: Majority of Feat 2 completed
+  Todo: Work on Feat 5
+  Blockers: None
+
+- Talon:
+  DoneL Majority of Feat 1 completed
+  Todo: Work on Feat 7
+  Blockers: None
+
+- Siam:
+  Todo: Continue work on Feat 8
+  Blockers: None
+
+SCRUM MEETING #12
+Date: March 14, 2026
+Attendance: Tariq, Talon, Siam
+Absence: Omarion (Reason: Personal Reasons)
+
+Discussion: PR concerns, timeline check, refactor discussion in light of insight from TAs
+
+
+Action Items:
+- All:
+  Done: Worked on at least one requirement, submitted and approved at least one PR
+  Todo: Continue PR work, think about refactors
+
+- Tariq:
+  Todo: Continue PR work and resolve merge conflicts
+  Blockers: Merge conflicts
+
+- Talon:
+  Done: Continue PR work and resolve merge conflicts
+  Todo: Work on merge conflicts
+  Blockers: None
+
+- Siam:
+  Todo: Continue work on Feat 9
+  Blockers: None
+
+
+
+
+
+
+SCRUM MEETING #13
+Date: March 15, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+Discussion: PR merge conflicts concerns, timeline check, set up next meeting same day
+
+
+Action Items:
+- All:
+  Done: Worked on at least one requirement, submitted and approved at least one PR
+  Todo: Continue PR work
+
+- Tariq:
+  Done: Refactored Feat 3 SR3 according to a comment, adding a router file for restaurants
+  Todo: Continue PR work and resolve merge conflicts
+  Blockers: Merge conflicts
+
+- Omarion:
+  Done: Made PRs for Feat 5
+  Todo: Continue work on Feat 6
+  Blockers: Merge conflicts
+
+- Talon:
+  DoneL Majority of Feat 1 completed
+  Todo: Work on merge conflicts
+  Blockers: None
+
+- Siam:
+  Todo: Continue work on Feat 9
+  Blockers: None
+
+
+
+
+SCRUM MEETING #14
+Date: March 15, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+Discussion: PR merge conflicts concerns, timeline check, set up next meeting for tomorrow
+
+
+Action Items:
+- All:
+  Done: Worked on at least one requirement, one refactor, submitted and approved at least one PR
+  Todo: Continue PR work
+
+- Tariq:
+  Done: Merged order router changes into main, completed feat 3.
+  Todo: Continue PR work.
+
+- Omarion:
+  Todo: Sort out order merge issues with Siam
+  Blockers: Merge conflicts
+
+- Talon:
+  Todo: Help team sort out PR issues
+  Blockers: None
+
+- Siam:
+  Todo: Sort out order merge issues with Omarion
+  Blockers: Merge conflicts
+
+
+
+
+SCRUM MEETING #15
+Date: March 16, 2026
+Attendance: Tariq, Omarion, Siam
+Absence: Talon (Reason: Miscommunication, it happens)
+
+Discussion: Combining “order” work between Tariq, Siam and Omarion
+
+
+Action Items:
+- All:
+  Done: Completed several PRs, recorded personal refactors
+  Todo: Continue PR work
+
+- Tariq:
+  Done: Restored personal functionality of code on broken order branch
+  Todo: Continue PR work and resolve merge conflicts
+  Blockers: Waiting for Siam and Omarion to get their code working on broken order branch
+
+- Omarion:
+  Done: Majority of Feat 6
+  Todo: Continue work on Feat 6, get code working on broken order branch
+  Blockers: None
+
+- Siam:
+  Done: Majority of Feat 9
+  Todo: Continue work on Feat 9, get code working on broken order branch
+  Blockers: None
+
+
+SCRUM MEETING #16
+Date: March 16, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Combining “order” work between Tariq, Siam and Omarion on new branch
+
+
+Action Items:
+- All:
+  Done: Completed several PRs, recorded personal refactors
+  Todo: Continue fixing broken branch
+
+- Tariq:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Omarion:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Talon:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Siam:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+SCRUM MEETING #17
+Date: March 17, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Continue combining “order” work between Tariq, Siam and Omarion on new branch, resolving merge conflicts with main
+
+
+Action Items:
+- All:
+  Todo: Continue fixing broken branch
+
+- Tariq:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Omarion:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Talon:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Siam:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+
+SCRUM MEETING #18
+Date: March 17, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Continue combining “order” work between Tariq, Siam and Omarion on new branch, resolving merge conflicts with main
+
+
+Action Items:
+- All:
+  Todo: Continue fixing broken branch
+
+- Tariq:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Omarion:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Talon:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Siam:
+  Todo: Continue work on broken branch, ensure personal code and tests work
+  Blockers: None
+
+
+SCRUM MEETING #19
+Date: March 18, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Timeline check as ¾ team members will be unable to work for the rest of the day.
+
+
+Action Items:
+- All:
+  Todo: Continue fixing broken branch
+
+- Tariq:
+  Todo: Continue work on broken branch
+  Blockers: Schedule
+
+- Omarion:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Talon:
+  Todo: Continue work on broken branch
+  Blockers: Schedule
+
+- Siam:
+  Todo: Continue work on broken branch, ensure personal code and tests work
+  Blockers: Schedule
+
+SCRUM MEETING #19
+Date: March 18, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Timeline check as ¾ team members will be unable to work the following day.
+
+
+Action Items:
+- All:
+  Todo: Continue fixing broken branch
+
+- Tariq:
+  Todo: Continue work on broken branch
+  Blockers: Schedule
+
+- Omarion:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Talon:
+  Todo: Continue work on broken branch
+  Blockers: Schedule
+
+- Siam:
+  Todo: Continue work on broken branch, ensure personal code and tests work
+  Blockers: Schedule
+
+
+SCRUM MEETING #20
+Date: March 19, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Timeline check as ¾ team members were unable to work the previous day, as well as quick demo of all features interacting appropriately.
+
+
+Action Items:
+- All:
+  Todo: Continue fixing broken branch
+
+- Tariq:
+  Todo: Continue work on broken branch
+  Blockers: Schedule
+
+- Omarion:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+- Talon:
+  Todo: Continue work on broken branch
+  Blockers: Schedule
+
+- Siam:
+  Todo: Continue work on broken branch
+  Blockers: Schedule
+
+
+SCRUM MEETING #21
+Date: March 21, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Timeline check, ensuring we’re on track to finish by new deadline, as well as discussing reforming some requirements to work with JSON instead of other data format as per discussion with TA.
+
+
+Action Items:
+- All:
+Done: Fixed broken branch! Some refactors done as well.
+
+- Tariq:
+  Todo: Integrate final feature in semi-complete state (will likely need to be redone in accordance with lab discussion from prior day)
+  Blockers: None
+
+- Omarion:
+  Todo: Patch up cohesiveness between own code and others’ order code
+  Blockers: None
+
+- Talon:
+  Todo: Patch up cohesiveness between own code and others’ order code
+  Blockers: None
+
+- Siam:
+  Todo: Patch up cohesiveness between own code and others’ order code
+  Blockers: Schedule
+
+SCRUM MEETING #22
+Date: March 21, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Timeline check, ensuring we’re on track to finish by deadline
+
+
+Action Items:
+
+- Tariq:
+  Todo: Work on documents beyond code while waiting for Talon and Omarion.
+  Blockers: Waiting
+
+- Omarion:
+  Todo: Work on fixing up code and tests with Talon
+  Blockers: None
+
+- Talon:
+  Todo: Work on fixing up code and tests with Omarion
+  Blockers: None
+
+- Siam:
+  Todo: N/A (for now)
+  Blockers: None
+
+
+SCRUM MEETING #23
+Date: March 22, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Timeline check, ensuring we’re on track to finish by deadline, discussed M4 potential steps
+
+
+Action Items:
+
+- Tariq:
+  Todo: Work on documents beyond code while waiting for Talon and Omarion.
+  Blockers: None
+
+- Omarion:
+  Todo: Work on fixing up code and tests with Talon
+  Blockers: None
+
+- Talon:
+  Todo: Work on fixing up code and tests with Omarion
+  Blockers: None
+
+- Siam:
+  Todo: Continue work on broken branch
+  Blockers: None
+
+
+
+SCRUM MEETING #24
+Date: March 23, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Ensure new broken branch passes all tests and code is cohesive
+
+
+Action Items:
+
+- Tariq:
+  Todo: Revise old code/legacy code, remove dead code, revise comments, revise new method of functionality for old requirements
+  Blockers: None
+
+- Omarion:
+  Todo: Work on fixing up code and tests with Talon and Tariq
+  Blockers: None
+
+- Talon:
+  Todo: Work on fixing up code and tests with Omarion and Tariq
+  Blockers: None
+
+- Siam:
+  Todo: Revise old tests to match new code
+  Blockers: None
+
+
+SCRUM MEETING #25
+Date: March 23, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Check-in, ensure new broken branch passes all tests and code is cohesive
+
+
+Action Items:
+
+- Tariq:
+  Todo: Continue to revise old code/legacy code, remove dead code, revise comments, revise new method of functionality for old requirements
+  Blockers: None
+
+- Omarion:
+  Todo: Work on fixing up code and tests with Talon and Tariq
+  Blockers: None
+
+- Talon:
+  Todo: Work on fixing up code and tests with Omarion and Tariq
+  Blockers: None
+
+- Siam:
+  Todo: Revise old tests to match new code
+  Blockers: None
+
+
+SCRUM MEETING #26
+Date: March 24, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Ensure new broken branch passes all tests and code is cohesive
+
+
+Action Items:
+
+- Tariq:
+  Todo: Revise old code/legacy code, remove dead code, revise comments, revise new method of functionality for old requirements
+  Blockers: None
+
+- Omarion:
+  Todo: Work on fixing up code and tests with Talon, Siam and Tariq
+  Blockers: None
+
+- Talon:
+  Todo: Work on fixing up code and tests with Omarion, Siam and Tariq
+  Blockers: None
+
+- Siam:
+  Todo: Revise old code/legacy code, remove dead code, revise comments, revise new method of functionality for old requirements
+  Blockers: None
+
+
+SCRUM MEETING #27
+Date: March 24, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Ensure new broken branch passes all tests and code is cohesive
+
+
+Action Items:
+
+- Tariq:
+  Done: Revised old code/legacy code, removed dead code, revised comments, revised new method of functionality for old requirements
+  Todo: 
+  Blockers: None
+
+- Omarion:
+  Todo: Work on fixing up code and tests with Talon, Siam and Tariq
+  Blockers: None
+
+- Talon:
+  Todo: Work on fixing up code and tests with Omarion, Siam and Tariq
+  Blockers: None
+
+- Siam:
+  Todo: Revise old code/legacy code, remove dead code, revise comments, revise new method of functionality for old requirements
+  Blockers: None
+
+
+
+SCRUM MEETING #28
+Date: March 24, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Merging fixed branch into main, documentation, next steps
+
+
+Action Items:
+-All:
+  Done: Fixed 2nd broken branch, code is cohesive and a lot of dead code has been removed or commented out.
+
+- Tariq:
+  Done: Patched up more old tests, removed dead functionality from feat3.
+  Todo: Work on scrum meeting documentation formatting
+  Blockers: None
+
+- Omarion:
+  Todo: Work on remaining coverage test for own code
+  Blockers: None
+
+- Talon:
+  Todo: Work on payment feature.
+  Blockers: None
+
+- Siam:
+  Todo: Work on API documentation
+  Blockers: None
+
+
+SCRUM MEETING #29
+Date: March 25, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Finishing up remaining code, tying loose ends, continuing documentation
+
+
+Action Items:
+
+- Tariq:
+  Done: Revised scrum meeting documentation for formatting
+  Todo: Work on architecture documentation
+  Blockers: None
+
+- Omarion:
+  Done: Majority of coverage test fixes
+  Todo: Work on remaining coverage test for own code
+  Blockers: None
+
+- Talon:
+  Done: Majority of payment system
+  Todo: Work on loose ends regarding payment feature
+  Blockers: None
+
+- Siam:
+  Todo: Continue work on API documentation
+  Blockers: None
+
+
+SCRUM MEETING #30
+Date: March 25, 2026
+Attendance: Tariq, Omarion, Talon
+Absence: Siam (Reason: Personal)
+
+
+Discussion: Timeline check, API documentation, backtracking PRs to find old refactors, next steps
+
+
+Action Items:
+
+- Tariq:
+  Todo: Complete architecture documentation
+  Blockers: None
+
+- Omarion:
+  Todo: Upload a PR, ensure personal refactors are recorded
+  Blockers: None
+
+- Talon:
+  Todo: Work on finishing touches regarding payment feature
+  Blockers: None
+
+
+SCRUM MEETING #31
+Date: March 25, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Timeline check, Docker discussion and check, readme, requirements traceability matrix review, architecture document review, API documentation review, refactor discussion, set up final meeting
+
+
+Action Items:
+
+- Tariq:
+  Done: Architecture document, updated requirements traceability matrix
+  Todo: Work on listing relevant test and refactor PRs, work on API documentation
+  Blockers: None
+
+- Omarion:
+  Todo: Work on remaining coverage test for own code, documentation
+  Blockers: None
+
+- Talon:
+  Todo: Polish code, work on documentation
+  Blockers: None
+
+- Siam:
+  Todo: Continue work on API documentation
+  Blockers: None
+
+SCRUM MEETING #32
+Date: March 25, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Timeline check, final checklist for M3
+
+
+Action Items:
+
+- Tariq:
+  Done: All personal sections
+  Todo: Help others complete their sections
+  Blockers: None
+
+- Omarion:
+  Todo: Work on final sections regarding test documentation and contribution statement.
+  Blockers: None
+
+- Talon:
+  Todo: Work on personal documentation
+  Blockers: None
+
+- Siam:
+  Todo: Continue work on personal documentation.
+  Blockers: None
