@@ -18,14 +18,14 @@ def seed_restaurant():
             "menuItems": [
                 {
                     "menuItemId": 1,
-                    "name": "Pizza",
-                    "price": 10.0,
+                    "name": "Onion Pizza",
+                    "price": 26.0,
                     "category": "Food"
                 },
                 {
                     "menuItemId": 2,
-                    "name": "Veggie Pizza",
-                    "price": 18.0,
+                    "name": "Cheesey Bread",
+                    "price": 15.0,
                     "category": "Food"
                 },
                 {
@@ -59,8 +59,8 @@ def test_get_restaurant_menu():
 
     data = response.json()
     assert len(data) == 3
-    assert data[0]["name"] == "Pizza"
-    assert data[1]["name"] == "Veggie Pizza"
+    assert data[0]["name"] == "Onion Pizza"
+    assert data[1]["name"] == "Cheesey Bread"
     assert data[2]["name"] == "Canadian Pizza"
 
 

@@ -23,8 +23,8 @@ def seed_restaurant():
             "tags": ["pizza"],
             "isOpen": True,
             "menuItems": [
-                {"menuItemId": 1, "name": "Pizza", "price": 10.0, "category": "Food"},
-                {"menuItemId": 2, "name": "Veggie Pizza", "price": 18.0, "category": "Food"},
+                {"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "category": "Food"},
+                {"menuItemId": 2, "name": "Cheesey Bread", "price": 15.0, "category": "Food"},
                 {"menuItemId": 3, "name": "Canadian Pizza", "price": 23.0, "category": "Food"}
             ]
         }
@@ -258,6 +258,7 @@ def test_create_order_bad_menu_item():
         service.create_order(
             CreateOrderRequest(
                 user_id="user-1",
+                card_id="test-card-id",
                 restaurant_id=RESTAURANT_ID,
                 items=[OrderItem(menuItemId=999, name="Fake", price=1.0, quantity=1)]
             )
@@ -273,6 +274,7 @@ def test_create_order_zero_quantity():
         service.create_order(
             CreateOrderRequest(
                 user_id="user-1",
+                card_id="test-card-id",
                 restaurant_id=RESTAURANT_ID,
                 items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=0)]
             )

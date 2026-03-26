@@ -21,8 +21,8 @@ def seed_restaurant():
             "tags": ["pizza"],
             "isOpen": True,
             "menuItems": [
-                {"menuItemId": 1, "name": "Pizza", "price": 10.0, "category": "Food"},
-                {"menuItemId": 2, "name": "Veggie Pizza", "price": 18.0, "category": "Food"},
+                {"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "category": "Food"},
+                {"menuItemId": 2, "name": "Cheesey Bread", "price": 15.0, "category": "Food"},
                 {"menuItemId": 3, "name": "Canadian Pizza", "price": 23.0, "category": "Food"},
             ]
         }
