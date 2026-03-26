@@ -30,6 +30,45 @@ def apply_admin_override():
     # Clear the override after test is done
     app.dependency_overrides = {}
 
+# Test card for API requests
+TEST_CARD = {
+    "card_num": "4868719196829038",
+    "card_cvc": "344",
+    "card_exp": "2029-11",
+    "holder_name": "John Smith",
+    "holder_address": "556 Sarsons Rd, V1W5H5, Kelowna, BC"
+}
+
+# Test card data for mock transactions
+TEST_CARD_DATA = {
+    "id": "test-card-txn-id",
+    "user_id": "8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7",
+    "card_num": "4868719196829038",
+    "card_cvc": "344",
+    "card_exp": "2029-11",
+    "holder_name": "Admin User",
+    "holder_address": "123 Admin St"
+}
+
+# Create test card and return id
+def create_test_card():
+    r = client.post("/payments/cards/", json=TEST_CARD)
+    assert r.status_code == 201
+    return r.json()["id"]
+
+# Build mock transaction for tests
+def make_transaction(order_id, user_id="8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7", status="pending"):
+    return {
+        "payment_id": f"pay-{order_id}",
+        "order_id": order_id,
+        "user_id": user_id,
+        "card": TEST_CARD_DATA,
+        "status": status,
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z",
+        "price_total": 25.00
+    }
+
 
 # Unit Tests
 
@@ -85,6 +124,16 @@ def test_address_validation():
 
 # Integration Tests
 
+# List User Cards - Valid
+def test_get_my_cards():
+    card_id = create_test_card()
+    r = client.get("/payments/cards")
+    assert r.status_code == 200
+    assert isinstance(r.json(), list)
+    assert any(c["id"] == card_id for c in r.json())
+    # Clean up test data
+    client.delete(f"/payments/cards/{card_id}")
+
 # Card Retrival by ID - Valid
 def test_get_card():
     # Create test card
@@ -122,9 +171,25 @@ def test_get_card():
 def test_get_card_na():
     r = client.get("/payments/cards/00000000-0000-0000-0000-000000000000")
     assert r.status_code == 404
+# Card Retrieval by ID - Unauthorized
+def test_get_card_unauthorized():
+    # Create card as admin
+    card_id = create_test_card()
+
+    # Switch to non-admin user who does not own the card
+    def override_non_admin():
+        return User(id="different-user-id", name="Other", email="other@example.com", password="pass", role="user")
+    app.dependency_overrides[get_current_user] = override_non_admin
+
+    r = client.get(f"/payments/cards/{card_id}")
+    assert r.status_code == 403
+
+    # Restore admin and clean up test data
+    app.dependency_overrides[get_current_user] = override_get_current_user
+    client.delete(f"/payments/cards/{card_id}")
 
 # Card Create - Valid
-def test_create_user():
+def test_create_card():
     # Create test card
     r = client.post(
         "/payments/cards/",
@@ -157,9 +222,8 @@ def test_create_user():
     # Clean up test data
     r = client.delete(f"/payments/cards/{data['id']}")
 
-
 # Card Delete - Valid
-def test_delete_user():
+def test_delete_card():
     # Create test card
     r = client.post(
         "/payments/cards/",
@@ -180,3 +244,130 @@ def test_delete_user():
     
     # Check card was deleted successfully
     assert r.status_code == 204
+
+# Card Create - Invalid Card Number
+def test_create_card_invalid_card_num():
+    r = client.post("/payments/cards/", json={**TEST_CARD, "card_num": "123"})
+    assert r.status_code == 422
+
+# Card Create - Invalid CVC
+def test_create_card_invalid_cvc():
+    r = client.post("/payments/cards/", json={**TEST_CARD, "card_cvc": "12"})
+    assert r.status_code == 422
+
+# Card Create - Invalid Expiry
+def test_create_card_invalid_expiry():
+    r = client.post("/payments/cards/", json={**TEST_CARD, "card_exp": "2026/13"})
+    assert r.status_code == 422
+
+# Card Create - Invalid Name
+def test_create_card_invalid_name():
+    r = client.post("/payments/cards/", json={**TEST_CARD, "holder_name": "John123"})
+    assert r.status_code == 422
+
+# Card Create - Invalid Address
+def test_create_card_invalid_address():
+    r = client.post("/payments/cards/", json={**TEST_CARD, "holder_address": "123 Main #4"})
+    assert r.status_code == 422
+
+# Card Update - Valid
+def test_update_card():
+    card_id = create_test_card()
+    r = client.put(f"/payments/cards/{card_id}", json={"holder_name": "Jane Smith"})
+    assert r.status_code == 200
+
+    # Save json response to variable
+    data = r.json()
+
+    # Check that returned card data matches the update
+    assert data["holder_name"] == "Jane Smith"
+     # Check cvc is masked
+    assert data["card_cvc"] == "***"
+
+    # Clean up test data
+    client.delete(f"/payments/cards/{card_id}")
+
+# Card Update - Not Found
+def test_update_card_na():
+    r = client.put("/payments/cards/00000000-0000-0000-0000-000000000000", json={"holder_name": "Jane"})
+    assert r.status_code == 404
+
+# Card Update - Unauthorized
+def test_update_card_unauthorized():
+    # Create card as admin
+    card_id = create_test_card()
+
+    # Switch to user who does not own the card
+    def override_non_admin():
+        return User(id="different-user-id", name="Other", email="other@example.com", password="pass", role="user")
+    app.dependency_overrides[get_current_user] = override_non_admin
+
+    r = client.put(f"/payments/cards/{card_id}", json={"holder_name": "Jane"})
+    assert r.status_code == 403
+
+    # Restore admin and clean up test data
+    app.dependency_overrides[get_current_user] = override_get_current_user
+    client.delete(f"/payments/cards/{card_id}")
+
+    # Card Update - Invalid Card Number
+def test_update_card_invalid_card_num():
+    card_id = create_test_card()
+    r = client.put(f"/payments/cards/{card_id}", json={"card_num": "123"})
+    assert r.status_code == 422
+    # Clean up test data
+    client.delete(f"/payments/cards/{card_id}")
+
+# Card Update - Invalid CVC
+def test_update_card_invalid_cvc():
+    card_id = create_test_card()
+    r = client.put(f"/payments/cards/{card_id}", json={"card_cvc": "12"})
+    assert r.status_code == 422
+    # Clean up test data
+    client.delete(f"/payments/cards/{card_id}")
+
+# Card Update - Invalid Expiry
+def test_update_card_invalid_expiry():
+    card_id = create_test_card()
+    r = client.put(f"/payments/cards/{card_id}", json={"card_exp": "2026/13"})
+    assert r.status_code == 422
+    # Clean up test data
+    client.delete(f"/payments/cards/{card_id}")
+
+# Card Update - Invalid Name
+def test_update_card_invalid_name():
+    card_id = create_test_card()
+    r = client.put(f"/payments/cards/{card_id}", json={"holder_name": "John123"})
+    assert r.status_code == 422
+    # Clean up test data
+    client.delete(f"/payments/cards/{card_id}")
+
+# Card Update - Invalid Address
+def test_update_card_invalid_address():
+    card_id = create_test_card()
+    r = client.put(f"/payments/cards/{card_id}", json={"holder_address": "123 Main #4"})
+    assert r.status_code == 422
+    # Clean up test data
+    client.delete(f"/payments/cards/{card_id}")
+
+# Card Delete - Not Found
+def test_delete_card_na():
+    r = client.delete("/payments/cards/00000000-0000-0000-0000-000000000000")
+    assert r.status_code == 404
+
+# Card Delete - Unauthorized
+def test_delete_card_unauthorized():
+    # Create card as admin
+    card_id = create_test_card()
+
+    # Switch to user who does not own card
+    def override_non_admin():
+        return User(id="different-user-id", name="Other", email="other@example.com", password="pass", role="user")
+    app.dependency_overrides[get_current_user] = override_non_admin
+
+    r = client.delete(f"/payments/cards/{card_id}")
+    assert r.status_code == 403
+
+    # Restore admin and clean up test data
+    app.dependency_overrides[get_current_user] = override_get_current_user
+    client.delete(f"/payments/cards/{card_id}")
+

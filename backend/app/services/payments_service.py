@@ -1,14 +1,18 @@
 import uuid
 import random
+from datetime import datetime, timezone
 from typing import List
 from fastapi import HTTPException
 from app.schemas.payment_method import CreditCard, CreditCardCreate, CreditCardUpdate
-from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusType
+from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusType, PaymentUpdate
+from app.schemas.order import OrderStatusUpdateRequest
+from app.schemas.delivery import DeliveryStatus
 from app.schemas.user import User
 from app.repositories import payment_methods_repository as card_repo
 from app.repositories import transactions_repository as transaction_repo
 from app.schemas.card_validator import CardValidator
 
+# [Payment Method Functions]
 def list_user_cards(user_id: str) -> List[CreditCard]:
     """
     Returns all cards belonging to a specific user
@@ -205,7 +209,7 @@ def delete_card(card_id: str, current_user: User) -> None:
             new_cards.append(c)
         # Check user is authorized to remove card
         elif str(c.get("id")) == card_id:
-            if str(c.get("user_id")) != str(current_user.id) or str(current_user.role) != "admin":
+            if str(c.get("user_id")) != str(current_user.id) and str(current_user.role) != "admin":
                 raise HTTPException(status_code=403, detail="Not authorized to delete this card.")
 
     # Check if new card list does not contain card        
@@ -213,30 +217,152 @@ def delete_card(card_id: str, current_user: User) -> None:
         raise HTTPException(status_code=404, detail="Credit card not found.")
     
     # Save new card list
-    new_cards = [c for c in cards if c.get("id") != card_id]
     card_repo.save_all(new_cards)
 
-# Transaction Functions
-def create_transaction(payment: PaymentTransaction) -> PaymentTransaction:
+# [Payment Transaction Functions]
+
+def get_transaction_by_id(order_id: str, user_id: str) -> PaymentTransaction:
+    """
+    Returns the card details matching card_id if it belongs to the user 
+    Raises 403 if user not authorized to use this card
+    Raises 404 if no card exists
+    """
+    # Load transaction list
+    payments = transaction_repo.load_all()
+    
+    # Search transaction list
+    for t in payments:
+        # Check if order_id matches
+        if str(t.get("order_id")) == str(order_id):
+            if str(t.get("user_id")) != str(user_id):
+                raise HTTPException(status_code=403, detail="Not authorized to view this transaction.")
+            # Mask Details
+            transaction = PaymentTransaction(**t)
+            # Get card number and mask details before returning to user
+            mask_card_num = transaction.card.card_num 
+            transaction.card.card_num = "*"*(len(mask_card_num)-4) + mask_card_num[len(mask_card_num)-4:] # Mask card number and show only last 4 digits
+            transaction.card.card_cvc = "***" # Mask cvc
+            # Return transaction to user
+            return transaction
+    # Throw exception if card does not exist
+    raise HTTPException(status_code=404, detail=f"Payment Transaction for '{order_id}' not found.")
+
+
+def create_transaction(payment: PaymentTransaction) -> PaymentStatusType:
     # Load transaction list
     payments = transaction_repo.load_all()
     cards = card_repo.load_all()
 
     # Collision check transaction list 
-    for idx, t in enumerate(payments):
+    for t in payments:
         # Check if transaction already exists
         if str(t.get("order_id")) == str(payment.order_id):
             raise HTTPException(status_code=409, detail="Transaction already exists.")
     
     # Card Validation
-    for idx, c in enumerate(cards):
+    for c in cards:
         # Check if transaction already exists
         if str(c.get("id")) == str(payment.card.id):
-            # Simulate payment by random selection 
-            payment.status = random.choice([PaymentStatusType.declined, PaymentStatusType.approved])
             # Save transaction and return result
             payments.append(payment.model_dump(mode='json'))
             transaction_repo.save_all(payments)
-            return payment
-        
-    raise HTTPException(status_code=404, detail="Credit card not found.")
+            # Return transaction status
+            return payment.status
+    # Throw exception if card does not exist
+    raise HTTPException(status_code=404, detail=f"Credit card '{payment.card.id}' not found.")
+
+def update_transaction(order_id: str, current_user: User, payload: PaymentUpdate) -> PaymentTransaction:
+    """
+    Updates transaction details if it belongs to the user
+    Raises 403 if user not authorized to update this transaction
+    Raises 422 if any input is invalid
+    Raises 404 if no transaction exists
+    """
+    payments = transaction_repo.load_all()
+    
+    # Search transaction list
+    for idx, t in enumerate(payments):
+        # Check if order_id matches
+        if str(t.get("order_id")) == str(order_id):
+            # Check if user is admin
+            if str(current_user.role) != "admin":
+                raise HTTPException(status_code=403, detail="Not authorized to update this transaction.")
+
+            # Validate inputs
+            if payload.price_total is not None and payload.price_total < 0:
+                raise HTTPException(status_code=422, detail="Invalid price_total. Must be 0 or greater.")
+
+            # Update fields
+            if payload.status is not None:
+                t["status"] = payload.status
+            if payload.price_total is not None:
+                t["price_total"] = payload.price_total
+            t["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+            # Import OrderService to update order status
+            from app.services.orders_service import OrdersService
+
+
+            # Adjust order status based on declined or approved status
+            if (payload.status == PaymentStatusType.declined):
+                # Order cancelled
+                try:
+                    # Import OrderService to update order status
+                    order = OrdersService()
+                    order.update_order_status(order_id, OrderStatusUpdateRequest(status=DeliveryStatus.cancelled))
+                    print("CANCELLED")
+                except HTTPException:
+                    raise HTTPException(status_code=403, detail="Unable to update order status to cancelled.")  
+            elif (payload.status == PaymentStatusType.approved):
+                # Order ready
+                try:
+                    # Import OrderService to update order status
+                    order = OrdersService()
+                    order.update_order_status(order_id, OrderStatusUpdateRequest(status=DeliveryStatus.preparing))
+                    print("Approved")
+                except HTTPException:
+                    raise HTTPException(status_code=403, detail="Unable to update order status to approved.")  
+
+            # Save changes
+            payments[idx] = t
+            transaction_repo.save_all(payments)
+
+            # Make response transaction with masked card details
+            transaction = PaymentTransaction(**t)
+            mask_card_num = transaction.card.card_num
+            transaction.card.card_num = "*" * (len(mask_card_num) - 4) + mask_card_num[-4:]
+            transaction.card.card_cvc = "***"
+
+            # Return updated transaction
+            return transaction 
+    # Throw exception if card does not exist
+    raise HTTPException(status_code=404, detail=f"Transaction '{order_id}' not found")
+
+def delete_transaction(order_id: str, current_user: User) -> None:
+    """
+    Deletes the transaction matching the given order_id
+    Raises 403 if user not authorized to delete this transaction
+    Raises 404 if no transaction exists
+    """
+    # Load transaction list
+    payments = transaction_repo.load_all()
+    new_payments = []
+
+    # Search transaction list
+    for t in payments:
+        # Check order_id matches
+        if str(t.get("order_id")) != order_id:
+            new_payments.append(t)
+        # Remove transaction from list
+        elif str(t.get("order_id")) == order_id:
+            # Check user is authorized to remove transaction
+            if str(t.get("user_id")) != str(current_user.id) and str(current_user.role) != "admin":
+                raise HTTPException(status_code=403, detail="Not authorized to delete this transaction.")
+
+    # Check if new transaction list does not contain transaction        
+    if len(new_payments) == len(payments):
+        raise HTTPException(status_code=404, detail="Transaction not found.")
+    
+    # Save new transaction list
+    new_payments = [t for t in payments if t.get("order_id") != order_id]
+    transaction_repo.save_all(new_payments)

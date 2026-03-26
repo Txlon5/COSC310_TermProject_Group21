@@ -5,7 +5,7 @@ class DeliveryType (StrEnum):
     delivery = "delivery"
     pickup = "pickup"
 
-# Delivery Statuses - Created, Preparing, Ready, Complete
+# Delivery Statuses - Created, Preparing, Ready, Cancelled, Complete
 class DeliveryStatus (StrEnum):
     created = "created"
     preparing = "preparing"
@@ -13,3 +13,4 @@ class DeliveryStatus (StrEnum):
     delivered = "delivered"
     picked_up = "pickedup"
     complete = "completed"
+    cancelled = "cancelled"

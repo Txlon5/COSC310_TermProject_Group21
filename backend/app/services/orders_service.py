@@ -1,4 +1,4 @@
-from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse,DeliveryInfoUpdateRequest,Order,DeliveryInfoResponse
+from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse,DeliveryInfoUpdateRequest,Order
 from fastapi import APIRouter, status, Depends, HTTPException
 from app.schemas.order import CreateOrderResponse, CreateOrderRequest, Order, OrderItem
 from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusType
@@ -14,16 +14,16 @@ from app.services.menu_service import fetch_menu_by_restaurant_id
 
 # Order Status Dictionary
 PICKUP_STATUS_TRANSITIONS = {
-    DeliveryStatus.created.value: [DeliveryStatus.preparing.value],
-    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value],
-    DeliveryStatus.ready.value: [DeliveryStatus.picked_up.value],
-    DeliveryStatus.picked_up.value: [DeliveryStatus.complete.value],
+    DeliveryStatus.created.value: [DeliveryStatus.preparing.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.ready.value: [DeliveryStatus.picked_up.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.picked_up.value: [DeliveryStatus.complete.value]
 }
 DELIVERY_STATUS_TRANSITIONS = {
-    DeliveryStatus.created.value: [DeliveryStatus.preparing.value],
-    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value],
-    DeliveryStatus.ready.value: [DeliveryStatus.delivered.value],
-    DeliveryStatus.delivered.value: [DeliveryStatus.complete.value],
+    DeliveryStatus.created.value: [DeliveryStatus.preparing.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.preparing.value: [DeliveryStatus.ready.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.ready.value: [DeliveryStatus.delivered.value, DeliveryStatus.cancelled.value],
+    DeliveryStatus.delivered.value: [DeliveryStatus.complete.value]
 }
 
 class OrdersService:
@@ -92,7 +92,8 @@ class OrdersService:
         # Generate payment transaction
         transaction = PaymentTransaction(
             payment_id = str(uuid4()),
-            order_id = order_id,
+            order_id = new_order.order_id,
+            user_id = new_order.user_id, 
             status = PaymentStatusType.pending,
             card = card,
             created_at = timestamp,
@@ -101,13 +102,12 @@ class OrdersService:
         )
 
         # Create payment transaction
-        create_transaction(transaction)
+        payment_status = create_transaction(transaction)
         
         # Generate a notification for the order creation event.
         self.notification.create_order_created_notification(user_id = new_order.user_id, order_id = new_order.order_id)
 
         return new_order
-        #return None #repo.create_order(restaurant_id, items)
     
     # Tariq
     def get_order_by_id(self, order_id: str, current_user: User) -> Order:
@@ -134,10 +134,20 @@ class OrdersService:
             if str(o.get("order_id")) == update_order_id:        
                 old_status = DeliveryStatus(o.get("status"))
                 new_status = status_request.status
-                
+                # If status is the same
                 if old_status == new_status:
                     raise HTTPException(status_code = 400, detail = "Order status remains unchanged.")  
+                
+                # Import get transaction by id function
+                from app.services.payments_service import get_transaction_by_id
 
+                # Check that order payment transaction is not declined
+                if new_status != DeliveryStatus.cancelled:
+                    transaction = get_transaction_by_id(update_order_id, str(o.get("user_id")))
+                    if transaction.status == PaymentStatusType.declined:
+                        raise HTTPException(status_code=400, detail="Cannot update order status with a declined payment.")
+
+                # Transistion rules for order status
                 if DeliveryType(o.get("delivery_method")) == DeliveryType.pickup:
                     allowed_next_statuses = PICKUP_STATUS_TRANSITIONS.get(old_status.value, [])
                 else:
@@ -146,6 +156,7 @@ class OrdersService:
                 if new_status.value not in allowed_next_statuses:
                     raise HTTPException(status_code=400, detail=f"Invalid status transition from '{old_status.value}' to '{new_status.value}'.")
 
+                # Set timestamp for status update
                 timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
                 
                 o["status"] = new_status.value     #Update the order status 
@@ -174,36 +185,47 @@ class OrdersService:
     def assign_delivery_info(self, update_order_id: str, delivery_request: DeliveryInfoUpdateRequest) -> Order:
         orders = load_all()
         # Search order list for order associated with update_order_id
-        for idx, order in enumerate(orders):
-            if str(order.get("order_id")) == update_order_id:
+        for idx, o in enumerate(orders):
+            if str(o.get("order_id")) == update_order_id:
+                # Check if order cancelled or complete
+                if DeliveryStatus(o.get("status")) in (DeliveryStatus.delivered, DeliveryStatus.picked_up, DeliveryStatus.complete, DeliveryStatus.cancelled):
+                    raise HTTPException(status_code=400, detail="Cannot update an order that is completed or cancelled.")
                 # Set new values
                 if delivery_request.delivery_method is not None:
-                    order["delivery_method"] = delivery_request.delivery_method
+                    o["delivery_method"] = delivery_request.delivery_method
                 if delivery_request.delivery_address is not None:
-                    order["delivery_address"] = delivery_request.delivery_address
+                    o["delivery_address"] = delivery_request.delivery_address
                 if delivery_request.pickup_location is not None:
-                    order["pickup_location"] = delivery_request.pickup_location
-                order["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z") # Convert to a string to prevent json save issues
+                    o["pickup_location"] = delivery_request.pickup_location
+                o["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z") # Convert to a string to prevent json save issues
 
                 # Set order entry with updated values
-                orders[idx] = order
+                orders[idx] = o
 
                 # Save changes to order
                 save_all(orders)
-                return Order(**order)
+                return Order(**o)
         raise HTTPException(status_code=404, detail="Order not found.")
 
     # Omarion
     # Update Order Information
     def update_order_info(self, update_order_id: str, items: List[OrderItem]):
         orders_store = load_all()
-        
         # Search order list for order associated with update_order_id
         for idx, o in enumerate(orders_store):
             # Check if update_restaurant_id matches
             if str(o.get("order_id")) == str(update_order_id):
-                if DeliveryStatus(o.get("status")) in (DeliveryStatus.delivered, DeliveryStatus.picked_up):
-                    raise HTTPException(status_code=400, detail="Cannot update a completed (Delivered or Picked up) order.")
+                # Import get transaction by id function
+                from app.services.payments_service import get_transaction_by_id
+
+                # Check that order payment transaction is not declined
+                transaction = get_transaction_by_id(update_order_id, str(o.get("user_id")))
+                if transaction.status == PaymentStatusType.declined:
+                    raise HTTPException(status_code=400, detail="Cannot update order status with a declined payment.")
+            
+                # Check if order cancelled or complete
+                if DeliveryStatus(o.get("status")) in (DeliveryStatus.delivered, DeliveryStatus.picked_up, DeliveryStatus.complete, DeliveryStatus.cancelled):
+                    raise HTTPException(status_code=400, detail="Cannot update an order that is completed or cancelled.")
                 if items is not None:
                     o["items"] = [it.model_dump() for it in items]
                 o["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
