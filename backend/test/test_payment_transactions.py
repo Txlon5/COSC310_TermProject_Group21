@@ -113,6 +113,12 @@ def test_get_transaction_na():
 def test_get_transaction_unauthorized():
     fake_transactions = [make_transaction("order-1", user_id="other-user-id")]
 
+    # Switch to user who does not own the transaction
+    def override_non_admin():
+        return User(id="user-id", name="User", email="user@example.com", password="Password123!", role="user")
+    
+    app.dependency_overrides[get_current_user] = override_non_admin
+
     with patch("app.services.payments_service.transaction_repo.load_all", return_value=fake_transactions):
         r = client.get("/payments/order-1")
         assert r.status_code == 403
