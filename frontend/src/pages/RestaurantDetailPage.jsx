@@ -39,20 +39,24 @@ export default function RestaurantDetailPage() {
   if (error) return <div className="page-container"><div className="alert error">{error}</div></div>;
   if (!restaurant) return null;
 
+  const PALETTE = ["#c2410c","#0e7490","#6d28d9","#047857","#b45309","#be185d","#1d4ed8","#065f46"];
+  const bannerColor = PALETTE[id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % PALETTE.length];
+
   const categories = [...new Set(menu.map((i) => i.category))];
 
   return (
     <div className="page-container">
-      <div className="restaurant-header">
-        <div>
+    <div className="restaurant-detail-wrap">
+      <div className="restaurant-header" style={{ "--card-bg": bannerColor }}>
+        <div className="restaurant-header-info">
           <h2>{restaurant.restaurant_name}</h2>
           <div className="tags">
             {restaurant.tags.map((t) => <span key={t} className="tag">{t}</span>)}
           </div>
+          <span className={`status-badge large ${restaurant.isOpen ? "open" : "closed"}`}>
+            {restaurant.isOpen ? "Open" : "Closed"}
+          </span>
         </div>
-        <span className={`status-badge large ${restaurant.isOpen ? "open" : "closed"}`}>
-          {restaurant.isOpen ? "Open" : "Closed"}
-        </span>
       </div>
 
       {cart.items.length > 0 && (
@@ -97,6 +101,7 @@ export default function RestaurantDetailPage() {
           </div>
         ))
       )}
+    </div>
     </div>
   );
 }

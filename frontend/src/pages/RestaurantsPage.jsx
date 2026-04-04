@@ -10,14 +10,14 @@ export default function RestaurantsPage() {
   const [tag, setTag] = useState("");
   const [openOnly, setOpenOnly] = useState(false);
 
-  const fetchRestaurants = async () => {
+  const fetchRestaurants = async ({ openOnlyVal = openOnly } = {}) => {
     setLoading(true);
     setError("");
     try {
       const params = {};
       if (search) params.q = search;
       if (tag) params.tag = tag;
-      if (openOnly) params.isOpen = true;
+      if (openOnlyVal) params.isOpen = true;
       const data = await getRestaurants(params);
       setRestaurants(data);
     } catch (err) {
@@ -30,6 +30,12 @@ export default function RestaurantsPage() {
   useEffect(() => { fetchRestaurants(); }, []);
 
   const handleSearch = (e) => { e.preventDefault(); fetchRestaurants(); };
+
+  const handleOpenToggle = (e) => {
+    const val = e.target.checked;
+    setOpenOnly(val);
+    fetchRestaurants({ openOnlyVal: val });
+  };
 
   return (
     <div>
@@ -59,13 +65,14 @@ export default function RestaurantsPage() {
               />
             </div>
             <div className="restaurants-search-check">
-              <label className="checkbox-label">
+              <label className={`restaurants-open-toggle ${openOnly ? "active" : ""}`}>
                 <input
                   type="checkbox"
                   checked={openOnly}
-                  onChange={(e) => setOpenOnly(e.target.checked)}
+                  onChange={handleOpenToggle}
                 />
-                Open only
+                <span className="restaurants-open-toggle-dot" />
+                Open now
               </label>
             </div>
             <button className="btn btn-primary restaurants-search-btn" type="submit">Search</button>
@@ -74,6 +81,7 @@ export default function RestaurantsPage() {
       </div>
 
       {/* ── Results ── */}
+      <div className="restaurants-divider" />
       <div className="page-container" style={{ paddingTop: "1.5rem" }}>
         {error && <div className="alert error">{error}</div>}
         {loading ? (
@@ -86,13 +94,13 @@ export default function RestaurantsPage() {
             <div className="card-grid">
               {restaurants.map((r) => (
                 <Link key={r.restaurant_id} to={`/restaurants/${r.restaurant_id}`} className="restaurant-card">
+                  <div className="restaurant-card-banner">
+                    <span className="restaurant-card-banner-name">{r.restaurant_name}</span>
+                    <span className={`status-badge ${r.isOpen ? "open" : "closed"}`}>
+                      {r.isOpen ? "Open" : "Closed"}
+                    </span>
+                  </div>
                   <div className="restaurant-card-inner">
-                    <div className="restaurant-card-header">
-                      <h3>{r.restaurant_name}</h3>
-                      <span className={`status-badge ${r.isOpen ? "open" : "closed"}`}>
-                        {r.isOpen ? "Open" : "Closed"}
-                      </span>
-                    </div>
                     {r.tags && r.tags.length > 0 && (
                       <div className="tags">
                         {r.tags.map((t) => <span key={t} className="tag">{t}</span>)}
