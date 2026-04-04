@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBell, faCartShopping, faBox, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
+import { faBell, faCartShopping, faBox, faCircleCheck, faRecordVinyl } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../useAuth";
 import { useCart } from "../CartContext";
 import { getNotifications } from "../api";
@@ -47,10 +47,25 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  if (!user) return null;
-
   const active = (path) =>
     location.pathname === path ? "nav-link active" : "nav-link";
+
+  if (!user) {
+    return (
+      <nav className="navbar">
+        <Link to="/" className="navbar-brand">
+        <FontAwesomeIcon icon={faRecordVinyl} /> Platter
+      </Link>
+        <div className="navbar-links">
+          <Link to="/" className={active("/")}>Restaurants</Link>
+        </div>
+        <div className="navbar-right">
+          <Link to="/login" className="btn btn-sm btn-outline">Login</Link>
+          <Link to="/register" className="btn btn-sm btn-primary">Sign Up</Link>
+        </div>
+      </nav>
+    );
+  }
 
   const sorted = [...notifications].sort(
     (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
@@ -64,7 +79,9 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="navbar-brand">🍔 FoodApp</Link>
+      <Link to="/" className="navbar-brand">
+        <FontAwesomeIcon icon={faRecordVinyl} /> Platter
+      </Link>
 
       <div className="navbar-links">
         <Link to="/" className={active("/")}>Restaurants</Link>

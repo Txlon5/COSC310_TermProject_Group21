@@ -34,8 +34,8 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/" element={<RequireAuth><RestaurantsPage /></RequireAuth>} />
-          <Route path="/restaurants/:id" element={<RequireAuth><RestaurantDetailPage /></RequireAuth>} />
+          <Route path="/" element={<RestaurantsPage />} />
+          <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
           <Route path="/cart" element={<RequireAuth><CartPage /></RequireAuth>} />
           <Route path="/orders" element={<RequireAuth><OrderHistoryPage /></RequireAuth>} />
           <Route path="/orders/:id" element={<RequireAuth><OrderDetailPage /></RequireAuth>} />

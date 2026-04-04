@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getRestaurantById, getRestaurantMenu } from "../api";
 import { useCart } from "../CartContext";
+import { useAuth } from "../useAuth";
 
 export default function RestaurantDetailPage() {
   const { id } = useParams();
+  const { user } = useAuth();
   const { addItem, cart } = useCart();
   const [restaurant, setRestaurant] = useState(null);
   const [menu, setMenu] = useState([]);
@@ -76,13 +78,17 @@ export default function RestaurantDetailPage() {
                     </div>
                     <div className="menu-item-footer">
                       <span className="menu-item-price">${item.price.toFixed(2)}</span>
-                      <button
-                        className={`btn btn-sm ${added === item.menuItemId ? "btn-success" : "btn-primary"}`}
-                        onClick={() => handleAdd(item)}
-                        disabled={!restaurant.isOpen}
-                      >
-                        {added === item.menuItemId ? "Added!" : qty > 0 ? `Add (${qty})` : "Add"}
-                      </button>
+                      {user ? (
+                        <button
+                          className={`btn btn-sm ${added === item.menuItemId ? "btn-success" : "btn-primary"}`}
+                          onClick={() => handleAdd(item)}
+                          disabled={!restaurant.isOpen}
+                        >
+                          {added === item.menuItemId ? "Added!" : qty > 0 ? `Add (${qty})` : "Add"}
+                        </button>
+                      ) : (
+                        <Link to="/login" className="btn btn-sm btn-outline">Login to add</Link>
+                      )}
                     </div>
                   </div>
                 );
