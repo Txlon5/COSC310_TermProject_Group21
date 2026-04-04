@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBell, faCartShopping } from "@fortawesome/free-solid-svg-icons";
+import { faBell, faCartShopping, faBox, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../useAuth";
 import { useCart } from "../CartContext";
 import { getNotifications } from "../api";
@@ -56,7 +56,11 @@ export default function Navbar() {
     (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
   );
 
-  const TYPE_ICONS = { order_created: "🛒", status_update: "📦", delivered: "✅" };
+  const TYPE_ICONS = {
+    order_created: { icon: faCartShopping, color: "#e85c2d" },
+    status_update: { icon: faBox,          color: "#7c3aed" },
+    delivered:     { icon: faCircleCheck,  color: "#15803d" },
+  };
 
   return (
     <nav className="navbar">
@@ -104,9 +108,14 @@ export default function Navbar() {
                 ) : (
                   sorted.map((n, i) => (
                     <div key={i} className="notif-dropdown-item">
-                      <span className="notif-icon">{TYPE_ICONS[n.type] || "🔔"}</span>
+                      <span className="notif-icon" style={{ color: (TYPE_ICONS[n.type] || {}).color || "#888" }}>
+                        <FontAwesomeIcon icon={(TYPE_ICONS[n.type] || {}).icon || faBell} />
+                      </span>
                       <div className="notif-body">
                         <strong className="notif-title">{n.title}</strong>
+                        {n.order_id && (
+                          <span className="notif-orderid">#{n.order_id}</span>
+                        )}
                         <p className="notif-message">{n.message}</p>
                         <span className="notif-time">
                           {new Date(n.timestamp).toLocaleString(undefined, {

@@ -267,6 +267,8 @@ a { color: inherit; text-decoration: none; }
   background: linear-gradient(135deg, #e85c2d 0%, #c94a1e 100%);
   padding: 3rem 1.5rem 2.5rem;
   text-align: center;
+  margin: 1.25rem 1.5rem 0;
+  border-radius: 18px;
 }
 .restaurants-hero-title {
   font-size: 2rem;
@@ -275,7 +277,14 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 1.75rem;
   letter-spacing: -0.02em;
 }
-.restaurants-search-form { max-width: 860px; margin: 0 auto; }
+.restaurants-search-form {
+  max-width: 860px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+}
 .restaurants-search-row {
   display: flex;
   gap: 0.75rem;
@@ -295,27 +304,27 @@ a { color: inherit; text-decoration: none; }
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: #aaa;
+  color: #555;
   text-align: left;
 }
 .restaurants-search-input {
   padding: 0.65rem 0.9rem;
-  border: 1px solid #444;
+  border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 0.95rem;
-  background: #2a2a2a;
-  color: #fff;
+  background: #fafafa;
+  color: #1a1a1a;
   transition: border-color 0.15s;
 }
-.restaurants-search-input::placeholder { color: #666; }
-.restaurants-search-input:focus { outline: none; border-color: #e85c2d; }
+.restaurants-search-input::placeholder { color: #aaa; }
+.restaurants-search-input:focus { outline: none; border-color: #e85c2d; background: #fff; }
 .restaurants-search-check {
   display: flex;
   align-items: center;
   padding-bottom: 0.1rem;
-  color: #ccc;
+  color: #333;
 }
-.restaurants-search-check .checkbox-label { color: #ccc; }
+.restaurants-search-check .checkbox-label { color: #333; }
 .restaurants-search-btn { padding: 0.65rem 1.5rem; white-space: nowrap; }
 .restaurants-count { font-size: 0.85rem; color: #aaa; margin-bottom: 1rem; }
 
@@ -1008,8 +1017,9 @@ a { color: inherit; text-decoration: none; }
 .notif-dropdown-item:last-child { border-bottom: none; }
 .notif-dropdown-item:hover { background: #fafafa; }
 
-.notif-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.1rem; }
+.notif-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.15rem; width: 1.1rem; text-align: center; }
 .notif-body { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
 .notif-title { font-size: 0.875rem; font-weight: 600; }
+.notif-orderid { font-size: 0.78rem; font-weight: 700; color: #e85c2d; letter-spacing: 0.02em; }
 .notif-message { font-size: 0.82rem; color: #555; white-space: normal; word-break: break-word; }
 .notif-time { font-size: 0.75rem; color: #bbb; margin-top: 0.1rem; }
