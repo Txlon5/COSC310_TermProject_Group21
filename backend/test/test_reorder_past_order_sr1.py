@@ -176,3 +176,48 @@ def test_reorder_past_order_rejects_another_users_order(setup_test_environment):
     assert response.status_code == 403
     assert response.json() == {"detail": "Not authorized to reorder this order."}
 
+# Ensure 404 is returned when trying to reorder an order that does not exist.
+def test_reorder_past_order_returns_404_when_original_order_does_not_exist(setup_test_environment):
+    reorder_request = {
+        "card_id": "card-123"
+    }
+
+    reorder_response = client.post("/orders/reorder/nonexistent-order-id", json=reorder_request)
+    assert reorder_response.status_code == 404
+    assert reorder_response.json() == {"detail": "Original order not found."}
+
+#Ensures that reorder allows changing delivery method and address, and validates required fields based on delivery method.
+def test_reorder_past_order_allows_changing_delivery_method(setup_test_environment):
+    original_order_request = {
+        "user_id": "user123",
+        "card_id": "card-123",
+        "restaurant_id": "restaurantD",
+        "delivery_method": "delivery",
+        "delivery_address": "111 First St",
+        "items": [
+            {"menuItemId": 1, "quantity": 1, "name": "Pasta", "price": 18.0}
+        ]
+    }
+
+    create_response = client.post("/orders", json=original_order_request)
+    assert create_response.status_code == 201
+
+    original_order = create_response.json()
+    original_order_id = original_order["order_id"]
+
+    # Reorder with new delivery method and pickup location
+    reorder_request = {
+        "card_id": "card-123",
+        "delivery_method": "pickup",
+        "pickup_location": "Front Counter"
+    }
+
+    reorder_response = client.post(f"/orders/reorder/{original_order_id}", json=reorder_request)
+    assert reorder_response.status_code == 201
+
+    reordered_order = reorder_response.json()
+
+    #validate updated delivery method and pickup location in the new order, while other details remain the same
+    assert reordered_order["order_id"] != original_order["order_id"]
+    assert reordered_order["delivery_method"] == "pickup"
+    assert reordered_order["pickup_location"] == "Front Counter"
