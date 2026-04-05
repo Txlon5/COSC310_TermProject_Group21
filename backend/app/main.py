@@ -9,7 +9,7 @@ from app.routers.notifications import router as notifications_router
 from app.routers.order_cost import router as order_cost_router
 from app.routers.payment_methods import router as payment_methods_router
 from app.routers.transactions_router import router as transactions_router
-#from app.routers.order_cost import router as order_cost_router
+from app.routers.cart import router as cart_router
 
 app = FastAPI()
 app.include_router(orders_router)   #Include the orders router to make the order creation endpoint available.
@@ -21,7 +21,7 @@ app.include_router(menus_router)
 app.include_router(order_cost_router)
 app.include_router(payment_methods_router)
 app.include_router(transactions_router)
-#app.include_router(order_cost_router)
+app.include_router(cart_router)
 
 @app.get("/", tags=["FastAPI Server"])
 def root():
