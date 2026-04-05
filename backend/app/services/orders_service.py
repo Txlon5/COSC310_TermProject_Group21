@@ -1,4 +1,4 @@
-from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse,DeliveryInfoUpdateRequest,Order
+from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse,DeliveryInfoUpdateRequest,Order, CreateOrderRequest, OrderItem, ReorderRequest
 from fastapi import APIRouter, status, Depends, HTTPException
 from app.schemas.order import CreateOrderResponse, CreateOrderRequest, Order, OrderItem
 from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusType
@@ -253,3 +253,60 @@ class OrdersService:
         # Return list of orders
         return user_orders
 
+    def reorder_past_order(self, original_order_id: str, reorder_request: ReorderRequest, current_user: User) -> CreateOrderResponse:
+        # Retrieve the original order from the repository
+        orders = load_all()
+        original_order = None
+        for o in orders:
+            if str(o.get("order_id")) == str(original_order_id):
+                original_order = o
+                break
+        
+        if original_order is None:
+            raise HTTPException(status_code=404, detail="Original order not found.")
+        
+        # Ensure the authenticated user is the owner of the original order
+        if current_user.id != str(original_order.get("user_id")):
+            raise HTTPException(status_code=403, detail="Not authorized to reorder this order.")
+        
+        # Override original order delivery method in reorder request if provided, otherwise use original delivery method
+        delivery_method = (
+            reorder_request.delivery_method
+            if reorder_request.delivery_method is not None
+            else original_order.get("delivery_method")
+        )
+
+        delivery_address = (
+            reorder_request.delivery_address
+            if reorder_request.delivery_address is not None
+            else original_order.get("delivery_address")
+        )
+
+        pickup_location = (
+            reorder_request.pickup_location
+            if reorder_request.pickup_location is not None
+            else original_order.get("pickup_location")
+        )
+
+        # Normalize delivery method
+        delivery_method = DeliveryType(delivery_method)
+
+        # Validate delivery or pickup requirements
+        if delivery_method == DeliveryType.delivery and not delivery_address:
+            raise HTTPException(status_code=400, detail="delivery_address is required when delivery_method is 'delivery'.")
+
+        if delivery_method == DeliveryType.pickup and not pickup_location:
+            raise HTTPException(status_code=400, detail="pickup_location is required when delivery_method is 'pickup'.")
+
+        # Build a new order request using the past order's details 
+        reordered_order_request = CreateOrderRequest(
+            user_id = str(current_user.id),
+            card_id = reorder_request.card_id,
+            restaurant_id = original_order["restaurant_id"],
+            items = [OrderItem(**item) for item in original_order["items"]],
+            delivery_method = delivery_method,
+            delivery_address = delivery_address,
+            pickup_location = pickup_location
+        )
+        # Create and return a new order
+        return self.create_order(reordered_order_request)

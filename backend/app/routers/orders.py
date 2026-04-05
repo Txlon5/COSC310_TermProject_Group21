@@ -1,5 +1,5 @@
 from typing import List 
-from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest, DeliveryInfoUpdateRequest, Order, OrderItem
+from app.schemas.order import CreateOrderRequest, CreateOrderResponse, OrderStatusUpdateRequest, DeliveryInfoUpdateRequest, Order, OrderItem, ReorderRequest
 from app.services.orders_service import OrdersService
 from fastapi import APIRouter, status, HTTPException, Depends
 from app.schemas.user import User
@@ -49,3 +49,8 @@ def update_delivery_info(order_id: str, delivery_request: DeliveryInfoUpdateRequ
 @router.put("/{order_id}", response_model=CreateOrderResponse)
 def update_order(order_id: str, items: List[OrderItem]) -> Order:
     return order_service.update_order_info(order_id, items)
+
+#M4-feat4-sr1 - Reorder past order with option to override delivery method and address
+@router.post("/reorder/{order_id}", response_model=CreateOrderResponse, status_code=status.HTTP_201_CREATED)
+def reorder_past_order(order_id: str, reorder_request: ReorderRequest, current_user: User = Depends(get_current_user)) -> CreateOrderResponse:
+    return order_service.reorder_past_order(order_id, reorder_request, current_user)
