@@ -189,3 +189,47 @@ def test_reorder_past_order_preserves_each_item_detail(setup_test_environment):
     assert items[1]["name"] == "Drink"
     assert items[1]["price"] == 3.5
     assert items[1]["quantity"] == 1
+    
+# Ensures that an admin user can reorder another user's order successfully, and that the reordered order still belongs to the original user.
+def test_admin_can_reorder_any_order(setup_test_environment):
+    #Create order as normal user
+    original_order_request = {
+        "user_id": "user123",
+        "card_id": "card-123",
+        "restaurant_id": "restaurantX",
+        "delivery_method": "delivery",
+        "delivery_address": "123 Main St",
+        "items": [
+            {"menuItemId": 1, "quantity": 1, "name": "Burger", "price": 10.0}
+        ]
+    }
+
+    create_response = client.post("/orders", json=original_order_request)
+    assert create_response.status_code == 201
+
+    original_order_id = create_response.json()["order_id"]
+
+    #Switch to admin user
+    def override_admin():
+        return User(
+            id="admin1",
+            name="Admin",
+            email="admin@test.com",
+            password="password",
+            role="admin"
+        )
+
+    app.dependency_overrides[get_current_user] = override_admin
+
+    #Admin reorders the order
+    reorder_response = client.post(f"/orders/reorder/{original_order_id}",json={"card_id": "card-123"})
+
+    #Validate success
+    assert reorder_response.status_code == 201
+
+    reordered_order = reorder_response.json()
+
+    # The reordered order should still belong to the original user
+    assert reordered_order["user_id"] == "user123"
+    assert reordered_order["restaurant_id"] == "restaurantX"
+    assert reordered_order["items"] == original_order_request["items"]
