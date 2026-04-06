@@ -21,7 +21,7 @@ def create_action_token(token_type: ActionTokenType, user_id: str) -> ActionToke
         user_id=user_id,
         type=token_type,
         created_at=datetime.now(),
-        used=False,
+        used=False
     )
 
     # Save action token and return it
@@ -56,3 +56,21 @@ def is_action_token_valid(token_id: str) -> bool:
 
     # Token invalid
     return False
+
+
+def use_action_token(token_id: str) -> None:
+    """
+    Marks an action token as used
+    Raises 404 if token not found
+    """
+    # Fetch token values
+    tokens = load_all()
+
+    # Find token associated with token_id
+    for idx, t in enumerate(tokens):
+        if t.get("id") == token_id:
+            t["used"] = True
+            tokens[idx] = t
+            save_all(tokens)
+            return
+    raise HTTPException(status_code=404, detail=f"Token '{token_id}' not found")
