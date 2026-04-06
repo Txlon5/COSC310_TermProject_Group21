@@ -63,6 +63,7 @@ def test_get_past_order_history_for_user_returns_empty_list():
 def test_get_past_order_history_returns_orders_for_that_user_only():
     #Verifies that order history belonging to a specific user is returned.
     order_1 = {"user_id": "user123",
+        "card_id": "test-card-id",
         "restaurant_id": "24",
         "delivery_method": "delivery",
         "items": [
@@ -74,6 +75,7 @@ def test_get_past_order_history_returns_orders_for_that_user_only():
     
     order_2 = {
         "user_id": "user123", 
+        "card_id": "test-card-id",
         "restaurant_id": "14", 
         "delivery_method": "delivery",
         "items": [
@@ -85,6 +87,7 @@ def test_get_past_order_history_returns_orders_for_that_user_only():
     assert response_2.status_code == 201
     
     order_3 = {"user_id": "user888",
+        "card_id": "test-card-id",
         "restaurant_id": "34",
         "delivery_method": "delivery",
         "items": [

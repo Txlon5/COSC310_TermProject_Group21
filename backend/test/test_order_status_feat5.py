@@ -52,6 +52,7 @@ def setup_test_environment():
 def test_invalid_delivery_method():
     response = client.post("/orders", json={
         "user_id": "u1",
+        "card_id": "test-card-id",
         "restaurant_id":RESTAURANT_ID ,
         "items": [{"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "quantity": 1}],
         "delivery_method": "drone"
@@ -62,6 +63,7 @@ def test_invalid_delivery_method():
 def test_delivery_without_address_is_currently_accepted():
     response = client.post("/orders", json={
         "user_id": "u1",
+        "card_id": "test-card-id",
         "restaurant_id": RESTAURANT_ID,
         "items": [{"menuItemId": 1,"name": "Onion Pizza", "price": 26.0, "quantity": 1}],
         "delivery_method": "delivery"
@@ -70,11 +72,11 @@ def test_delivery_without_address_is_currently_accepted():
 
 
 def test_pickup_without_location_is_not_accepted():
-    response = client.post("/orders", json={
+    response = client.post("/orders", params={"delivery_method": "pickup"}, json={
         "user_id": "u1",
+        "card_id": "test-card-id",
         "restaurant_id": 1,
         "items": [{"menuItemId": 1,"name": "Onion Pizza", "price": 26.0, "quantity": 1}],
-        "delivery_method": "pickup"
     })
     assert response.status_code == 422
 
@@ -82,6 +84,7 @@ def test_pickup_without_location_is_not_accepted():
 def test_delivered_status_sets_timestamp():
     create = client.post("/orders", json={
         "user_id": "u1",
+        "card_id": "test-card-id",
         "restaurant_id":  RESTAURANT_ID,
         "items": [{"menuItemId": 1,"name": "Onion Pizza", "price": 26.0, "quantity": 1}]
     })

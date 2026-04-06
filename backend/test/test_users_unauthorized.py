@@ -51,5 +51,5 @@ def test_delete_user():
 
 # User Update - Invalid Authorization
 def test_update_user():
-    r = client.put("/users/9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", json={"name": "User", "email": "updateme@example.com", "password": "Password123!"})
+    r = client.put("/users/9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", json={"name": "User", "email": "updateme@example.com", "password": "Password123!", "is_verified": "true"})
     assert r.status_code == 403

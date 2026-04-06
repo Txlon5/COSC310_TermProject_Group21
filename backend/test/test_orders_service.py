@@ -1,12 +1,59 @@
+from datetime import datetime, timezone
 import pytest
 from app.services.orders_service import OrdersService
 from app.repositories.orders_repository import save_all
-from app.schemas.order import CreateOrderRequest, OrderItem
+from app.repositories.restaurants_repository import RestaurantsRepository
+from app.schemas.order import CreateOrderRequest, OrderItem,DeliveryInfoUpdateRequest, OrderStatusUpdateRequest
 from app.schemas.user import User
 from fastapi import HTTPException
+from app.schemas.delivery import DeliveryStatus, DeliveryType
+from fastapi.testclient import TestClient
+from app.main import app
+from app.schemas.payment_method import CreditCard
+from app.schemas.payment_transaction import PaymentStatusType, PaymentTransaction
+
+client = TestClient(app)
 
 # Use a restaurant id that exists in the packaged restaurant data.
 RESTAURANT_ID = "85590c53-fc55-4837-a3ef-283345df572a"
+
+def seed_restaurant():
+    repo = RestaurantsRepository()
+    repo.save_all([
+        {
+            "restaurant_id": RESTAURANT_ID,
+            "restaurant_name": "Test Pizza",
+            "tags": ["pizza"],
+            "isOpen": True,
+            "menuItems": [
+                {"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "category": "Food"},
+                {"menuItemId": 2, "name": "Cheesey Bread", "price": 15.0, "category": "Food"},
+                {"menuItemId": 3, "name": "Canadian Pizza", "price": 23.0, "category": "Food"}
+            ]
+        }
+    ])
+
+# Create test declined_payment for test
+def _make_declined_transaction(order_id, user_id):
+    return PaymentTransaction(
+        payment_id="pay-1",
+        order_id=order_id,
+        user_id=user_id,
+        card=CreditCard(
+            id="card-1",
+            user_id=user_id,
+            card_num="4111111111111111",
+            card_cvc="123",
+            card_exp="2030-01",
+            holder_name="Test User",
+            holder_address="1 Test St",
+        ),
+        status=PaymentStatusType.declined,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+        price_total=0.0,
+    )
+
 
 # Making sure we don't override the orders JSON file
 # Automatic fixture to isolate tests, it runs per test 
@@ -23,6 +70,7 @@ def test_service_creates_valid_order():
     order = service.create_order(
         CreateOrderRequest(
             user_id="user-1",
+            card_id="test-card-id",
             restaurant_id=RESTAURANT_ID,
             items=[OrderItem(menuItemId=1, name="Onion Pizza", price=26.0, quantity=2)],
         )
@@ -39,7 +87,7 @@ def test_service_rejects_empty_order():
 
     # Empty item lists are not allowed.
     with pytest.raises(ValueError):
-        service.create_order(CreateOrderRequest(user_id="user-1", restaurant_id=RESTAURANT_ID, items=[]))
+        service.create_order(CreateOrderRequest(user_id="user-1", card_id="test-card-id", restaurant_id=RESTAURANT_ID, items=[]))
 
 
 def test_create_order_rejects_no_items():
@@ -48,6 +96,7 @@ def test_create_order_rejects_no_items():
         service.create_order(
             CreateOrderRequest(
                 user_id="user-1",
+                card_id="test-card-id",
                 restaurant_id=RESTAURANT_ID,
                 items=[]
             )
@@ -56,10 +105,13 @@ def test_create_order_rejects_no_items():
 
 
 def test_service_retrieves_created_order_for_matching_user():
+    seed_restaurant()
+    
     service = OrdersService()
     created = service.create_order(
         CreateOrderRequest(
             user_id="9c6dbfcb-72c5-4cc4-9f76-29200f0efda7",
+            card_id="test-card-id",
             restaurant_id=RESTAURANT_ID,
             items=[OrderItem(menuItemId=2, name="Cheesey Bread", price=15.0, quantity=1)],
         )
@@ -78,10 +130,13 @@ def test_service_retrieves_created_order_for_matching_user():
 
 
 def test_service_rejects_access_for_wrong_user():
+    seed_restaurant()
+
     service = OrdersService()
     created = service.create_order(
         CreateOrderRequest(
             user_id="owner-id",
+            card_id="test-card-id",
             restaurant_id=RESTAURANT_ID,
             items=[OrderItem(menuItemId=3, name="Canadian Pizza", price=23.0, quantity=1)],
         )
@@ -100,6 +155,7 @@ def test_get_order_by_id_owner():
     # Create and save an order
     order = service.create_order(CreateOrderRequest(
         user_id="user-1",
+        card_id="test-card-id",
         restaurant_id=RESTAURANT_ID,
         items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
     ))
@@ -112,6 +168,7 @@ def test_get_order_by_id_admin():
     service = OrdersService()
     order = service.create_order(CreateOrderRequest(
         user_id="user-1",
+        card_id="test-card-id",
         restaurant_id=RESTAURANT_ID,
         items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
     ))
@@ -124,6 +181,7 @@ def test_get_order_by_id_forbidden():
     service = OrdersService()
     order = service.create_order(CreateOrderRequest(
         user_id="user-1",
+        card_id="test-card-id",
         restaurant_id=RESTAURANT_ID,
         items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
     ))
@@ -139,31 +197,216 @@ def test_get_order_by_id_not_found():
     with pytest.raises(HTTPException) as exc_info:
         service.get_order_by_id("nonexistent-id", user)
     assert exc_info.value.status_code == 404
-    
-    
-# LEGACY CODE BELOW - FOR REFERENCE
-# def test_service_creates_valid_order():
-#     service = OrdersService(OrdersRepository(), RestaurantsRepository())
-#     order = service.create_order(
-#         restaurant_id=19,
-#         items=[{"menuItemId": 5, "quantity": 2, "item_name": "Pasta"}]
-#     ) # Updated values to match the CSV file, also done for other tests in this file
-#     assert order["orderId"] == 1
-#     assert len(order["items"]) == 1
 
-# def test_service_rejects_empty_order():
-#     service = OrdersService(OrdersRepository(), RestaurantsRepository())
-#     with pytest.raises(ValueError): # We expect a ValueError to be raised when trying to create an order with no items
-#         service.create_order(
-#             restaurant_id=19,
-#             items=[]
-#         )
 
-# def test_service_retrieves_created_order():
-#     service = OrdersService(OrdersRepository(), RestaurantsRepository())
-#     created = service.create_order(
-#         restaurant_id=22,
-#         items=[{"menuItemId": 2, "quantity": 1, "item_name": "Burger"}]
-#     )
-#     fetched = service.get_order_by_id(created["orderId"]) # We should be able to retrieve the same order we just created
-#     assert fetched["orderId"] == created["orderId"] # The IDs should match, confirming we retrieved the correct order
+
+
+def test_subtotal_endpoint_works():
+    payload = {
+        "restaurant_id": RESTAURANT_ID,
+        "items": [
+            {
+                "item_id": "1",
+                "quantity": 1
+            }
+        ]
+    }
+
+    response = client.post("/order-cost/subtotal", json=payload)
+
+    assert response.status_code == 200
+    assert "subtotal" in response.json()
+
+
+def test_calculate_endpoint_works():
+    payload = {
+        "restaurant_id": RESTAURANT_ID,
+        "delivery_method": "delivery",
+        "delivery_address": "123 Test St",
+        "province": "BC",
+        "distance_km": 4,
+        "items": [
+            {
+                "item_id": "1",
+                "quantity": 1
+            }
+        ]
+    }
+
+    response = client.post("/order-cost/calculate", json=payload)
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert "subtotal" in data
+    assert "delivery_fee" in data
+    assert "tax" in data
+    assert "total" in data
+    
+#////////////////
+
+def test_list_orders_simple():
+    save_all([
+        {
+            "order_id": "order-1",
+            "user_id": "user-1",
+            "restaurant_id": RESTAURANT_ID,
+            "items": [
+                {
+                    "menuItemId": 1,
+                    "name": "Pizza",
+                    "price": 10.0,
+                    "quantity": 1
+                }
+            ],
+            "status": "created",
+            "delivery_method": "delivery",
+            "delivery_address": None,
+            "pickup_location": None,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z",
+            "delivered_at": None
+        }
+    ])
+
+    service = OrdersService()
+    orders = service.list_orders()
+
+    assert len(orders) == 1
+    assert orders[0].order_id == "order-1"
+
+
+def test_create_order_bad_menu_item():
+    service = OrdersService()
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.create_order(
+            CreateOrderRequest(
+                user_id="user-1",
+                card_id="test-card-id",
+                restaurant_id=RESTAURANT_ID,
+                items=[OrderItem(menuItemId=999, name="Fake", price=1.0, quantity=1)]
+            )
+        )
+
+    assert exc_info.value.status_code == 400
+
+
+def test_create_order_zero_quantity():
+    service = OrdersService()
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.create_order(
+            CreateOrderRequest(
+                user_id="user-1",
+                card_id="test-card-id",
+                restaurant_id=RESTAURANT_ID,
+                items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=0)]
+            )
+        )
+
+    assert exc_info.value.status_code == 400
+
+
+def test_assign_delivery_info_not_found():
+    service = OrdersService()
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.assign_delivery_info(
+            "missing-id",
+            DeliveryInfoUpdateRequest(
+                delivery_method=DeliveryType.pickup,
+                pickup_location="Front Desk"
+            )
+        )
+
+    assert exc_info.value.status_code == 404
+
+
+def test_update_order_info_not_found():
+    service = OrdersService()
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.update_order_info(
+            "missing-id",
+            [OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
+        )
+
+    assert exc_info.value.status_code == 404
+
+# Update Order Status - Invalid Transition
+def test_update_order_status_invalid_transition():
+    service = OrdersService()
+    order = service.create_order(CreateOrderRequest(
+        user_id="user-1",
+        card_id="card-1",
+        restaurant_id=RESTAURANT_ID,
+        items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
+    ))
+
+    # Make order go from created to complete
+    with pytest.raises(HTTPException) as exc_info:
+        service.update_order_status(
+            order.order_id,
+            OrderStatusUpdateRequest(status=DeliveryStatus.complete)
+        )
+
+    assert exc_info.value.status_code == 400
+
+# Assign Delivery Info - Completed Order
+def test_assign_delivery_info_completed_order():
+    service = OrdersService()
+    order = service.create_order(CreateOrderRequest(
+        user_id="user-1",
+        card_id="card-1",
+        restaurant_id=RESTAURANT_ID,
+        items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
+    ))
+
+    # Cancel order
+    service.update_order_status(order.order_id, OrderStatusUpdateRequest(status=DeliveryStatus.cancelled))
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.assign_delivery_info(
+            order.order_id,
+            DeliveryInfoUpdateRequest(delivery_method=DeliveryType.delivery)
+        )
+
+    assert exc_info.value.status_code == 400
+
+
+# Assign Delivery Info - Pickup Location Valid
+def test_assign_delivery_info_with_pickup_location():
+    service = OrdersService()
+    order = service.create_order(CreateOrderRequest(
+        user_id="user-1",
+        card_id="card-1",
+        restaurant_id=RESTAURANT_ID,
+        delivery_method=DeliveryType.pickup,
+        items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
+    ))
+
+    updated = service.assign_delivery_info(
+        order.order_id,
+        DeliveryInfoUpdateRequest(pickup_location="Front Lobby")
+    )
+
+    assert updated.pickup_location == "Front Lobby"
+
+# Update Order Info - Valid
+def test_update_order_info_success():
+    service = OrdersService()
+    order = service.create_order(CreateOrderRequest(
+        user_id="user-1",
+        card_id="card-1",
+        restaurant_id=RESTAURANT_ID,
+        items=[OrderItem(menuItemId=1, name="Pizza", price=10.0, quantity=1)]
+    ))
+
+    updated = service.update_order_info(
+        order.order_id,
+        [OrderItem(menuItemId=2, name="Cheesey Bread", price=15.0, quantity=2)]
+    )
+
+    assert len(updated.items) == 1
+    assert updated.items[0].menuItemId == 2

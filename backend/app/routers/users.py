@@ -4,7 +4,7 @@ from app.schemas.user import User, UserCreate, UserUpdate
 from app.services.users_service import list_users, create_user, delete_user, update_user, get_user_by_id, get_user_by_email
 from app.auth.token_utils import get_current_user
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/users", tags=["User Accounts"])
 
 # Get all users
 @router.get("", response_model=List[User])
@@ -14,7 +14,7 @@ def get_users(current_user: User = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Not authorized to fetch users.")
     return list_users()
 
-#simple post the payload (is the body of the request)
+# Create user account
 @router.post("", response_model=User, status_code=201)
 def post_user(payload: UserCreate):
     return create_user(payload)

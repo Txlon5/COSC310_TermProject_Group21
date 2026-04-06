@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 class User(BaseModel):
     id: str
@@ -7,6 +7,7 @@ class User(BaseModel):
     email: str
     password: str
     role: str="user"
+    is_verified: bool = False
 
 class UserCreate(BaseModel):
     name: str
@@ -14,6 +15,6 @@ class UserCreate(BaseModel):
     password: str
 
 class UserUpdate(BaseModel):
-    name: str
-    email: str
-    password: str
+    name: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None

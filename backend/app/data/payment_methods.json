@@ -1,0 +1,11 @@
+[
+  {
+    "id": "b5234eab-c899-4716-b899-a5942c839c3d",
+    "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "card_num": "13908319083231314",
+    "card_cvc": "145",
+    "card_exp": "2029-11",
+    "holder_name": "string",
+    "holder_address": "string"
+  }
+]

@@ -91,14 +91,34 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
     users = load_all()
     for idx, it in enumerate(users):
         if it.get("id") == user_id:
-            # User input validation
-            if not UserValidator.is_valid_email(payload.email.strip()):
-                raise HTTPException(status_code=422, detail="Invalid email format.")
-            if not UserValidator.is_valid_password(payload.password.strip()):
-                raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
+
+            # Fetch updated values
+            # Name field
+            if payload.name is not None:
+                new_name = payload.name.strip() 
+            else: 
+                new_name = it.get("name")
+
+            # Password field
+            if payload.password is not None:
+                new_password = payload.password.strip()
+                # User input validation
+                if not UserValidator.is_valid_password(str(new_password)):
+                    raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
+            else: 
+                new_password = it.get("password")
+
+            # Email field
+            if payload.email is not None:
+                new_email = payload.email.strip()
+                # User input validation
+                if not UserValidator.is_valid_email(str(new_email)):
+                    raise HTTPException(status_code=422, detail="Invalid email format.")
+            else: 
+                new_email = it.get("email")
             
             # Conflict checks
-            check_email_collision(payload.email.strip(), user_id)
+            check_email_collision(str(new_email), user_id)
 
             # Fetch role or set to default if none
             user_role = it.get("role", "user")
@@ -106,9 +126,9 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
             # Create updated user object
             updated = User(
                 id=user_id,
-                name=payload.name.strip(),
-                email=payload.email.strip(),
-                password=PasswordHandler.hash_password(payload.password.strip()),
+                name=str(new_name),
+                email=str(new_email),
+                password=PasswordHandler.hash_password(str(new_password)),
                 role=user_role
             )
             
@@ -124,9 +144,18 @@ def delete_user(user_id: str) -> None:
     Raises 404 if no user exists
     """
     users = load_all()
-    new_users = [it for it in users if it.get("id") != user_id]
+    new_users = []
+
+    # Search user list
+    for it in users:
+        # Check user is associated with user_id
+        if it.get("id") != user_id:
+            new_users.append(it)
+
+    # Check if new user list does not contain user
     if len(new_users) == len(users):
         raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+    # Save new user list
     save_all(new_users)
 
 def login_user (email:str, password: str) -> User:
@@ -153,6 +182,20 @@ def login_user (email:str, password: str) -> User:
         raise HTTPException(status_code=401, detail="Invalid credentials.")
     
     return user
+
+def verify_user(user_id: str) -> None:
+    """
+    Marks the user matching the userid as verified
+    Raises 404 if no user exists.
+    """
+    users = load_all()
+    for idx, it in enumerate(users):
+        if it.get("id") == user_id:
+            it["is_verified"] = True
+            users[idx] = it
+            save_all(users)
+            return
+    raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
 
 
 # Helper Functions

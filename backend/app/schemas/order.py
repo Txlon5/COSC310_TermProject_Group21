@@ -13,6 +13,7 @@ class OrderItem(ItemBase):
 # Unified CreateOrderRequest
 class CreateOrderRequest(BaseModel):
     user_id: str
+    card_id: str
     restaurant_id: str
     items: List[OrderItem]
     status: DeliveryStatus = DeliveryStatus.created
@@ -82,3 +83,10 @@ class DeliveryInfoResponse(BaseModel):
     delivery_address: Optional[str] = None
     pickup_location: Optional[str] = None
     status: str = Field(..., min_length=1)
+
+# For Reorder Requests M4-feat4-sr1
+class ReorderRequest(BaseModel):
+    card_id: str
+    delivery_method: Optional[DeliveryType] = None
+    delivery_address: Optional[str] = None
+    pickup_location: Optional[str] = None
