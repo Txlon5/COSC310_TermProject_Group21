@@ -35,8 +35,11 @@ class OrdersService:
     def list_orders(self):
         return [Order(**it) for it in load_all()]
     
+    def _get_current_time(self):
+        return datetime.now().time()
+    
     def _is_restaurant_open(self, restaurant: dict) -> bool:
-        now = datetime.now().time()
+        now = self._get_current_time()
         opening = datetime.strptime(restaurant["opening_time"], "%H:%M").time()
         closing = datetime.strptime(restaurant["closing_time"], "%H:%M").time()
         return opening <= now <= closing
