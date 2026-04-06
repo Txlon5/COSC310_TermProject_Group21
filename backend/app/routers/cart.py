@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, HTTPException
-from app.services.cart_service import add_item_to_cart, get_cart_by_user_id, checkout_cart
-from app.schemas.cart import Cart, CartCheckoutRequest, AddCartItemRequest
+from app.services.cart_service import add_item_to_cart, get_cart_by_user_id, checkout_cart, update_cart_item
+from app.schemas.cart import Cart, CartCheckoutRequest, AddCartItemRequest, UpdateCartItemRequest
 from app.schemas.order import CreateOrderResponse
 from typing import Optional
 from pydantic import ValidationError
@@ -31,3 +31,7 @@ def checkout(request: CartCheckoutRequest):
     except ValidationError as e:
         detail = e.errors()
         raise HTTPException(status_code=400, detail=detail)
+
+@router.post("/update-item", response_model=Cart, status_code=status.HTTP_200_OK)
+def update_item(request: UpdateCartItemRequest):
+    return update_cart_item(request)

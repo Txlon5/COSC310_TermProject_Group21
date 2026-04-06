@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from app.services.menu_service import fetch_menu_by_restaurant_id
-from app.schemas.cart import CartCheckoutRequest
+from app.schemas.cart import CartCheckoutRequest, UpdateCartItemRequest
 from typing import Dict, Any, Optional
 from app.repositories.cart_repository import load_all, save_all
 from app.schemas.order import OrderItem, CreateOrderRequest, CreateOrderResponse
@@ -136,3 +136,23 @@ def checkout_cart(request: CartCheckoutRequest) -> CreateOrderResponse:
     delete_cart_by_user_id(request.user_id)
 
     return order
+
+def update_cart_item(request: UpdateCartItemRequest):
+    cart = get_cart_by_user_id(request.user_id)
+    if not cart or cart["restaurant_id"] != request.restaurant_id:
+        raise HTTPException(status_code=404, detail="Cart not found for user and restaurant.")
+    found = False
+    for item in cart["items"]:
+        if item["menuItemId"] == request.menu_item_id:
+            found = True
+            if request.quantity == 0:
+                cart["items"].remove(item)
+            else:
+                item["quantity"] = request.quantity
+            break
+    if not found:
+        raise HTTPException(status_code=404, detail="Item not found in cart.")
+    cart["updated_at"] = __import__('datetime').datetime.now().isoformat()
+    save_cart(cart)
+    return cart
+
