@@ -27,3 +27,9 @@ class AddCartItemRequest(BaseModel):
     restaurant_id: str
     menu_item_id: int
     quantity: int = Field(..., ge=1)
+    
+class UpdateCartItemRequest(BaseModel):
+    user_id: str
+    restaurant_id: str
+    menu_item_id: int
+    quantity: int = Field(..., ge=0)

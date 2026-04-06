@@ -125,3 +125,95 @@ def test_checkout_invalid_delivery_method():
     })
     assert resp.status_code == 400
     assert "delivery_method" in resp.text
+
+
+def test_update_item_quantity():
+    # Add an item
+    client.post("/cart/add-item", json={
+        "user_id": USER_ID,
+        "restaurant_id": RESTAURANT_ID,
+        "menu_item_id": 1,
+        "quantity": 2
+    })
+    # Then update its quantity
+    resp = client.post("/cart/update-item", json={
+        "user_id": USER_ID,
+        "restaurant_id": RESTAURANT_ID,
+        "menu_item_id": 1,
+        "quantity": 5
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["items"][0]["quantity"] == 5
+
+
+def test_remove_item_from_cart():
+    # Add an item
+    client.post("/cart/add-item", json={
+        "user_id": USER_ID,
+        "restaurant_id": RESTAURANT_ID,
+        "menu_item_id": 1,
+        "quantity": 2
+    })
+    # Remove item (ie set quantity to 0)
+    resp = client.post("/cart/update-item", json={
+        "user_id": USER_ID,
+        "restaurant_id": RESTAURANT_ID,
+        "menu_item_id": 1,
+        "quantity": 0
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert all(item["menuItemId"] != 1 for item in data["items"])
+
+
+def test_update_item_quantity_to_zero_removes_item():
+    # Try adding two items
+    client.post("/cart/add-item", json={
+        "user_id": USER_ID,
+        "restaurant_id": RESTAURANT_ID,
+        "menu_item_id": 1,
+        "quantity": 2
+    })
+    client.post("/cart/add-item", json={
+        "user_id": USER_ID,
+        "restaurant_id": RESTAURANT_ID,
+        "menu_item_id": 2,
+        "quantity": 1
+    })
+    # Remove first item by setting quantity to 0
+    resp = client.post("/cart/update-item", json={
+        "user_id": USER_ID,
+        "restaurant_id": RESTAURANT_ID,
+        "menu_item_id": 1,
+        "quantity": 0
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert all(item["menuItemId"] != 1 for item in data["items"])
+    assert any(item["menuItemId"] == 2 for item in data["items"])
+
+
+def test_update_item_quantity_reflected_in_cart():
+    # Add item
+    client.post("/cart/add-item", json={
+        "user_id": USER_ID,
+        "restaurant_id": RESTAURANT_ID,
+        "menu_item_id": 3,
+        "quantity": 1
+    })
+    # Update quantity
+    resp = client.post("/cart/update-item", json={
+        "user_id": USER_ID,
+        "restaurant_id": RESTAURANT_ID,
+        "menu_item_id": 3,
+        "quantity": 4
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["items"][0]["quantity"] == 4
+    # Get cart and check again
+    resp2 = client.get(f"/cart/get?user_id={USER_ID}")
+    assert resp2.status_code == 200
+    data2 = resp2.json()
+    assert data2["items"][0]["quantity"] == 4
