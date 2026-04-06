@@ -4,15 +4,15 @@ from fastapi import HTTPException
 import os
 from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(find_dotenv())
+load_dotenv("backend/app/.env")
 
 # Email Host Information
-SMTP_HOST = str(os.getenv("SMTP_HOST"))
+SMTP_HOST = os.getenv("SMTP_HOST", "")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = str(os.getenv("SMTP_USER"))
-SMTP_PASS = str(os.getenv("SMTP_PASS"))
-FROM_EMAIL = str(os.getenv("FROM_EMAIL"))
-FRONTEND_URL = str(os.getenv("FRONTEND_URL"))
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASS = os.getenv("SMTP_PASS", "")
+FROM_EMAIL = os.getenv("FROM_EMAIL", "")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "")
 
 
 def send_email(to: str, subject: str, body: str) -> None:
