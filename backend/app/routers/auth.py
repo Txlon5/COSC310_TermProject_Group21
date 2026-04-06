@@ -24,6 +24,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @router.get("/verify/{token_id}", status_code=200)
 def verify(token_id: str):
     verify_account(token_id)
+    return {"detail": "Account verified successfully."}
 
 
 # forgot password route - sends a password reset email to the user
@@ -34,6 +35,7 @@ def forgot_password(payload: ForgotPasswordRequest):
     # Generate reset token and send reset email
     token = create_action_token(ActionTokenType.reset, user.id)
     send_reset_email(user.email, token.id)
+    return {"detail": "Password reset email sent."}
 
 
 # reset password route - resets user password using a reset token
@@ -41,3 +43,4 @@ def forgot_password(payload: ForgotPasswordRequest):
 def reset_password(token_id: str, payload: ResetPasswordRequest):
     # Reset user password using reset token
     reset_account_password(token_id, payload.password)
+    return {"detail": "Password reset successfully."}
