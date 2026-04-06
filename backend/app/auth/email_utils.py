@@ -1,15 +1,18 @@
 import smtplib
 from email.mime.text import MIMEText
 from fastapi import HTTPException
+import os
+from dotenv import load_dotenv, find_dotenv
 
+load_dotenv(find_dotenv())
 
 # Email Host Information
-SMTP_HOST = "sandbox.smtp.mailtrap.io"
-SMTP_PORT = 587
-SMTP_USER = "24b567e057a980"
-SMTP_PASS = "f30fee31cf94ee"
-FROM_EMAIL = "noreply@yourapp.com"
-FRONTEND_URL = "localhost:8000"
+SMTP_HOST = str(os.getenv("SMTP_HOST"))
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = str(os.getenv("SMTP_USER"))
+SMTP_PASS = str(os.getenv("SMTP_PASS"))
+FROM_EMAIL = str(os.getenv("FROM_EMAIL"))
+FRONTEND_URL = str(os.getenv("FRONTEND_URL"))
 
 
 def send_email(to: str, subject: str, body: str) -> None:
