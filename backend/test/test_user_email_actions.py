@@ -205,6 +205,24 @@ def test_reset_password_invalid_password():
     client.delete(f"/users/{user_id}")
     save_all([t for t in load_all() if t.get("id") != token.id])
 
+# Reset Password - Wrong ActionToken Type (verify token used)
+def test_reset_password_wrong_type():
+    # Create a test user
+    r = client.post("/users/", json={"name": "User", "email": "reset@example.com", "password": "Password123!"})
+    assert r.status_code == 201
+    user_id = r.json()["id"]
+
+    # Create verify token
+    token = create_action_token(ActionTokenType.verify, user_id)
+
+    # Reset password with verify token
+    r = client.post(f"/auth/reset-password/{token.id}", json={"password": "NewPassword123!"})
+    assert r.status_code == 400
+
+    # Clean up test data
+    client.delete(f"/users/{user_id}")
+    save_all([t for t in load_all() if t.get("id") != token.id])
+
 # Reset Password - Not Found
 def test_reset_password_na():
     r = client.post("/auth/reset-password/00000000-0000-0000-0000-000000000000", json={"password": "NewPassword123!"})

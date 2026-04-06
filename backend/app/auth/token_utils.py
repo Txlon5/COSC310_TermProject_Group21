@@ -86,8 +86,10 @@ def reset_account_password(token_id: str, new_password: str) -> None:
         raise HTTPException(
             status_code=400, detail="Reset Token is invalid or expired."
         )
-    # Fetch token
+    # Fetch token and verify it is a reset token
     token = get_action_token_by_id(token_id)
+    if token.type != ActionTokenType.reset:
+        raise HTTPException(status_code=400, detail="Invalid token type.")
     # Reset user password
     reset_user_password(token.user_id, new_password)
     # Set token to used
