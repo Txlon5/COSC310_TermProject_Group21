@@ -50,6 +50,8 @@ class RestaurantsService:
             restaurant_name = payload.restaurant_name.strip(),
             tags = payload.tags if payload.tags is not None else [],
             isOpen = bool(payload.isOpen),
+            opening_time=payload.opening_time.strip(),
+            closing_time=payload.closing_time.strip(),
             menuItems = []
         )
 
@@ -76,6 +78,10 @@ class RestaurantsService:
                     r["tags"] = payload.tags
                 if payload.isOpen is not None:
                     r["isOpen"] = payload.isOpen
+                if payload.opening_time is not None and payload.opening_time.strip() != "":
+                    r["opening_time"] = payload.opening_time.strip()
+                if payload.closing_time is not None and payload.closing_time.strip() != "":
+                    r["closing_time"] = payload.closing_time.strip()
 
                 # Save changes to restaurant list
                 restaurants[idx] = r
