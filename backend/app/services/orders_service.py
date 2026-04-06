@@ -277,27 +277,32 @@ class OrdersService:
             if reorder_request.delivery_method is not None
             else original_order.get("delivery_method")
         )
-
-        delivery_address = (
-            reorder_request.delivery_address
-            if reorder_request.delivery_address is not None
-            else original_order.get("delivery_address")
-        )
-        pickup_location = (
-            reorder_request.pickup_location
-            if reorder_request.pickup_location is not None
-            else original_order.get("pickup_location")
-        )
-
-        # Normalize delivery method
         delivery_method = DeliveryType(delivery_method)
-
-        # Validate delivery or pickup requirements
-        if delivery_method == DeliveryType.delivery and not delivery_address:
-            raise HTTPException(status_code=400, detail="delivery_address is required when delivery_method is 'delivery'.")
-
-        if delivery_method == DeliveryType.pickup and not pickup_location:
-            raise HTTPException(status_code=400, detail="pickup_location is required when delivery_method is 'pickup'.")
+        
+        # Handle only the fields relevant to delivery method override for simplicity.
+        if delivery_method == DeliveryType.delivery:
+            delivery_address = (
+                reorder_request.delivery_address
+                if reorder_request.delivery_address is not None
+                else original_order.get("delivery_address")
+            )
+            pickup_location = None  # Clear pickup location if switching to delivery
+            
+            # Validate delivery or pickup requirements
+            if not delivery_address:
+                raise HTTPException(status_code=400, detail="delivery_address is required when delivery_method is 'delivery'.")
+            
+        else:
+            pickup_location = (
+                reorder_request.pickup_location
+                if reorder_request.pickup_location is not None
+                else original_order.get("pickup_location")
+            )
+            delivery_address = None  # Clear delivery address if switching to pickup
+            
+            # Validate delivery or pickup requirements
+            if not pickup_location:
+                raise HTTPException(status_code=400, detail="pickup_location is required when delivery_method is 'pickup'.")
 
         # Build a new order request using the past order's details. 
         reordered_order_request = CreateOrderRequest(
