@@ -10,3 +10,4 @@ Milestone2.pdf
 .gitignore
 .vscode/
 node_modules/
+.env

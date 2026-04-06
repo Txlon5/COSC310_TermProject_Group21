@@ -48,3 +48,12 @@ def stub_payment_dependencies(monkeypatch):
     monkeypatch.setattr("app.services.orders_service.create_transaction", _fake_create_transaction)
     monkeypatch.setattr("app.services.payments_service.get_transaction_by_id", _fake_get_transaction_by_id)
     yield
+
+
+# Override function for email sending to prevent sending real emails during tests
+@pytest.fixture(autouse=True)
+def stub_email_dependencies(monkeypatch):
+    monkeypatch.setattr("app.services.users_service.send_verification_email", lambda to, token_id: None)
+    monkeypatch.setattr("app.auth.email_utils.send_verification_email", lambda to, token_id: None)
+    monkeypatch.setattr("app.auth.email_utils.send_reset_email", lambda to, token_id: None)
+    yield

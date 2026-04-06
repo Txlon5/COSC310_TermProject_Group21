@@ -3,6 +3,9 @@ import { useAuth } from "./useAuth";
 import Navbar from "./components/Navbar";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import RestaurantsPage from "./pages/RestaurantsPage";
 import RestaurantDetailPage from "./pages/RestaurantDetailPage";
 import CartPage from "./pages/CartPage";
@@ -34,6 +37,9 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/auth/verify/:tokenId" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/auth/reset-password/:tokenId" element={<ResetPasswordPage />} />
           <Route path="/" element={<RestaurantsPage />} />
           <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
           <Route path="/cart" element={<RequireAuth><CartPage /></RequireAuth>} />
