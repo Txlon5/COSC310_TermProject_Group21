@@ -6,6 +6,7 @@ from app.schemas.delivery import DeliveryType, DeliveryStatus
 from app.schemas.user import User
 from app.services.notification_service import NotificationService
 from app.repositories.orders_repository import load_all, save_all
+from app.repositories.restaurants_repository import RestaurantsRepository
 from typing import List
 from datetime import datetime, timezone
 from app.services.payments_service import create_transaction, get_card_for_user
@@ -29,15 +30,36 @@ DELIVERY_STATUS_TRANSITIONS = {
 class OrdersService:
     def __init__(self):
         self.notification = NotificationService()     #Creates an instance of NotificationService class. This will be used to generate notifications when orders are created.
+        self.restaurant_repo = RestaurantsRepository()
 
     def list_orders(self):
         return [Order(**it) for it in load_all()]
+    
+    def _is_restaurant_open(self, restaurant: dict) -> bool:
+        now = datetime.now().time()
+        opening = datetime.strptime(restaurant["opening_time"], "%H:%M").time()
+        closing = datetime.strptime(restaurant["closing_time"], "%H:%M").time()
+        return opening <= now <= closing
     
     # Tariq/Siam [Notification]
     def create_order(self, order_request: CreateOrderRequest) -> CreateOrderResponse:
         # Order must contain at least one item
         if not order_request.items or len(order_request.items) == 0:
             raise ValueError("Order must contain at least one item")
+        
+
+        # Load restaurants and find the one for this order
+        restaurants = self.restaurant_repo.load_all()
+
+        restaurant = None
+        for r in restaurants:
+            if str(r.get("restaurant_id")) == str(order_request.restaurant_id):
+                restaurant = r
+                break
+
+        if restaurant is not None:
+            if not self._is_restaurant_open(restaurant):
+                raise HTTPException(status_code=400, detail="Restaurant is currently closed")
 
         # Validate menuItemIds against restaurant's menuItems
         menu = fetch_menu_by_restaurant_id(order_request.restaurant_id)
