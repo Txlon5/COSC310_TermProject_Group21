@@ -5,6 +5,8 @@ from app.schemas.user import User, UserCreate, UserUpdate
 from app.auth.password_utils import PasswordHandler
 from app.schemas.user_validator import UserValidator
 from app.repositories.users_repo import load_all, save_all
+from app.schemas.auth import ActionTokenType
+from app.services.action_token_service import create_action_token
 
 def list_users() -> List[User]:
     """
@@ -50,6 +52,11 @@ def create_user(payload: UserCreate) -> User:
     )
     users.append(new_user.model_dump())
     save_all(users)
+
+    # Generate verify token and send email
+    token = create_action_token(ActionTokenType.verify, new_user.id)
+    # send verify email - Not done yet
+
     return new_user
 
 def get_user_by_id(user_id: str) -> User:
