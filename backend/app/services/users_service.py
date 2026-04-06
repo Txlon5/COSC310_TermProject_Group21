@@ -7,6 +7,7 @@ from app.schemas.user_validator import UserValidator
 from app.repositories.users_repo import load_all, save_all
 from app.schemas.auth import ActionTokenType
 from app.services.action_token_service import create_action_token
+from app.auth.email_utils import send_verification_email
 
 def list_users() -> List[User]:
     """
@@ -55,7 +56,7 @@ def create_user(payload: UserCreate) -> User:
 
     # Generate verify token and send email
     token = create_action_token(ActionTokenType.verify, new_user.id)
-    # send verify email - Not done yet
+    send_verification_email(new_user.email, token.id)
 
     return new_user
 

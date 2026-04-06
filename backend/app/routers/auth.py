@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.schemas.auth import LoginToken, ForgotPasswordRequest, ActionTokenType
 from app.services.users_service import login_user, get_user_by_email
 from app.services.action_token_service import create_action_token
+from app.auth.email_utils import send_reset_email
 from app.auth.token_utils import create_token, verify_account
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -32,4 +33,4 @@ def forgot_password(payload: ForgotPasswordRequest):
     user = get_user_by_email(payload.email)
     # Generate reset token and send reset email
     token = create_action_token(ActionTokenType.reset, user.id)
-    # send reset email - Not done yet
+    send_reset_email(user.email, token.id)
