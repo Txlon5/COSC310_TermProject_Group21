@@ -183,6 +183,20 @@ def login_user (email:str, password: str) -> User:
     
     return user
 
+def verify_user(user_id: str) -> None:
+    """
+    Marks the user matching the userid as verified
+    Raises 404 if no user exists.
+    """
+    users = load_all()
+    for idx, it in enumerate(users):
+        if it.get("id") == user_id:
+            it["is_verified"] = True
+            users[idx] = it
+            save_all(users)
+            return
+    raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+
 
 # Helper Functions
 

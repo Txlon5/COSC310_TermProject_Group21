@@ -7,6 +7,7 @@ class User(BaseModel):
     email: str
     password: str
     role: str="user"
+    is_verified: bool = False
 
 class UserCreate(BaseModel):
     name: str

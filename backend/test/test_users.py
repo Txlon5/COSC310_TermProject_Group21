@@ -17,7 +17,8 @@ def override_get_current_user():
         name="Admin",
         email="admin@example.com",
         password="password123!",
-        role="admin"
+        role="admin",
+        is_verified=True
     )
 
 # Overide get_current_user() function to return the mock admin
@@ -72,7 +73,7 @@ def test_hash_password():
 def test_get_user():
     r = client.get("/users/9c6dbfcb-72c5-4cc4-9f76-29200f0efda7")
     assert r.status_code == 200
-    assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "role": "user"}
+    assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "role": "user", "is_verified": True}
 
 # User ID Retrival by ID - Not Found
 def test_get_user_na():
@@ -89,7 +90,7 @@ def test_get_users():
 def test_get_user_email():
     r = client.get("/users/email/jane.doe@example.com")
     assert r.status_code == 200
-    assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "role": "user"}
+    assert r.json() == {"id": "9c6dbfcb-72c5-4cc4-9f76-29200f0efda7", "name": "Jane Doe", "email": "jane.doe@example.com", "password": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "role": "user", "is_verified": True}
 
 # User Retrival by Email- Not Found
 def test_get_user_by_email_na():
@@ -231,7 +232,7 @@ def test_update_user_invalid_password():
 def test_get_self():
     r = client.get("/users/self")
     assert r.status_code == 200
-    assert r.json() == {"id": "8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7", "name": "Admin", "email":"admin@example.com", "password":"password123!", "role":"admin"}
+    assert r.json() == {"id": "8c6dbfcb-72c5-4cc4-9f76-29200f0ecda7", "name": "Admin", "email":"admin@example.com", "password":"password123!", "role":"admin", "is_verified": True}
 
 # User Update Self - Valid
 def test_update_self():
