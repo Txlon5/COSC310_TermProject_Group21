@@ -8,6 +8,7 @@ from app.schemas.auth import ActionTokenType
 from app.schemas.user import User
 from app.services.action_token_service import create_action_token, use_action_token
 from app.services.users_service import reset_user_password
+from app.auth.email_utils import send_verification_email, send_reset_email
 from app.repositories.auth_repository import load_all, save_all
 
 client = TestClient(app)
@@ -85,7 +86,45 @@ def test_reset_user_password_na():
     save_all([t for t in load_all() if t.get("id") != token.id])
 
 
+# Send Verification Email - Valid Link Format
+def test_send_verification_email():
+    with patch("app.auth.email_utils.send_email") as mock_send:
+        send_verification_email("user@example.com", "test-token-id")
+
+        # Check email was sent with correct recipient and token link
+        kwargs = mock_send.call_args.kwargs
+        assert kwargs["to"] == "user@example.com"                                  # True - correct recipient
+        assert "test-token-id" in kwargs["body"]                                   # True - token in body
+        assert "localhost:8000/auth/verify/test-token-id" in kwargs["body"]       # True - correct link
+
+# Send Reset Email - Valid Link Format
+def test_send_reset_email():
+    with patch("app.auth.email_utils.send_email") as mock_send:
+        send_reset_email("user@example.com", "test-token-id")
+
+        # Check email was sent with correct recipient and token link
+        kwargs = mock_send.call_args.kwargs
+        assert kwargs["to"] == "user@example.com"                                  # True - correct recipient
+        assert "test-token-id" in kwargs["body"]                                   # True - token in body
+        assert "localhost:8000/auth/reset-password/test-token-id" in kwargs["body"]   # True - correct link
+
+
 # Integration Tests
+
+# Create User - Sends Verification Email
+def test_create_user_sends_verification_email():
+    with patch("app.services.users_service.send_verification_email") as mock_send:
+        r = client.post("/users/", json={"name": "User", "email": "verify@example.com", "password": "Password123!"})
+        assert r.status_code == 201
+
+        # Check verification email was sent to the correct address with verify token
+        mock_send.assert_called_once()
+        args = mock_send.call_args[0]
+        assert args[0] == "verify@example.com"
+        assert args[1] != ""
+
+        # Clean up test data
+        client.delete(f"/users/{r.json()['id']}")
 
 # Forgot Password - Valid
 def test_forgot_password():
@@ -93,7 +132,7 @@ def test_forgot_password():
         r = client.post("/auth/forgot-password", json={"email": "jane.doe@example.com"})
         assert r.status_code == 200
 
-        # Check reset email was sent to the correct address with a token
+        # Check reset email was sent to the correct address with reset token
         mock_send.assert_called_once()
         args = mock_send.call_args[0]
         assert args[0] == "jane.doe@example.com"
