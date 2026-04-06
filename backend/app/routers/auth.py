@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from app.schemas.auth import LoginToken, ForgotPasswordRequest, ActionTokenType
+from app.schemas.auth import LoginToken, ForgotPasswordRequest, ResetPasswordRequest, ActionTokenType
 from app.services.users_service import login_user, get_user_by_email
 from app.services.action_token_service import create_action_token
 from app.auth.email_utils import send_reset_email
-from app.auth.token_utils import create_token, verify_account
+from app.auth.token_utils import create_token, verify_account, reset_account_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -34,3 +34,10 @@ def forgot_password(payload: ForgotPasswordRequest):
     # Generate reset token and send reset email
     token = create_action_token(ActionTokenType.reset, user.id)
     send_reset_email(user.email, token.id)
+
+
+# reset password route - resets user password using a reset token
+@router.post("/reset-password/{token_id}", status_code=200)
+def reset_password(token_id: str, payload: ResetPasswordRequest):
+    # Reset user password using reset token
+    reset_account_password(token_id, payload.password)

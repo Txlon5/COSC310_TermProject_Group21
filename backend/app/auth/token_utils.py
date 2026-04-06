@@ -9,8 +9,8 @@ from app.services.action_token_service import (
     is_action_token_valid,
     use_action_token,
 )
-from app.services.users_service import verify_user
-
+from app.services.users_service import verify_user, reset_user_password
+from app.schemas.auth import ActionTokenType
 from app.services.users_service import get_user_by_id
 import jwt
 
@@ -75,5 +75,20 @@ def verify_account(token_id: str) -> None:
     token = get_action_token_by_id(token_id)
     # Set user to verified
     verify_user(token.user_id)
+    # Set token to used
+    use_action_token(token_id)
+
+
+# reset user password with a reset action_token
+def reset_account_password(token_id: str, new_password: str) -> None:
+    # Verify token is valid
+    if not is_action_token_valid(token_id):
+        raise HTTPException(
+            status_code=400, detail="Reset Token is invalid or expired."
+        )
+    # Fetch token
+    token = get_action_token_by_id(token_id)
+    # Reset user password
+    reset_user_password(token.user_id, new_password)
     # Set token to used
     use_action_token(token_id)

@@ -51,7 +51,7 @@ def send_reset_email(to: str, token_id: str) -> None:
     Sends a password reset email link with the token_id
     """
     # Build reset link and send email
-    link = f"{FRONTEND_URL}/auth/forgot-password/{token_id}"
+    link = f"{FRONTEND_URL}/auth/reset-password/{token_id}"
     send_email(
         to=to,
         subject="Reset your password",

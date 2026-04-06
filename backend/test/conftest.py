@@ -54,6 +54,6 @@ def stub_payment_dependencies(monkeypatch):
 @pytest.fixture(autouse=True)
 def stub_email_dependencies(monkeypatch):
     monkeypatch.setattr("app.services.users_service.send_verification_email", lambda to, token_id: None)
-    monkeypatch.setattr("app.auth.email_service.send_verification_email", lambda to, token_id: None)
-    monkeypatch.setattr("app.auth.email_service.send_reset_email", lambda to, token_id: None)
+    monkeypatch.setattr("app.auth.email_utils.send_verification_email", lambda to, token_id: None)
+    monkeypatch.setattr("app.auth.email_utils.send_reset_email", lambda to, token_id: None)
     yield

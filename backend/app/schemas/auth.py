@@ -23,3 +23,7 @@ class ActionToken(BaseModel):
 # Forgot Password Request
 class ForgotPasswordRequest(BaseModel):
     email: str
+
+# Reset Password Request
+class ResetPasswordRequest(BaseModel):
+    password: str

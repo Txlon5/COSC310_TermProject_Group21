@@ -191,6 +191,26 @@ def login_user (email:str, password: str) -> User:
     
     return user
 
+def reset_user_password(user_id: str, new_password: str) -> None:
+    """
+    Updates the password for the user matching the userid
+    Raises 422 if password is invalid
+    Raises 404 if no user exists
+    """
+    # User input validation
+    if not UserValidator.is_valid_password(new_password):
+        raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
+
+    users = load_all()
+    for idx, it in enumerate(users):
+        if it.get("id") == user_id:
+            # Hash and store new password
+            it["password"] = PasswordHandler.hash_password(new_password)
+            users[idx] = it
+            save_all(users)
+            return
+    raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+
 def verify_user(user_id: str) -> None:
     """
     Marks the user matching the userid as verified
