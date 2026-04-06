@@ -1,5 +1,5 @@
 from app.schemas.order import OrderStatusUpdateRequest, CreateOrderResponse,DeliveryInfoUpdateRequest,Order, CreateOrderRequest, OrderItem, ReorderRequest
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import HTTPException
 from app.schemas.order import CreateOrderResponse, CreateOrderRequest, Order, OrderItem
 from app.schemas.payment_transaction import PaymentTransaction, PaymentStatusType
 from app.schemas.delivery import DeliveryType, DeliveryStatus
@@ -265,8 +265,10 @@ class OrdersService:
         if original_order is None:
             raise HTTPException(status_code=404, detail="Original order not found.")
         
-        # Ensure the authenticated user is the owner of the original order
-        if current_user.id != str(original_order.get("user_id")):
+        # Ensure the authenticated user is the owner of the original.
+        #Now admins can reorder any order, but regular users can only reorder their own orders.
+        #This is consistent with our security model for order retrieval and ensures users cannot reorder other users' orders.
+        if current_user.id != str(original_order.get("user_id")) and current_user.role != "admin":                                                                                       
             raise HTTPException(status_code=403, detail="Not authorized to reorder this order.")
         
         # Override original order delivery method in reorder request if provided, otherwise use original delivery method
@@ -281,7 +283,6 @@ class OrdersService:
             if reorder_request.delivery_address is not None
             else original_order.get("delivery_address")
         )
-
         pickup_location = (
             reorder_request.pickup_location
             if reorder_request.pickup_location is not None
@@ -298,9 +299,11 @@ class OrdersService:
         if delivery_method == DeliveryType.pickup and not pickup_location:
             raise HTTPException(status_code=400, detail="pickup_location is required when delivery_method is 'pickup'.")
 
-        # Build a new order request using the past order's details 
+        # Build a new order request using the past order's details. 
         reordered_order_request = CreateOrderRequest(
-            user_id = str(current_user.id),
+            # The user_id for the new order will be the same as the original order, which is the current authenticated user. 
+            #We enforce this in the security check above to ensure users can only reorder their own orders (unless admin).
+            user_id = str(original_order["user_id"]),       
             card_id = reorder_request.card_id,
             restaurant_id = original_order["restaurant_id"],
             items = [OrderItem(**item) for item in original_order["items"]],
