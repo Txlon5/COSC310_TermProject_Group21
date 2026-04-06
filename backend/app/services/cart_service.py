@@ -1,21 +1,26 @@
 from fastapi import HTTPException
 from app.services.menu_service import fetch_menu_by_restaurant_id
-from app.schemas.cart import CartCheckoutRequest, UpdateCartItemRequest
+from app.schemas.cart import CartCheckoutRequest, UpdateCartItemRequest, Cart, CartItem
 from typing import Dict, Any, Optional
 from app.repositories.cart_repository import load_all, save_all
 from app.schemas.order import OrderItem, CreateOrderRequest, CreateOrderResponse
 from app.services.orders_service import OrdersService
+from app.services.order_cost_service import calculate_subtotal
 
-"""
-Cart will take ideas from Orders, but
-work more with the idea that each user only gets one active cart
-ie cart is tied directly to user id
-"""
 
 def get_cart_by_user_id(user_id: str) -> Optional[Dict[str, Any]]:
     carts = load_all()
     for cart in carts:
         if cart.get('user_id') == user_id:
+            # Calculate subtotal
+            menu_items = fetch_menu_by_restaurant_id(cart['restaurant_id'])
+            menu_lookup = {str(item.menuItemId): item for item in menu_items}
+            subtotal = 0.0
+            for item in cart['items']:
+                item_id = str(item['menuItemId'])
+                if item_id in menu_lookup:
+                    subtotal += menu_lookup[item_id].price * item['quantity']
+            cart['subtotal'] = round(subtotal, 2)
             return cart
     return None
 
@@ -82,6 +87,15 @@ def add_item_to_cart(user_id: str, restaurant_id: str, menu_item_id: int, quanti
         })
         cart["updated_at"] = now.isoformat()
         save_cart(cart)
+        # Add subtotal before returning
+        menu_items = fetch_menu_by_restaurant_id(cart['restaurant_id'])
+        menu_lookup = {str(item.menuItemId): item for item in menu_items}
+        subtotal = 0.0
+        for item in cart['items']:
+            item_id = str(item['menuItemId'])
+            if item_id in menu_lookup:
+                subtotal += menu_lookup[item_id].price * item['quantity']
+        cart['subtotal'] = round(subtotal, 2)
         return cart
     else:
         # If cart does not exist, create new cart
@@ -98,6 +112,15 @@ def add_item_to_cart(user_id: str, restaurant_id: str, menu_item_id: int, quanti
             "updated_at": now.isoformat()
         }
         save_cart(cart)
+        # Add subtotal before returning
+        menu_items = fetch_menu_by_restaurant_id(cart['restaurant_id'])
+        menu_lookup = {str(item.menuItemId): item for item in menu_items}
+        subtotal = 0.0
+        for item in cart['items']:
+            item_id = str(item['menuItemId'])
+            if item_id in menu_lookup:
+                subtotal += menu_lookup[item_id].price * item['quantity']
+        cart['subtotal'] = round(subtotal, 2)
         return cart
 
 
@@ -154,5 +177,14 @@ def update_cart_item(request: UpdateCartItemRequest):
         raise HTTPException(status_code=404, detail="Item not found in cart.")
     cart["updated_at"] = __import__('datetime').datetime.now().isoformat()
     save_cart(cart)
+    # Add subtotal before returning
+    menu_items = fetch_menu_by_restaurant_id(cart['restaurant_id'])
+    menu_lookup = {str(item.menuItemId): item for item in menu_items}
+    subtotal = 0.0
+    for item in cart['items']:
+        item_id = str(item['menuItemId'])
+        if item_id in menu_lookup:
+            subtotal += menu_lookup[item_id].price * item['quantity']
+    cart['subtotal'] = round(subtotal, 2)
     return cart
 

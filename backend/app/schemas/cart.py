@@ -12,6 +12,7 @@ class Cart(BaseModel):
     user_id: str
     restaurant_id: str
     items: List[CartItem] = Field(default_factory=list)
+    subtotal: float = 0.0
     created_at: datetime
     updated_at: datetime
 
