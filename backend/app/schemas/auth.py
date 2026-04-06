@@ -2,6 +2,6 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import List
 
 # Login Token
-class Token(BaseModel):
+class LoginToken(BaseModel):
     access_token: str
     token_type: str
