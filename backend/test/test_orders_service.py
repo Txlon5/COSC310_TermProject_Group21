@@ -25,6 +25,8 @@ def seed_restaurant():
             "restaurant_name": "Test Pizza",
             "tags": ["pizza"],
             "isOpen": True,
+            "opening_time": "09:00",
+            "closing_time": "20:00",
             "menuItems": [
                 {"menuItemId": 1, "name": "Onion Pizza", "price": 26.0, "category": "Food"},
                 {"menuItemId": 2, "name": "Cheesey Bread", "price": 15.0, "category": "Food"},

@@ -18,6 +18,8 @@ def test_save_all_and_load_all_work_together(tmp_path):
             "restaurant_name": "Round Trip Cafe",
             "tags": ["coffee"],
             "isOpen": True,
+            "opening_time": "07:00",
+            "closing_time": "20:00",
             "menuItems": [],
         }
     ]
