@@ -8,11 +8,12 @@ class NotificationService:
     def __init__(self) -> None:
         pass
     
-    def create_order_created_notification(self, user_id: str, order_id: str) -> Notification:
+    def create_order_created_notification(self, user_id: str, order_id: str, restaurant_name: str) -> Notification:
         """Generates a notification for an order created new. key method for SR1.
         """
         notification = Notification(
             user_id = user_id,
+            restaurant_name = restaurant_name,
             order_id = order_id,
             type = "Order_Created",
             title = "Order Created",
@@ -23,10 +24,11 @@ class NotificationService:
         return notification
     
    
-    def create_order_status_changed_notification(self, user_id: str, order_id: str, old_status: str, new_status: str) -> Notification:
+    def create_order_status_changed_notification(self, user_id: str, order_id: str, old_status: str, new_status: str, restaurant_name: str) -> Notification:
         """A notification is generated when an order status is changed. A requirement for SR2"""
         notification = Notification(
             user_id = user_id,
+            restaurant_name = restaurant_name,
             order_id = order_id,
             type = "Order_Status_Changed",
             title = "Order Status Updated",
