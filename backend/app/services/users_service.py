@@ -188,7 +188,11 @@ def login_user (email:str, password: str) -> User:
     if not (PasswordHandler.verify_password(password, hash_password)):
         # If invalid raise issue for invalid credentials
         raise HTTPException(status_code=401, detail="Invalid credentials.")
-    
+
+    # Check if user is verified
+    if not user.is_verified:
+        raise HTTPException(status_code=403, detail="Account is not verified. Please check your email to verify your account.")
+
     return user
 
 def reset_user_password(user_id: str, new_password: str) -> None:
