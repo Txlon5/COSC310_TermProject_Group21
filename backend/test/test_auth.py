@@ -4,7 +4,21 @@ from fastapi import HTTPException
 from app.main import app
 from app.auth.password_utils import PasswordHandler
 from app.auth.token_utils import create_token, decode_token, get_current_user
+from app.auth.token_utils import get_current_user
+from app.schemas.user import User
+from app.services.users_service import get_user_by_id
 client = TestClient(app)
+
+
+def override_get_current_user_admin():
+    return User(
+        id="9c6dbfcb-72c5-4cc4-9f76-29200f0efda7",
+        name="Jane Doe",
+        email="jane.doe@example.com",
+        password="a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
+        role="admin",
+        is_verified=True,
+    )
 
 # Unit Tests
 
@@ -122,3 +136,58 @@ def test_login_incorrect_login():
     )
     # Check returned code is 401 for incorrect login
     assert r.status_code == 401
+
+# Login - Unverified User
+def test_login_unverified_user():
+    # Create unverified test user
+    app.dependency_overrides[get_current_user] = override_get_current_user_admin
+    r = client.post("/users/", json={"name": "Unverified", "email": "unverified@example.com", "password": "Password123!"})
+    assert r.status_code == 201
+    user_id = r.json()["id"]
+    app.dependency_overrides = {}
+
+    # Login without verification
+    r = client.post(
+        "/auth/login",
+        data={"username": "unverified@example.com", "password": "Password123!"},
+    )
+    # Raises 403 for unverified account
+    assert r.status_code == 403
+    assert "not verified" in r.json()["detail"].lower()
+
+    # Clean up
+    app.dependency_overrides[get_current_user] = override_get_current_user_admin
+    client.delete(f"/users/{user_id}")
+    app.dependency_overrides = {}
+
+# Login - Verified User
+def test_login_verified_user():
+    from app.services.action_token_service import create_action_token
+    from app.schemas.auth import ActionTokenType
+    from app.repositories.auth_repository import load_all, save_all
+
+    # Create test user
+    app.dependency_overrides[get_current_user] = override_get_current_user_admin
+    r = client.post("/users/", json={"name": "Verified", "email": "verified@example.com", "password": "Password123!"})
+    assert r.status_code == 201
+    user_id = r.json()["id"]
+    app.dependency_overrides = {}
+
+    # Verify user
+    token = create_action_token(ActionTokenType.verify, user_id)
+    r = client.get(f"/auth/verify/{token.id}")
+    assert r.status_code == 200
+
+    # Login user
+    r = client.post(
+        "/auth/login",
+        data={"username": "verified@example.com", "password": "Password123!"},
+    )
+    assert r.status_code == 200
+    assert "access_token" in r.json()
+
+    # Clean up
+    app.dependency_overrides[get_current_user] = override_get_current_user_admin
+    client.delete(f"/users/{user_id}")
+    app.dependency_overrides = {}
+    save_all([t for t in load_all() if t.get("id") != token.id])

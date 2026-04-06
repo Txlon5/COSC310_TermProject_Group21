@@ -38,6 +38,10 @@ async function request(method, path, body, formData = false) {
 }
 
 // Auth
+export const verifyEmail = (tokenId) => request("GET", `/auth/verify/${tokenId}`);
+export const forgotPassword = (email) => request("POST", "/auth/forgot-password", { email });
+export const resetPassword = (tokenId, password) =>
+  request("POST", `/auth/reset-password/${tokenId}`, { password });
 export const login = (username, password) => {
   const form = new URLSearchParams();
   form.append("username", username);
