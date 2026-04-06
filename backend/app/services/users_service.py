@@ -5,6 +5,9 @@ from app.schemas.user import User, UserCreate, UserUpdate
 from app.auth.password_utils import PasswordHandler
 from app.schemas.user_validator import UserValidator
 from app.repositories.users_repo import load_all, save_all
+from app.schemas.auth import ActionTokenType
+from app.services.action_token_service import create_action_token
+from app.auth.email_utils import send_verification_email
 
 def list_users() -> List[User]:
     """
@@ -50,6 +53,11 @@ def create_user(payload: UserCreate) -> User:
     )
     users.append(new_user.model_dump())
     save_all(users)
+
+    # Generate verify token and send email
+    token = create_action_token(ActionTokenType.verify, new_user.id)
+    send_verification_email(new_user.email, token.id)
+
     return new_user
 
 def get_user_by_id(user_id: str) -> User:
@@ -182,6 +190,26 @@ def login_user (email:str, password: str) -> User:
         raise HTTPException(status_code=401, detail="Invalid credentials.")
     
     return user
+
+def reset_user_password(user_id: str, new_password: str) -> None:
+    """
+    Updates the password for the user matching the userid
+    Raises 422 if password is invalid
+    Raises 404 if no user exists
+    """
+    # User input validation
+    if not UserValidator.is_valid_password(new_password):
+        raise HTTPException(status_code=422, detail="Password must at minimum 8 characters, have 1 capital and 1 special character.")
+
+    users = load_all()
+    for idx, it in enumerate(users):
+        if it.get("id") == user_id:
+            # Hash and store new password
+            it["password"] = PasswordHandler.hash_password(new_password)
+            users[idx] = it
+            save_all(users)
+            return
+    raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
 
 def verify_user(user_id: str) -> None:
     """
