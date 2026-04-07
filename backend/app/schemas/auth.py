@@ -19,3 +19,11 @@ class ActionToken(BaseModel):
     type: ActionTokenType
     created_at: datetime
     used: bool = False
+
+# Forgot Password Request
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+# Reset Password Request
+class ResetPasswordRequest(BaseModel):
+    password: str
