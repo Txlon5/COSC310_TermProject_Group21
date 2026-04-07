@@ -55,3 +55,40 @@ def test_is_restaurant_open_returns_false_when_restaurant_is_manually_closed():
     }
 
     assert service._is_restaurant_open(restaurant) is False
+
+
+def test_is_restaurant_open_true():
+    service = OrdersService()
+    service._current_time_override = datetime.strptime("12:00", "%H:%M").time()
+
+    restaurant = {
+        "isOpen": True,
+        "opening_time": "09:00",
+        "closing_time": "21:00"
+    }
+
+    assert service._is_restaurant_open(restaurant) is True
+
+def test_is_restaurant_open_false_outside_hours():
+    service = OrdersService()
+    service._current_time_override = datetime.strptime("22:00", "%H:%M").time()
+
+    restaurant = {
+        "isOpen": True,
+        "opening_time": "09:00",
+        "closing_time": "21:00"
+    }
+
+    assert service._is_restaurant_open(restaurant) is False
+
+def test_is_restaurant_open_false_when_manually_closed():
+    service = OrdersService()
+    service._current_time_override = datetime.strptime("12:00", "%H:%M").time()
+
+    restaurant = {
+        "isOpen": False,
+        "opening_time": "09:00",
+        "closing_time": "21:00"
+    }
+
+    assert service._is_restaurant_open(restaurant) is False
