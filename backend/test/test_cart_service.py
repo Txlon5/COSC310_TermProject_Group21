@@ -55,23 +55,6 @@ def test_delete_cart():
 def test_get_cart_nonexistent():
     assert cart_service.get_cart_by_user_id("no_such_user") is None
 
-def test_delete_cart():
-    user_id = "user123"
-    cart = {
-        "user_id": user_id,
-        "restaurant_id": "rest1",
-        "items": [],
-        "created_at": datetime.now().isoformat(),
-        "updated_at": datetime.now().isoformat()
-    }
-    cart_service.save_cart(cart)
-    cart_service.delete_cart_by_user_id(user_id)
-    loaded = cart_service.get_cart_by_user_id(user_id)
-    assert loaded is None
-
-def test_get_cart_nonexistent():
-    assert cart_service.get_cart_by_user_id("no_such_user") is None
-
 def test_cart_subtotal():
     user_id = "user_subtotal"
     cart = {
