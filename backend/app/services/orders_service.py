@@ -32,6 +32,7 @@ class OrdersService:
         self.notification = NotificationService()     #Creates an instance of NotificationService class. This will be used to generate notifications when orders are created.
         self.restaurant_repo = RestaurantsRepository()
         self._current_time_override = None
+        
 
 
     def list_orders(self):
@@ -41,7 +42,7 @@ class OrdersService:
         if self._current_time_override is not None:
             return self._current_time_override
          #return datetime.now().time()
-        return datetime.strptime("12:00", "%H:%M").time()
+        return datetime.now().time()
 
     def _is_restaurant_open(self, restaurant: dict) -> bool:
         if restaurant.get("isOpen") is False:
@@ -57,7 +58,10 @@ class OrdersService:
         now = self._get_current_time()
         opening = datetime.strptime(restaurant["opening_time"], "%H:%M").time()
         closing = datetime.strptime(restaurant["closing_time"], "%H:%M").time()
-        return opening <= now <= closing
+        if opening <= closing:
+          return opening <= now <= closing
+        
+        return now >= opening or now <= closing
     
     # Tariq/Siam [Notification]
     def create_order(self, order_request: CreateOrderRequest) -> CreateOrderResponse:
@@ -75,9 +79,9 @@ class OrdersService:
                 restaurant = r
                 break
 
-        if restaurant is not None and "opening_time" in restaurant and "closing_time" in restaurant:
+        if restaurant is not None:
             if not self._is_restaurant_open(restaurant):
-                raise HTTPException(status_code=400, detail="Restaurant is currently closed")
+                raise HTTPException(status_code=400, detail="Restaurant is currently closed and cannot accept orders at this time")
 
         # Validate menuItemIds against restaurant's menuItems
         menu = fetch_menu_by_restaurant_id(order_request.restaurant_id)
