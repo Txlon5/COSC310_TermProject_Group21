@@ -79,7 +79,9 @@ class OrdersService:
                 restaurant = r
                 break
 
-        if restaurant is not None:
+        if restaurant is None:
+            restaurant = {}
+        if "opening_time" in restaurant and "closing_time" in restaurant:
             if not self._is_restaurant_open(restaurant):
                 raise HTTPException(status_code=400, detail="Restaurant is currently closed and cannot accept orders at this time")
 
