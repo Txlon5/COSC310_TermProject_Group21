@@ -30,9 +30,10 @@ DELIVERY_STATUS_TRANSITIONS = {
 }
 
 class OrdersService:
-    def __init__(self):
+    def __init__(self,current_time_provider=None):
         self.notification = NotificationService()     #Creates an instance of NotificationService class. This will be used to generate notifications when orders are created.
         self.restaurant_repo = RestaurantsRepository()
+        self.current_time_provider = current_time_provider
         self._current_time_override = None
         
 
@@ -44,6 +45,11 @@ class OrdersService:
         if self._current_time_override is not None:
             return self._current_time_override
         
+        if self.current_time_provider is not None:
+            return self.current_time_provider()
+        
+        # Use a fixed time during tests so results don’t depend on the real clock.
+        # This keeps tests consistent while production still uses real time.
         if "pytest" in sys.modules or os.getenv("PYTEST_CURRENT_TEST"):
             return datetime.strptime("12:00", "%H:%M").time()
 
@@ -62,8 +68,8 @@ class OrdersService:
             return True
 
         now = self._get_current_time()
-        opening = datetime.strptime(restaurant["opening_time"], "%H:%M").time()
-        closing = datetime.strptime(restaurant["closing_time"], "%H:%M").time()
+        opening = datetime.strptime(opening_time, "%H:%M").time()
+        closing = datetime.strptime(closing_time, "%H:%M").time()
         if opening <= closing:
           return opening <= now <= closing
         
