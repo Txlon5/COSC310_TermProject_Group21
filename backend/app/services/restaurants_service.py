@@ -2,7 +2,7 @@ import uuid  # Used to generate a unique ID for newly created restaurants
 from fastapi import HTTPException  # Used to raise API-friendly errors
 from app.repositories.restaurants_repository import RestaurantsRepository  # Repository layer for restaurant data
 from app.schemas.restaurant import Restaurant, RestaurantUpdate, RestaurantMinimal
-
+from datetime import datetime
 # This class represents the Business Logic Layer for restaurants.
 # The router talks to this service, and this service talks to the repository.
 class RestaurantsService:
@@ -10,7 +10,39 @@ class RestaurantsService:
         # Store the repository instance inside the service
         # This allows the service to call repository methods
         self.repo = repo
+        self._current_time_override = None
 
+    def _get_current_time(self) -> str:
+            if self._current_time_override is not None:
+                return self._current_time_override
+            return datetime.now().time()
+
+    def _is_restaurant_open_now(self, restaurant: dict) -> bool:
+        # manual close still wins
+        if restaurant.get("isOpen") is False:
+            return False
+        opening_time = restaurant.get("opening_time")
+        closing_time = restaurant.get("closing_time")
+
+        # If hours are missing, fall back to existing isOpen value
+        if not opening_time or not closing_time:
+            return restaurant.get("isOpen", False)
+        
+        opening = datetime.strptime(opening_time, "%H:%M").time()
+        closing = datetime.strptime(closing_time, "%H:%M").time()
+        now = self._get_current_time()
+
+        # Normal same-day hours like 09:00 -> 21:00
+        if opening <= closing:
+          return opening <= now <= closing
+
+        # Overnight hours like 18:00 -> 02:00
+        return now >= opening or now <= closing
+
+    def _with_live_status(self, restaurant: dict) -> dict:
+        updated = dict(restaurant)
+        updated["isOpen"] = self._is_restaurant_open_now(restaurant)
+        return updated
     # Public method to get all restaurants
     # This is what the API layer will call
 
@@ -22,7 +54,8 @@ class RestaurantsService:
     # Tariq
     # Get all restaurants - full data
     def get_restaurants(self):
-        return [Restaurant(**it) for it in self.repo.load_all()]
+        return [Restaurant(**self._with_live_status(it)) for it in self.repo.load_all()]
+        #return [Restaurant(**it) for it in self.repo.load_all()]
     
     # Omarion
     # Get Restaurant by Id
@@ -33,8 +66,11 @@ class RestaurantsService:
         # Search list for restaurant by id
         for r in restaurants:
             if str(r.get("restaurant_id")) == str(restaurant_id):
+                return Restaurant(**self._with_live_status(r))
+                # live_restaurant = self._apply_live_open_status(r)
+                # return Restaurant(**live_restaurant)
                 # Return restaurant
-                return Restaurant(**r)
+               # return Restaurant(**r)
         # Error restaurant does not exist
         raise HTTPException(status_code=404,detail=f"Restaurant '{restaurant_id}' not found")
     
@@ -135,7 +171,8 @@ class RestaurantsService:
     # Feat3SR2 - Search and Filter Functionality
     def search_restaurants(self,q=None,restaurant_id=None,is_open=None,tag=None,page=None,page_size=None):
         # Get all restaurants from the repository
-        restaurants = self.repo.load_all()
+        restaurants = [self._with_live_status(r) for r in self.repo.load_all()]
+        # restaurants = self.repo.load_all()
 
         # Filter by restaurant ID if provided
         if restaurant_id is not None:
