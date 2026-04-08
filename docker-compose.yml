@@ -5,6 +5,10 @@ services:
       dockerfile: Dockerfile
     container_name: cosc310-backend
     restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - platter-data:/app/app/data
     networks:
       - app-net
 
@@ -24,3 +28,7 @@ services:
 networks:
   app-net:
     driver: bridge
+
+volumes:
+  platter-data:
+
