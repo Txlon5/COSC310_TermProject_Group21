@@ -15,6 +15,8 @@ def setup_fake_repo():
             "restaurant_name": "Pizza Place",
             "tags": ["Italian", "Pizza"],
             "isOpen": True,
+            "opening_time": "09:00",
+            "closing_time": "21:00",
             "menuItems": []
         }
     ]
@@ -44,7 +46,9 @@ def test_create_restaurant():
     new_restaurant = {
         "restaurant_name": "Test Pizza",
         "tags": ["pizza"],
-        "isOpen": True
+        "isOpen": True,
+        "opening_time": "10:00",
+        "closing_time": "19:00",
     }
 
     response = client.post("/restaurants", json=new_restaurant)
@@ -61,7 +65,9 @@ def test_get_restaurant_by_id():
         "restaurant_name": "Test Burger",
         "category": "Fast Food",
         "tags": ["burger"],
-        "isOpen": True
+        "isOpen": True,
+        "opening_time": "08:00",
+        "closing_time": "21:00",
     }
 
     create_response = client.post("/restaurants", json=new_restaurant)
@@ -79,7 +85,9 @@ def test_delete_restaurant():
         "restaurant_name": "Delete Me",
         "category": "Test",
         "tags": [],
-        "isOpen": False
+        "isOpen": False,
+        "opening_time": "07:00",
+        "closing_time": "19:00",
     }
 
     create_response = client.post("/restaurants", json=new_restaurant)

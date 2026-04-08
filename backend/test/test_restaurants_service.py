@@ -14,6 +14,8 @@ class FakeRestaurantsRepository(RestaurantsRepository): # As mentioned in the se
                 "restaurant_name": "Pizza Place",
                 "tags": ["Italian", "Pizza"],
                 "isOpen": True,
+                "opening_time": "09:00",
+                "closing_time": "21:00",
                 "menuItems": [
                     {"menuItemId": 1, "name": "Pepperoni Pizza", "price": 15.0, "category": "Pizza"},
                     {"menuItemId": 2, "name": "Veggie Pizza", "price": 13.0, "category": "Pizza"},
@@ -24,6 +26,8 @@ class FakeRestaurantsRepository(RestaurantsRepository): # As mentioned in the se
                 "restaurant_name": "Burger House",
                 "tags": ["Fast Food", "Burgers"],
                 "isOpen": False,
+                "opening_time": "10:00",
+                "closing_time": "18:00",
                 "menuItems": [
                     {"menuItemId": 1, "name": "Cheeseburger", "price": 10.0, "category": "Burger"},
                 ],
