@@ -201,9 +201,7 @@ Both need to be running at the same time.
 
 ## 9. Data Storage
 
-All application data is persisted as JSON files in `backend/app/data/`. These files are created automatically on first run and store users, orders, restaurants, menus, carts, payment methods, transactions, tokens, and notifications.
-
-> **Note:** These files are not committed to the repository. To wipe all data and start fresh, see the command in [Setup & Deployment](#3-setup--deployment).
+All application data is persisted as JSON files in `backend/app/data/`. These files store users, orders, restaurants, menus, carts, payment methods, transactions, tokens, and notifications.
 
 ---
 
