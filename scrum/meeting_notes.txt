@@ -72,6 +72,7 @@ Action Items:
   Will look into scrum folder requirements and start piecing it together
 
 
+
 SCRUM MEETING #5
 Date: February 26, 2026
 Attendance: Tariq, Siam, Omarion, Talon
@@ -95,14 +96,15 @@ Action Items:
   Blockers: None
 
 - Omarion:
-  Done:None
-  Todo: Look into FastAPI
+  Done:
+  Todo: 
   Blockers: None
 
 - Talon:
-  Done: Made branch for Feat1Sr1 and pushed project template to repo. Dockerfile also made for the project
+  Done: Made branch for Feat1Sr1 and pushed project template to repo. Dockerfile also made   for the project
  Todo: Follow up with TA to get clarification on blockers
  Blockers: Unsure about how to implement test data
+
 
 
 SCRUM MEETING #6
@@ -111,14 +113,16 @@ Attendance: Tariq, Omarion, Talon
 Absence: Siam (reason: iftar)
 
 Discussion:
-- Focused on feature distribution, each member selecting two features
-- 2 PRs must be done by end of the week Mar 6
-- Blockers regarding dataset were resolved during lab 
+Focused on feature distribution, each member selecting two features
+2 PRs must be done by end of the week Mar 6
+Blockers regarding dataset were resolved during lab 
 
 Action Items:
 - All:
 Done: Received clarification for blockers from previous meeting
 Todo: Finalize feature selection for each member
+
+
 
 
 SCRUM MEETING #7
@@ -1002,3 +1006,238 @@ Action Items:
 - Siam:
   Todo: Continue work on personal documentation.
   Blockers: None
+
+
+
+
+SCRUM MEETING #33
+Date: March 26, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: M4 Check up, Presentation Discussion
+
+
+Action Items:
+-All:
+Todo: Form a cohesive presentation format for next day, find transition from one feature showcase to the next, practice presenting together
+
+
+SCRUM MEETING #34
+Date: March 27, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Timeline check, discuss presentation (lab ran out of time)
+
+
+-All:
+Todo: Practice presenting together
+
+
+SCRUM MEETING #34
+Date: April 2nd, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: Timeline check, M4 feature discussion, email formatting
+
+Action Items:
+
+- Tariq:
+  Done: Approved M4 feature by Tanner in person
+  Todo: Work on feature
+  Blockers: None
+
+- Omarion:
+  Todo: Work on email formatting, think about M4 feature
+  Blockers: None
+
+- Talon:
+  Done: Approved M4 feature by Tanner in person
+  Todo: Work on feature
+  Blockers: None
+
+- Siam:
+  Todo: Work on email formatting, think about M4 feature
+  Blockers: None
+
+
+SCRUM MEETING #35
+Date: April 2nd, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: M4 timeline check
+
+Action Items:
+
+- Tariq:
+  Done: Begun work on M4 feature
+  Todo: Continue working on feature
+  Blockers: None
+
+- Omarion:
+  Done: Begun work on M4 feature
+  Todo: Continue working on feature
+  Blockers: None
+
+
+- Talon:
+  Done: Begun work on M4 feature
+  Todo: Continue working on feature
+  Blockers: None
+
+
+- Siam:
+  Done: Begun work on M4 feature
+  Todo: Continue working on feature
+  Blockers: None
+
+
+SCRUM MEETING #36
+Date: April 3rd, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: M4 timeline check, set personal deadline of features done by Sunday 05/04/2026 to leave time for other documents
+
+Action Items:
+
+- Tariq:
+  Todo: Continue working on feature
+  Blockers: None
+
+- Omarion:
+  Todo: Continue working on feature
+  Blockers: None
+
+
+- Talon:
+  Todo: Continue working on feature
+  Blockers: None
+
+
+- Siam:
+  Todo: Continue working on feature
+  Blockers: None
+
+
+SCRUM MEETING #37
+Date: April 5th, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: M4 timeline check, ensure everyone on track to finish
+
+Action Items:
+
+- Tariq:
+  Todo: Continue working on feature
+  Blockers: None
+
+- Omarion:
+  Todo: Continue working on feature
+  Blockers: None
+
+
+- Talon:
+  Todo: Continue working on feature
+  Blockers: None
+
+
+- Siam:
+  Todo: Continue working on feature
+  Blockers: None
+
+SCRUM MEETING #38
+Date: April 6th, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: M4 timeline check
+
+Action Items:
+
+- Tariq:
+  Done: M4 feature
+  Blockers: None
+
+- Omarion:
+  Todo: Continue working on M4 feature
+  Blockers: None
+
+
+- Talon:
+  Done: M4 feature
+  Blockers: None
+
+
+- Siam:
+  Done: M4 feature
+  Blockers: None
+
+
+SCRUM MEETING #39
+Date: April 7th, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: M4 timeline check, frontend check
+
+Action Items:
+
+-All:
+Todo: Work on frontend, general documents for M4
+
+- Omarion:
+  Done: M4 feature
+  Blockers: None
+
+SCRUM MEETING #40
+Date: April 8th, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: M4 timeline check, frontend check
+
+Action Items:
+
+-All:
+Todo: Work on video presentation, remaining M4 documents
+
+- Tariq:
+  Todo: Work on personal presentation format
+  Done: Requirements traceability matrix, scrum meeting documentation checkup
+  Blockers: None
+
+- Omarion:
+  Todo: Work on personal presentation format
+  Blockers: None
+
+
+- Talon:
+  Todo: Work on personal presentation format
+  Blockers: None
+
+
+- Siam:
+  Todo: Work on personal presentation format
+  Blockers: None
+
+
+
+
+SCRUM MEETING #41
+Date: April 8th, 2026
+Attendance: Tariq, Omarion, Talon, Siam
+
+
+Discussion: M4 timeline check, video presentation
+
+Action Items:
+
+-All:
+Done: Video scripting and presentation, remaining M4 documents
+
+
