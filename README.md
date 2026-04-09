@@ -1,6 +1,6 @@
 # COSC310 Term Project Group 21
 
-Deployed Site: [https://platter.quietrecords.store]()
+Deployed Site: [https://platter.quietrecords.store](https://platter.quietrecords.store)
 
 ## Run with Docker Compose
 
