@@ -9,7 +9,7 @@ import {
   getTransaction, updateTransaction,
 } from "../api";
 
-const TABS = ["Users", "Orders", "Payments", "Restaurants"];
+const TABS = ["Overview", "Users", "Orders", "Payments", "Restaurants"];
 
 const STATUS_HERO = {
   created:   { icon: faClock,       label: "Order Placed",    color: "#1d4ed8", bg: "#dbeafe" },
@@ -57,7 +57,7 @@ function nextStatuses(order) {
 }
 
 export default function AdminPage() {
-  const [tab, setTab] = useState("Users");
+  const [tab, setTab] = useState("Overview");
 
   return (
     <div className="page-container">
@@ -74,10 +74,102 @@ export default function AdminPage() {
         ))}
       </div>
       <div className="admin-tab-content">
+        {tab === "Overview"    && <OverviewTab onNavigate={setTab} />}
         {tab === "Users"       && <UsersTab />}
         {tab === "Orders"      && <OrdersTab />}
         {tab === "Payments"    && <PaymentsTab />}
         {tab === "Restaurants" && <RestaurantsTab />}
+      </div>
+    </div>
+  );
+}
+
+/* ── Overview Tab ──────────────────────────────────────── */
+function OverviewTab({ onNavigate }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    Promise.all([listAllUsers(), getRestaurants(), getOrders()])
+      .then(([users, restaurants, orders]) => setData({ users, restaurants, orders }))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="loading">Loading overview…</div>;
+  if (error) return <div className="alert error">{error}</div>;
+
+  const { users, restaurants, orders } = data;
+  const openCount = restaurants.filter((r) => r.isOpen).length;
+  const revenue = orders.reduce((sum, o) => sum + (o.total_price || 0), 0);
+  const activeOrders = orders.filter((o) => !["completed", "cancelled"].includes(o.status));
+  const recentOrders = [...orders]
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 5);
+
+  return (
+    <div>
+      <div className="overview-stats">
+        <div className="stat-card" role="button" style={{ cursor: "pointer" }} onClick={() => onNavigate("Users")}>
+          <span className="stat-value">{users.length}</span>
+          <span className="stat-label">Total Users</span>
+        </div>
+        <div className="stat-card" role="button" style={{ cursor: "pointer" }} onClick={() => onNavigate("Restaurants")}>
+          <span className="stat-value">{restaurants.length}</span>
+          <span className="stat-label">Restaurants</span>
+          <span className="stat-sub">{openCount} open now</span>
+        </div>
+        <div className="stat-card" role="button" style={{ cursor: "pointer" }} onClick={() => onNavigate("Orders")}>
+          <span className="stat-value">{orders.length}</span>
+          <span className="stat-label">Total Orders</span>
+          <span className="stat-sub">{activeOrders.length} active</span>
+        </div>
+        <div className="stat-card" role="button" style={{ cursor: "pointer" }} onClick={() => onNavigate("Payments")}>
+          <span className="stat-value">${revenue.toFixed(2)}</span>
+          <span className="stat-label">Total Revenue</span>
+        </div>
+      </div>
+
+      <div className="overview-grid">
+        <div className="card">
+          <h3 className="overview-section-title">Recent Orders</h3>
+          {recentOrders.length === 0 ? (
+            <p className="empty-state">No orders yet.</p>
+          ) : (
+            recentOrders.map((o) => (
+              <div key={o.order_id} className="overview-order-row">
+                <div className="overview-order-left">
+                  <span className={`status-badge ${ORDER_STATUS_COLORS[o.status] || "gray"}`}>{o.status}</span>
+                  <span className="overview-order-method">{o.delivery_method}</span>
+                </div>
+                <div className="overview-order-right">
+                  {o.total_price != null && <span>${o.total_price.toFixed(2)}</span>}
+                  <span className="overview-order-date">
+                    {new Date(o.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="card">
+          <h3 className="overview-section-title">Restaurants</h3>
+          {restaurants.map((r) => (
+            <div key={r.restaurant_id} className="overview-restaurant-row">
+              <span className="overview-restaurant-name">{r.restaurant_name}</span>
+              <div className="overview-restaurant-right">
+                {r.opening_time && r.closing_time && (
+                  <span className="admin-restaurant-hours">{r.opening_time} – {r.closing_time}</span>
+                )}
+                <span className={`status-badge ${r.isOpen ? "open" : "closed"}`}>
+                  {r.isOpen ? "Open" : "Closed"}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -215,7 +307,7 @@ function OrdersTab() {
   useEffect(() => {
     Promise.all([getOrders(), listAllUsers(), getRestaurants()])
       .then(([ords, users, restaurants]) => {
-        setOrders(ords);
+        setOrders([...ords].sort((a, b) => (b.created_at > a.created_at ? 1 : -1)));
         setUserMap(Object.fromEntries(users.map((u) => [u.id, u.email])));
         setRestaurantMap(Object.fromEntries(restaurants.map((r) => [r.restaurant_id, r.restaurant_name])));
       })
@@ -376,7 +468,7 @@ function PaymentsTab() {
   useEffect(() => {
     Promise.all([getOrders(), listAllUsers(), getRestaurants()])
       .then(([ords, users, restaurants]) => {
-        setOrders(ords);
+        setOrders([...ords].sort((a, b) => (b.created_at > a.created_at ? 1 : -1)));
         setUserMap(Object.fromEntries(users.map((u) => [u.id, u.email])));
         setRestaurantMap(Object.fromEntries(restaurants.map((r) => [r.restaurant_id, r.restaurant_name])));
       })
@@ -529,7 +621,7 @@ function RestaurantsTab() {
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({ restaurant_name: "", isOpen: true, tags: "" });
+  const [form, setForm] = useState({ restaurant_name: "", isOpen: true, tags: "", opening_time: "", closing_time: "" });
   const [saving, setSaving] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
 
@@ -543,10 +635,10 @@ function RestaurantsTab() {
   const setF = (field) => (e) =>
     setForm((f) => ({ ...f, [field]: field === "isOpen" ? e.target.checked : e.target.value }));
 
-  const openAdd = () => { setEditId(null); setForm({ restaurant_name: "", isOpen: true, tags: "" }); setShowForm(true); };
+  const openAdd = () => { setEditId(null); setForm({ restaurant_name: "", isOpen: true, tags: "", opening_time: "", closing_time: "" }); setShowForm(true); };
   const openEdit = (r) => {
     setEditId(r.restaurant_id);
-    setForm({ restaurant_name: r.restaurant_name, isOpen: r.isOpen, tags: r.tags.join(", ") });
+    setForm({ restaurant_name: r.restaurant_name, isOpen: r.isOpen, tags: r.tags.join(", "), opening_time: r.opening_time || "", closing_time: r.closing_time || "" });
     setShowForm(true);
   };
   const closeForm = () => { setShowForm(false); setEditId(null); };
@@ -559,6 +651,8 @@ function RestaurantsTab() {
         restaurant_name: form.restaurant_name,
         isOpen: form.isOpen,
         tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        opening_time: form.opening_time,
+        closing_time: form.closing_time,
       };
       if (editId) {
         const updated = await updateRestaurant(editId, payload);
@@ -608,10 +702,21 @@ function RestaurantsTab() {
               <label>Tags (comma-separated)</label>
               <input type="text" value={form.tags} onChange={setF("tags")} placeholder="pizza, italian, fast-food" />
             </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Opening Time</label>
+                <input type="time" value={form.opening_time} onChange={setF("opening_time")} required />
+              </div>
+              <div className="form-group">
+                <label>Closing Time</label>
+                <input type="time" value={form.closing_time} onChange={setF("closing_time")} required />
+              </div>
+            </div>
             <div className="form-group">
               <label className="checkbox-label">
-                <input type="checkbox" checked={form.isOpen} onChange={setF("isOpen")} /> Open
+                <input type="checkbox" checked={form.isOpen} onChange={setF("isOpen")} /> Active
               </label>
+              <p className="hint">Uncheck to temporarily close this restaurant regardless of its business hours.</p>
             </div>
             <div className="form-actions">
               <button className="btn btn-primary" disabled={saving}>{saving ? "Saving…" : "Save"}</button>
@@ -628,6 +733,9 @@ function RestaurantsTab() {
               <div className="admin-restaurant-info">
                 <span className="admin-restaurant-name">{r.restaurant_name}</span>
                 <span className={`status-badge ${r.isOpen ? "open" : "closed"}`}>{r.isOpen ? "Open" : "Closed"}</span>
+                {r.opening_time && r.closing_time && (
+                  <span className="admin-restaurant-hours">{r.opening_time} – {r.closing_time}</span>
+                )}
                 <div className="tags">
                   {r.tags.map((t) => <span key={t} className="tag">{t}</span>)}
                 </div>
@@ -652,10 +760,21 @@ function RestaurantsTab() {
                     <label>Tags (comma-separated)</label>
                     <input type="text" value={form.tags} onChange={setF("tags")} placeholder="pizza, italian, fast-food" />
                   </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Opening Time</label>
+                      <input type="time" value={form.opening_time} onChange={setF("opening_time")} />
+                    </div>
+                    <div className="form-group">
+                      <label>Closing Time</label>
+                      <input type="time" value={form.closing_time} onChange={setF("closing_time")} />
+                    </div>
+                  </div>
                   <div className="form-group">
                     <label className="checkbox-label">
-                      <input type="checkbox" checked={form.isOpen} onChange={setF("isOpen")} /> Open
+                      <input type="checkbox" checked={form.isOpen} onChange={setF("isOpen")} /> Active
                     </label>
+                    <p className="hint">Uncheck to temporarily close this restaurant regardless of its business hours.</p>
                   </div>
                   <div className="form-actions">
                     <button className="btn btn-primary" disabled={saving}>{saving ? "Saving…" : "Save"}</button>

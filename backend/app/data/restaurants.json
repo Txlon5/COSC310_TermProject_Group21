@@ -1,7 +1,7 @@
 [
   {
     "restaurant_id": "85590c53-fc55-4837-a3ef-283345df572a",
-    "restaurant_name": "Test Pizza",
+    "restaurant_name": "Pizzeria K",
     "tags": [
       "pizza"
     ],
@@ -26,6 +26,218 @@
         "name": "Canadian Pizza",
         "price": 23.0,
         "category": "Food"
+      }
+    ]
+  },
+  {
+    "restaurant_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "restaurant_name": "Burger Barn",
+    "tags": ["burgers", "fast food"],
+    "isOpen": true,
+    "opening_time": "10:00",
+    "closing_time": "22:00",
+    "menuItems": [
+      {
+        "menuItemId": 1,
+        "name": "Classic Cheeseburger",
+        "price": 12.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 2,
+        "name": "Bacon BBQ Burger",
+        "price": 15.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 3,
+        "name": "Veggie Burger",
+        "price": 11.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 4,
+        "name": "Loaded Fries",
+        "price": 8.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 5,
+        "name": "Chocolate Milkshake",
+        "price": 6.99,
+        "category": "Drinks"
+      }
+    ]
+  },
+  {
+    "restaurant_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    "restaurant_name": "Sushi Palace",
+    "tags": ["sushi", "japanese", "seafood"],
+    "isOpen": true,
+    "opening_time": "11:00",
+    "closing_time": "21:00",
+    "menuItems": [
+      {
+        "menuItemId": 1,
+        "name": "Salmon Nigiri (2 pcs)",
+        "price": 9.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 2,
+        "name": "Spicy Tuna Roll",
+        "price": 13.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 3,
+        "name": "Dragon Roll",
+        "price": 16.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 4,
+        "name": "Miso Soup",
+        "price": 3.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 5,
+        "name": "Green Tea",
+        "price": 2.99,
+        "category": "Drinks"
+      }
+    ]
+  },
+  {
+    "restaurant_id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+    "restaurant_name": "Taco Town",
+    "tags": ["mexican", "tacos", "burritos"],
+    "isOpen": false,
+    "opening_time": "11:00",
+    "closing_time": "21:00",
+    "menuItems": [
+      {
+        "menuItemId": 1,
+        "name": "Street Tacos (3 pcs)",
+        "price": 10.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 2,
+        "name": "Beef Burrito",
+        "price": 13.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 3,
+        "name": "Chicken Quesadilla",
+        "price": 11.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 4,
+        "name": "Guacamole & Chips",
+        "price": 6.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 5,
+        "name": "Horchata",
+        "price": 3.99,
+        "category": "Drinks"
+      }
+    ]
+  },
+  {
+    "restaurant_id": "d4e5f6a7-b8c9-0123-defa-234567890123",
+    "restaurant_name": "The Pasta Place",
+    "tags": ["italian", "pasta", "pizza"],
+    "isOpen": true,
+    "opening_time": "12:00",
+    "closing_time": "21:30",
+    "menuItems": [
+      {
+        "menuItemId": 1,
+        "name": "Spaghetti Bolognese",
+        "price": 16.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 2,
+        "name": "Fettuccine Alfredo",
+        "price": 15.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 3,
+        "name": "Margherita Pizza",
+        "price": 14.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 4,
+        "name": "Caesar Salad",
+        "price": 9.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 5,
+        "name": "Tiramisu",
+        "price": 7.99,
+        "category": "Dessert"
+      },
+      {
+        "menuItemId": 6,
+        "name": "Sparkling Water",
+        "price": 2.99,
+        "category": "Drinks"
+      }
+    ]
+  },
+  {
+    "restaurant_id": "e5f6a7b8-c9d0-1234-efab-345678901234",
+    "restaurant_name": "Dragon Wok",
+    "tags": ["chinese", "asian", "noodles"],
+    "isOpen": true,
+    "opening_time": "10:30",
+    "closing_time": "20:30",
+    "menuItems": [
+      {
+        "menuItemId": 1,
+        "name": "Kung Pao Chicken",
+        "price": 14.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 2,
+        "name": "Beef Chow Mein",
+        "price": 13.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 3,
+        "name": "Vegetable Fried Rice",
+        "price": 11.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 4,
+        "name": "Spring Rolls (4 pcs)",
+        "price": 7.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 5,
+        "name": "Wonton Soup",
+        "price": 8.99,
+        "category": "Food"
+      },
+      {
+        "menuItemId": 6,
+        "name": "Jasmine Tea",
+        "price": 2.49,
+        "category": "Drinks"
       }
     ]
   }

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { useAuth } from "../useAuth";
-import { createOrder, getMyCards } from "../api";
+import { createOrder, getMyCards, getRestaurantById } from "../api";
 
 export default function CartPage() {
   const { cart, addItem, removeItem, clearCart, total } = useCart();
@@ -16,6 +16,14 @@ export default function CartPage() {
   const [pickupLocation, setPickupLocation] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [restaurantOpen, setRestaurantOpen] = useState(null);
+
+  useEffect(() => {
+    if (!cart.restaurantId) return;
+    getRestaurantById(cart.restaurantId)
+      .then((r) => setRestaurantOpen(r.isOpen))
+      .catch(() => {});
+  }, [cart.restaurantId]);
 
   useEffect(() => {
     getMyCards()
@@ -83,6 +91,11 @@ export default function CartPage() {
   return (
     <div className="page-container">
       <h2>Cart — {cart.restaurantName}</h2>
+      {restaurantOpen === false && (
+        <div className="alert warning">
+          This restaurant is currently closed and not accepting orders right now.
+        </div>
+      )}
       {error && <div className="alert error">{error}</div>}
 
       <div className="cart-layout">
@@ -161,7 +174,7 @@ export default function CartPage() {
           <button
             className="btn btn-primary w-full"
             onClick={handleCheckout}
-            disabled={loading || cards.length === 0}
+            disabled={loading || cards.length === 0 || restaurantOpen === false}
           >
             {loading ? "Placing order…" : `Place Order — $${total.toFixed(2)}`}
           </button>

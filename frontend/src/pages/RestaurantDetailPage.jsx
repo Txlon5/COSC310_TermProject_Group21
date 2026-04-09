@@ -4,6 +4,13 @@ import { getRestaurantById, getRestaurantMenu } from "../api";
 import { useCart } from "../CartContext";
 import { useAuth } from "../useAuth";
 
+const to12h = (t) => {
+  const [h, m] = t.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, "0")} ${ampm}`;
+};
+
 export default function RestaurantDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -55,6 +62,9 @@ export default function RestaurantDetailPage() {
           </div>
           <span className={`status-badge large ${restaurant.isOpen ? "open" : "closed"}`}>
             {restaurant.isOpen ? "Open" : "Closed"}
+          </span>
+          <span className="restaurant-hours" style={{ color: "rgba(255,255,255,0.85)" }}>
+            {to12h(restaurant.opening_time)} – {to12h(restaurant.closing_time)}
           </span>
         </div>
       </div>

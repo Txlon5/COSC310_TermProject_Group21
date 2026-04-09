@@ -2,6 +2,13 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getRestaurants } from "../api";
 
+const to12h = (t) => {
+  const [h, m] = t.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, "0")} ${ampm}`;
+};
+
 export default function RestaurantsPage() {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -105,6 +112,9 @@ export default function RestaurantsPage() {
                       <div className="tags">
                         {r.tags.map((t) => <span key={t} className="tag">{t}</span>)}
                       </div>
+                    )}
+                    {r.opening_time && r.closing_time && (
+                      <p className="restaurant-hours">{to12h(r.opening_time)} – {to12h(r.closing_time)}</p>
                     )}
                     {r.menuItems && r.menuItems.length > 0 && (
                       <p className="item-count">{r.menuItems.length} item{r.menuItems.length !== 1 ? "s" : ""}</p>

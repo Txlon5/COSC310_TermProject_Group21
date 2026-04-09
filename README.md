@@ -2,18 +2,23 @@
 
 ## Run with Docker Compose
 
-From the project root:
-
+### Start (keeps existing data)
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
-Backend will be available at:
 
-- [http://localhost:8000](http://localhost:8000)
+### Clean Start (wipes existing data)
+```bash
+docker compose down -v && docker compose up --build -d
+```
 
-## Stop
 
+### Stop
 ```bash
 docker compose down
 ```
+
+Backend API available at [http://localhost:8000](http://localhost:8000) — Swagger docs at [http://localhost:8000/docs](http://localhost:8000/docs)
+
+Frontend available at [http://localhost:3000](http://localhost:3000)
