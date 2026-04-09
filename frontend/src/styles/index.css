@@ -418,7 +418,7 @@ a { color: inherit; text-decoration: none; }
 .restaurant-card-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.6rem; }
 .restaurant-card-header h3 { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; }
 .item-count { font-size: 0.78rem; color: #aaa; margin-top: 0.55rem; }
-.restaurant-hours { font-size: 0.78rem; color: #888; margin-top: 0.4rem; }
+.restaurant-hours { font-size: 0.78rem; color: #555; margin-top: 0.4rem; }
 
 /* ── Tags / badges ────────────────────────────── */
 .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
