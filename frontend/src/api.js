@@ -94,6 +94,10 @@ export const getPaymentStatus = (orderId) =>
 export const updateTransaction = (orderId, payload) =>
   request("PUT", `/payments/${orderId}`, payload);
 
+// Reorder
+export const reorderPastOrder = (orderId, payload) =>
+  request("POST", `/orders/reorder/${orderId}`, payload);
+
 // Notifications
 export const getNotifications = (userId) =>
   request("GET", `/notifications/${userId}`);
