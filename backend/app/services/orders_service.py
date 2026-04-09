@@ -101,6 +101,7 @@ class OrdersService:
         menu = fetch_menu_by_restaurant_id(order_request.restaurant_id)
         valid_menu_ids = {item.menuItemId for item in menu}
         
+        restaurant_name = str(order_request.restaurant_id)
 
         # Check for at least one valid menu item with quantity >= 1
         has_valid_quantity = False
@@ -163,7 +164,7 @@ class OrdersService:
         payment_status = create_transaction(transaction)
         
         # Generate a notification for the order creation event.
-        self.notification.create_order_created_notification(user_id = new_order.user_id, order_id = new_order.order_id)
+        self.notification.create_order_created_notification(user_id = new_order.user_id, order_id = new_order.order_id, restaurant_name = restaurant_name)
 
         return new_order
     
@@ -225,11 +226,14 @@ class OrdersService:
                     
                 orders[idx] = o     #Save the updated order 
                 save_all(orders)
-                    
+                
+                restaurant_name = str(o.get("restaurant_name") or o.get("restaurant_id") or "Unknown Restaurant")
+                
                 #Now generate a notification for the order status change event.
                 self.notification.create_order_status_changed_notification(
                     user_id = o["user_id"],
                     order_id = o["order_id"],
+                    restaurant_name = restaurant_name,
                     old_status = old_status,
                     new_status = new_status
                 )
