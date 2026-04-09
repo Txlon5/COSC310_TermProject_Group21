@@ -121,7 +121,7 @@ export default function OrderHistoryPage() {
   useEffect(() => {
     Promise.all([getOrderHistory(user.id), getRestaurants()])
       .then(([ords, restaurants]) => {
-        setOrders([...ords].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+        setOrders([...ords].sort((a, b) => (b.created_at > a.created_at ? 1 : -1)));
         setRestaurantMap(Object.fromEntries(restaurants.map((r) => [r.restaurant_id, r.restaurant_name])));
       })
       .catch((err) => setError(err.message))

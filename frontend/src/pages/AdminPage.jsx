@@ -307,7 +307,7 @@ function OrdersTab() {
   useEffect(() => {
     Promise.all([getOrders(), listAllUsers(), getRestaurants()])
       .then(([ords, users, restaurants]) => {
-        setOrders(ords);
+        setOrders([...ords].sort((a, b) => (b.created_at > a.created_at ? 1 : -1)));
         setUserMap(Object.fromEntries(users.map((u) => [u.id, u.email])));
         setRestaurantMap(Object.fromEntries(restaurants.map((r) => [r.restaurant_id, r.restaurant_name])));
       })
@@ -468,7 +468,7 @@ function PaymentsTab() {
   useEffect(() => {
     Promise.all([getOrders(), listAllUsers(), getRestaurants()])
       .then(([ords, users, restaurants]) => {
-        setOrders(ords);
+        setOrders([...ords].sort((a, b) => (b.created_at > a.created_at ? 1 : -1)));
         setUserMap(Object.fromEntries(users.map((u) => [u.id, u.email])));
         setRestaurantMap(Object.fromEntries(restaurants.map((r) => [r.restaurant_id, r.restaurant_name])));
       })
