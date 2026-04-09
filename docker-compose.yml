@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: cosc310-backend
     restart: unless-stopped
+    environment:
+      - TZ=America/Vancouver
     ports:
       - "8000:8000"
     volumes:
