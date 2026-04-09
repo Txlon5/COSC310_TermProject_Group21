@@ -56,6 +56,9 @@ export default function RestaurantDetailPage() {
           <span className={`status-badge large ${restaurant.isOpen ? "open" : "closed"}`}>
             {restaurant.isOpen ? "Open" : "Closed"}
           </span>
+          <span className="restaurant-hours">
+            {restaurant.opening_time} – {restaurant.closing_time}
+          </span>
         </div>
       </div>
 

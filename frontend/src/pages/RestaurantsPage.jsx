@@ -106,6 +106,9 @@ export default function RestaurantsPage() {
                         {r.tags.map((t) => <span key={t} className="tag">{t}</span>)}
                       </div>
                     )}
+                    {r.opening_time && r.closing_time && (
+                      <p className="restaurant-hours">{r.opening_time} – {r.closing_time}</p>
+                    )}
                     {r.menuItems && r.menuItems.length > 0 && (
                       <p className="item-count">{r.menuItems.length} item{r.menuItems.length !== 1 ? "s" : ""}</p>
                     )}
