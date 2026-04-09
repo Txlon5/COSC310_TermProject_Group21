@@ -161,7 +161,7 @@ export default function OrderHistoryPage() {
             return (
               <div key={order.order_id} className={`order-card-wrap ${isOpen ? "expanded" : ""}`}>
                 <div
-                  className="order-card"
+                  className="order-card order-card--reorderable"
                   role="button"
                   tabIndex={0}
                   onClick={() => handleToggle(order.order_id)}
